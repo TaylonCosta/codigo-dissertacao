@@ -3,7 +3,7 @@ geral:
   planilha: instancias/P_Semanal.xlsx
   janela_planejamento: 7
   # funcao_objetivo: [max_conc, max_usina, min_atr_nav, min_est_patio]
-  funcao_objetivo: [max_usina]
+  funcao_objetivo: [max_conc, max_usina]
   mipgap: 0.3
   timeLimit: 120
  
@@ -88,3 +88,6 @@ mineroduto:
 porto:  
   capacidade_carreg_porto_por_dia:  1
   estoque_produto_patio: {'PRDT_U': 228563, 'PRDT_U': 228563, 'PRDT_U': 228563, 'PRDT_U': 228563, 'PRDT_U': 228563}
+  produtos_de_cada_navio: [['EZDK-L2', 'PRDT_U'],
+                           ['ACINDAR-L3', 'PRDT_U'],
+                           ['NUCOR-L5', 'PRDT_U']]

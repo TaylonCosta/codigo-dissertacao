@@ -1,5 +1,9 @@
 print(f'Inicializando otimizador...   ', end='')
 
+from model_p1 import Model_p1
+from model_p2 import Model_p2
+
+import json
 from openpyxl import load_workbook # usado para ler a planilha
 from pulp import *                 # usado para resolver o problema de otimização
 import math
@@ -16,13 +20,13 @@ def ler_cenario(nome_arquivo):
 
 def gerar_nome_arquivo_saida(nome_base_arquivo):
     """ Gera o nome padronizado do arquivo de saída """
-    if not os.path.exists(nome_base_arquivo + ".pkl"):
-        return nome_base_arquivo + ".pkl"
+    if not os.path.exists(nome_base_arquivo + ".json"):
+        return nome_base_arquivo + ".json"
     
     contador = 1
-    while os.path.exists(f"{nome_base_arquivo}_{contador}.pkl"):
+    while os.path.exists(f"{nome_base_arquivo}_{contador}.json"):
         contador += 1
-    return f"{nome_base_arquivo}_{contador}.pkl"
+    return f"{nome_base_arquivo}_{contador}.json"
 
 parser = argparse.ArgumentParser(description='Otimizador Plano Semanal')
 parser.add_argument('-s', '--solver', default='GUROBI', type=str, help='Nome do otimizador a ser usado')
@@ -77,7 +81,7 @@ print(f'[OK]\nObtendo parâmetros do cenário...   ', end='')
 janela_planejamento = cenario['geral']['janela_planejamento']
 
 #verificar se não vai mesmo britagem 
-'''
+
 taxa_alimentacao_britagem = cenario['mina']['taxa_alimentacao_britagem']
 disponibilidade_britagem = cenario['mina']['disponibilidade_britagem']
 utilizacao_britagem = cenario['mina']['utilizacao_britagem']
@@ -86,7 +90,6 @@ taxa_producao_britagem = {dias[d]: taxa_alimentacao_britagem[d] *
                                    disponibilidade_britagem[d]/100 * 
                                    utilizacao_britagem[d]/100 
                           for d in range(len(dias))}
-'''
 
 # Mina
 campanha_c3 = cenario['mina']['campanha']
@@ -456,9 +459,9 @@ for parametro in ['DATA-PLANEJADA','DATA-REAL']:
 
 # PORTO
 
-#produtos_de_cada_navio = {navio:{produto_usina:0 for produto_usina in produtos_usina} for navio in navios}
-#for navio, produto_usina in cenario['porto']['produtos_de_cada_navio']:
-#    produtos_de_cada_navio[navio][produto_usina] = 1
+produtos_de_cada_navio = {navio:{produto_usina:0 for produto_usina in produtos_usina} for navio in navios}
+for navio, produto_usina in cenario['porto']['produtos_de_cada_navio']:
+    produtos_de_cada_navio[navio][produto_usina] = 1
 
 print(f'[OK]\nDefinindo parâmetros calculados...   ', end='')
 
@@ -517,7 +520,7 @@ for idx_hora in range(len(horas_Dm3)-1,-1,-1):
 # print(f"{parametros_calculados['Bombeamento Acumulado final semana anterior']=}")
 
 # -----------------------------------------------------------------------------
-
+'''
 print(f'[OK]\nDefinindo o modelo de otimização...   ', end='')
 # Definindo modelo de otimização
 
@@ -546,7 +549,7 @@ varTaxaAlim = LpVariable.dicts("Taxa Alimentacao - C3", (produtos_conc, horas_D1
 dados = {}
 
 # Restrição para garantir que a taxa de britagem se refere ao produto da mina que está sendo entregue
-'''
+
 for produto in produtos_mina:
     dados[produto] = []
     for hora in horas_D14:        
@@ -556,7 +559,7 @@ for produto in produtos_mina:
             varTaxaBritagem[produto][hora] <= int(taxa_producao_britagem[extrair_dia(hora)]*produtos_britagem[produto][hora]),
             f"rest_TaxaBritagem_{produto}_{hora}"
         )
-'''
+
 # Restrição para tratar o de-para de produtos da mina e do concentrador
 #DA PRA TIRAR
 for produto_mina in produtos_mina:
@@ -633,7 +636,7 @@ for produto_conc in produtos_conc:
             varTaxaAlim[produto_conc][hora] == lpSum(varTaxaAlimProdMinaConc[produto_mina][produto_conc][hora] for produto_mina in produtos_mina),
             f"rest_amarra_varTaxaAlim_{produto_conc}_{hora}",
         )
-
+'''
 '''
 # Indica a hora de início das manutenções da britagem
 varInicioManutencoesBritagem = LpVariable.dicts("Início Manutenção Britagem", (range(len(duracao_manutencoes_britagem)), horas_Dm3_D14), 0, 1, LpInteger)
@@ -704,8 +707,7 @@ for idx_hora in range(len(horas_D14)):
                                  for j in range(idx_hora - duracao_manutencoes_britagem[idx_manut] + 1, idx_hora))),
         f"rest_UB_taxa_britagem_{horas_D14[idx_hora]}",
     )
-'''
-'''
+
 # Indica a hora de início das manutenções do concentrador
 varInicioManutencoesConcentrador = LpVariable.dicts("Início Manutenção Concentrador", (range(len(duracao_manutencoes_concentrador)), horas_Dm3_D14), 0, 1, LpInteger)
 
@@ -800,6 +802,7 @@ for idx_hora in range(len(horas_D14)):
             f"rest_taxa_alim_fixa3_{horas_D14[idx_hora]}",
         )
 '''
+'''
 # Puxada, por dia, é calculada a partir da taxa de alimentação e demais parâmetros
 varPuxada = LpVariable.dicts("Puxada - C3 - Prog", (horas_D14), 0, None, LpContinuous) 
 for hora in horas_D14:
@@ -855,7 +858,7 @@ varEstoqueEB06 = LpVariable.dicts("Estoque EB06", (produtos_conc, horas_D14), 0,
 #varEstoqueEB04 = LpVariable.dicts("Estoque EB04", (produtos_conc, horas_D14), 0, None, LpContinuous)
 
 # Indica se há bombeamento de polpa em cada hora
-#varBombeamentoPolpa = LpVariable.dicts("Bombeamento Polpa", (horas_Dm3_D14), 0, 1, LpInteger)
+varBombeamentoPolpa = LpVariable.dicts("Bombeamento Polpa", (horas_Dm3_D14), 0, 1, LpInteger)
 
 # Restrição de capacidade do estoque EB06
 for hora in horas_D14:
@@ -864,6 +867,7 @@ for hora in horas_D14:
             <= parametros_mineroduto_ubu['Capacidade EB06'][hora],
         f"rest_capacidade_EstoqueEB06_{hora}",
     )
+'''
 
 '''
 # Restrição de capacidade do estoque EB04
@@ -881,10 +885,11 @@ varEnvioEB06EB04 = LpVariable.dicts("Envio EB06 para EB04", (produtos_conc, hora
 varTaxaEnvioEB04EB06 = LpVariable.dicts("Taxa Envio EB04 para EB06", (produtos_conc, horas_D14), 0, taxa_transferencia_entre_eb, LpContinuous)
 varTaxaEnvioEB06EB04 = LpVariable.dicts("Taxa Envio EB06 para EB04", (produtos_conc, horas_D14), 0, taxa_transferencia_entre_eb, LpContinuous)
 '''
-
+'''
 # Indica se há bombeamento de polpa em cada hora
 varBombeamentoPolpa = LpVariable.dicts("Bombeamento Polpa", (produtos_conc, horas_Dm3_D14), 0, 1, LpInteger)
-'''
+
+
 for produto in produtos_conc:
     for hora in horas_D14:
         modelo += (
@@ -895,7 +900,7 @@ for produto in produtos_conc:
             varTaxaEnvioEB04EB06[produto][hora] <= taxa_transferencia_entre_eb*varEnvioEB04EB06[produto][hora],
             f"rest_define_TaxaEnvioEB04EB06_{produto}_{hora}",
         )
-'''
+
 # Define o valor de estoque de EB06, por produto, da segunda hora em diante
 for produto in produtos_conc:
     for i in range(1, len(horas_D14)):
@@ -925,7 +930,6 @@ for produto in produtos_conc:
         f"rest_define_EstoqueEB06_{produto}_{horas_D14[0]}",
     )
 
-'''
 # Define o valor de estoque de EB04, por produto, da segunda hora em diante
 for produto in produtos_conc:
     for i in range(1, len(horas_D14)):
@@ -964,6 +968,9 @@ for hora in horas_D14:
             <= BIG_M * (1 - lpSum(varEnvioEB06EB04[produto][hora] for produto in produtos_conc)),
         f"rest_define_tranferencia_por_enchimento_tanque_{hora}",
     )
+'''
+#------------------------------------------- INICIA AQUI O MINERODUTO E TERMINA A PARTE 1 DO MODELO
+
 '''
  # Indica o quanto foi bombeado de polpa, por produto do concentrador, em cada hora
 varBombeado = LpVariable.dicts("Bombeado", (produtos_conc, horas_Dm3_D14), 0, None, LpContinuous)
@@ -1130,6 +1137,7 @@ for hora in horas_D14:
     )
 
 '''
+'''
 # Indica a hora de início das manutenções do mineroduto
 varInicioManutencoesMineroduto = LpVariable.dicts("Início Manutenção Mineroduto", (range(len(duracao_manutencoes_mineroduto)), horas_Dm3_D14), 0, 1, LpInteger)
 
@@ -1182,6 +1190,7 @@ for produto in produtos_conc:
                                         for j in range(idx_hora - duracao_manutencoes_mineroduto[idx_manut] + 1, idx_hora))),
             f"rest_manutencao_mineroduto_{produto}_{horas_D14[idx_hora]}",
 )
+'''
 '''
 # Restrições para fixar as janelas de bombeamento
 
@@ -1480,6 +1489,8 @@ if fixar_janela_bombeamento_agua in ['fixado_pelo_modelo','fixado_pelo_usuario']
             f"seq_bomb_agua_3b_{horas_D14[idx_hora]}",
         )
 
+#----------------------------------- TERMINA AQUI O MINERODUTO E COMEÇA A PARTE DOIS DO MODELO
+
 # Indica chegada de polpa em Ubu, por produto, por hora
 varPolpaUbu = LpVariable.dicts("Polpa Ubu (65Hs)", (produtos_conc, horas_D14), 0, None, LpContinuous)
 
@@ -1517,7 +1528,7 @@ for produto_c in produtos_conc:
                     varProducaoUbu[produto_c][produto_u][hora] == 0,
                     f"rest_zera_ProducaoUbu_{produto_c}_{produto_u}_{hora}",
                 )
-
+'''
 '''
 # Indica a hora de início das manutenções da usina
 varInicioManutencoesUsina = LpVariable.dicts("Início Manutenção Usina", (range(len(duracao_manutencoes_usina)), horas_Dm3_D14), 0, 1, LpInteger)
@@ -1610,6 +1621,7 @@ for produto in produtos_usina:
                 varProducaoSemIncorporacao[produto][horas_D14[idx_hora]] <= taxa_fixa,
                 f"rest_prod_sem_incorp_fixa3_{produto}_{horas_D14[idx_hora]}",
             )
+'''
 '''
 # Indica o estoque de polpa em Ubu, por hora
 varEstoquePolpaUbu = LpVariable.dicts("Estoque Polpa Ubu", (produtos_conc, horas_D14), min_estoque_polpa_ubu, max_estoque_polpa_ubu, LpContinuous)
@@ -1744,7 +1756,7 @@ varDataInicioCarregNavio = LpVariable.dicts("Ct Inicio Carregamento", (navios), 
 
 # Indica o estoque de produto no pátio de Ubu, por hora
 varEstoqueProdutoPatio = LpVariable.dicts("S Estoque Produto Patio", (produtos_usina, horas_D14), 0, None, LpContinuous)
-'''
+
 for navio in navios:
     for idx_hora in range(len(horas_D14)):
         modelo += (
@@ -1787,7 +1799,7 @@ for navio in navios_ate_d14:
        lpSum([idx_hora*varInicioCarregNavio[navio][horas_D14[idx_hora]] for idx_hora in range(len(horas_D14))]) >= extrair_hora(parametros_navios['DATA-REAL'][navio]),
         f"rest_limita_DataInicioCarregNavio_{navio}",
     )
-'''
+
 # Define o estoque de produto no pátio de Ubu da segunda hora em diante
 for produto in produtos_usina:
     for idx_hora in range(1, len(horas_D14)):
@@ -1795,12 +1807,11 @@ for produto in produtos_usina:
             varEstoqueProdutoPatio[produto][horas_D14[idx_hora]] 
                 == varEstoqueProdutoPatio[produto][horas_D14[idx_hora-1]] + 
                     varProducaoSemIncorporacao[produto][horas_D14[idx_hora]] 
-                    # - lpSum([varInicioCarregNavio[navio][horas_D14[idx_hora_s]] *
-                    #    parametros_navios['Taxa de Carreg.'][navio] *
-                    #    produtos_de_cada_navio[navio][produto]
-                    #        for navio in navios
-                    #            for idx_hora_s in range(max(idx_hora-math.ceil(parametros_navios['VOLUME'][navio]/parametros_navios['Taxa de Carreg.'][navio])+1,1), idx_hora+1)]),
-            ,
+                     - lpSum([varInicioCarregNavio[navio][horas_D14[idx_hora_s]] *
+                        parametros_navios['Taxa de Carreg.'][navio] *
+                        produtos_de_cada_navio[navio][produto]
+                            for navio in navios
+                                for idx_hora_s in range(max(idx_hora-math.ceil(parametros_navios['VOLUME'][navio]/parametros_navios['Taxa de Carreg.'][navio])+1,1), idx_hora+1)]),
             f"rest_define_EstoqueProdutoPatio_{produto}_{horas_D14[idx_hora]}",
         )
     # Define o estoque de produto no pátio de Ubu do primeiro dia
@@ -1808,14 +1819,13 @@ for produto in produtos_usina:
         varEstoqueProdutoPatio[produto][horas_D14[0]] 
             == estoque_produto_patio_d0[produto] +
             varProducaoSemIncorporacao[produto][horas_D14[0]] 
-            #- lpSum([varInicioCarregNavio[navio][horas_D14[0]] * 
-            #        parametros_navios['Taxa de Carreg.'][navio] *
-            #        produtos_de_cada_navio[navio][produto]
-            #        for navio in navios]),
-            ,
+            - lpSum([varInicioCarregNavio[navio][horas_D14[0]] * 
+                    parametros_navios['Taxa de Carreg.'][navio] *
+                    produtos_de_cada_navio[navio][produto]
+                    for navio in navios]),
         f"rest_define_EstoqueProdutoPatio_{produto}_{horas_D14[0]}",
     )
-'''
+
 varVolumeAtrasadoNavio = LpVariable.dicts("Volume Atrasado por navio", (navios_ate_d14), 0, None, LpContinuous)
 
 for navio in navios_ate_d14:
@@ -1825,7 +1835,7 @@ for navio in navios_ate_d14:
              parametros_navios['Taxa de Carreg.'][navio],
         f"rest_define_VolumeAtrasadoNavio_{navio}",
     )
-'''
+
 # -----------------------------------------------------------------------------
 
 print(f'[OK]\nDefinindo função objetivo...   ', end='')
@@ -1863,6 +1873,21 @@ solver.solve(modelo)
 print(f'{LpStatus[modelo.status]}')
 
 print(f'[OK]\nObtendo resultados...   ', end='')
+
+'''
+#varBombeado = {"PRDT_C" :{"d01_h01":1270, "d01_h02":1270, "d01_h03":1270, "d01_h04":1270, "d01_h05":1270, "d01_h06":1270, "d01_h07":1270, "d01_h08":1270, "d01_h09":1270, "d01_h10":1270, "d01_h11":1270, "d01_h12":1270, "d01_h13":1270, "d01_h14":0, "d01_h15":0, "d01_h16":0, "d01_h17":0, "d01_h18":0, "d01_h19":0, "d01_h20":1270, "d01_h21":1270, "d01_h22":1270, "d01_h23":1270, "d01_h24":1270, "d02_h01":1270, "d02_h02":1270, "d02_h03":1270, "d02_h04":1270, "d02_h05":1270, "d02_h06":1270, "d02_h07":1270, "d02_h08":1270, "d02_h09":0, "d02_h10":0, "d02_h11":0, "d02_h12":0, "d02_h13":1270, "d02_h14":1270, "d02_h15":1270, "d02_h16":1270, "d02_h17":1270, "d02_h18":1270, "d02_h19":1270, "d02_h20":1270, "d02_h21":1270, "d02_h22":1270, "d02_h23":1270, "d02_h24":1270, "d03_h01":1270, "d03_h02":0, "d03_h03":0, "d03_h04":0, "d03_h05":0, "d03_h06":0, "d03_h07":0, "d03_h08":0, "d03_h09":1270, "d03_h10":1270, "d03_h11":1270, "d03_h12":1270, "d03_h13":1270, "d03_h14":1270, "d03_h15":1270, "d03_h16":1270, "d03_h17":1270, "d03_h18":1270, "d03_h19":1270, "d03_h20":1270, "d03_h21":1270, "d03_h22":0, "d03_h23":0, "d03_h24":0, "d04_h01":0, "d04_h02":1270, "d04_h03":1270, "d04_h04":1270, "d04_h05":1270, "d04_h06":1270, "d04_h07":1270, "d04_h08":1270, "d04_h09":1270, "d04_h10":1270, "d04_h11":1270, "d04_h12":1270, "d04_h13":1270, "d04_h14":1270, "d04_h15":0, "d04_h16":0, "d04_h17":0, "d04_h18":0, "d04_h19":0, "d04_h20":0, "d04_h21":1270, "d04_h22":1270, "d04_h23":1270, "d04_h24":1270, "d05_h01":1270, "d05_h02":1270, "d05_h03":1270, "d05_h04":1270, "d05_h05":1270, "d05_h06":1270, "d05_h07":1270, "d05_h08":1270, "d05_h09":1270, "d05_h10":0, "d05_h11":0, "d05_h12":0, "d05_h13":0, "d05_h14":0, "d05_h15":0, "d05_h16":1270, "d05_h17":1270, "d05_h18":1270, "d05_h19":1270, "d05_h20":1270, "d05_h21":1270, "d05_h22":1270, "d05_h23":1270, "d05_h24":1270, "d06_h01":1270, "d06_h02":1270, "d06_h03":1270, "d06_h04":1270, "d06_h05":0, "d06_h06":0, "d06_h07":0, "d06_h08":0, "d06_h09":0, "d06_h10":0, "d06_h11":1270, "d06_h12":1270, "d06_h13":1270, "d06_h14":1270, "d06_h15":1270, "d06_h16":1270, "d06_h17":1270, "d06_h18":1270, "d06_h19":1270, "d06_h20":1270, "d06_h21":1270, "d06_h22":1270, "d06_h23":1270, "d06_h24":0, "d07_h01":0, "d07_h02":0, "d07_h03":0, "d07_h04":0, "d07_h05":0, "d07_h06":0, "d07_h07":1270, "d07_h08":1270, "d07_h09":1270, "d07_h10":1270, "d07_h11":1270, "d07_h12":1270, "d07_h13":1270, "d07_h14":1270, "d07_h15":1270, "d07_h16":1270, "d07_h17":1270, "d07_h18":1270, "d07_h19":1270, "d07_h20":0, "d07_h21":0, "d07_h22":0, "d07_h23":0, "d07_h24":0, "d08_h01":0, "d08_h02":0, "d08_h03":1270, "d08_h04":1270, "d08_h05":1270, "d08_h06":1270, "d08_h07":1270, "d08_h08":1270, "d08_h09":1270, "d08_h10":1270, "d08_h11":1270, "d08_h12":1270, "d08_h13":1270, "d08_h14":1270, "d08_h15":1270, "d08_h16":0, "d08_h17":0, "d08_h18":0, "d08_h19":0, "d08_h20":0, "d08_h21":0, "d08_h22":0, "d08_h23":1270, "d08_h24":1270, "d09_h01":1270, "d09_h02":1270, "d09_h03":1270, "d09_h04":1270, "d09_h05":1270, "d09_h06":1270, "d09_h07":1270, "d09_h08":1270, "d09_h09":1270, "d09_h10":1270, "d09_h11":1270, "d09_h12":0, "d09_h13":0, "d09_h14":0, "d09_h15":0, "d09_h16":0, "d09_h17":0, "d09_h18":1270, "d09_h19":1270, "d09_h20":1270, "d09_h21":1270, "d09_h22":1270, "d09_h23":1270, "d09_h24":1270, "d10_h01":1270, "d10_h02":1270, "d10_h03":1270, "d10_h04":1270, "d10_h05":1270, "d10_h06":1270, "d10_h07":1270, "d10_h08":0, "d10_h09":0, "d10_h10":0, "d10_h11":0, "d10_h12":0, "d10_h13":0, "d10_h14":0, "d10_h15":1270, "d10_h16":1270, "d10_h17":1270, "d10_h18":1270, "d10_h19":1270, "d10_h20":1270, "d10_h21":1270, "d10_h22":1270, "d10_h23":1270, "d10_h24":1270, "d11_h01":1270, "d11_h02":1270, "d11_h03":1270, "d11_h04":0, "d11_h05":0, "d11_h06":0, "d11_h07":0, "d11_h08":0, "d11_h09":0, "d11_h10":1270, "d11_h11":1270, "d11_h12":1270, "d11_h13":1270, "d11_h14":1270, "d11_h15":1270, "d11_h16":1270, "d11_h17":1270, "d11_h18":1270, "d11_h19":1270, "d11_h20":1270, "d11_h21":1270, "d11_h22":1270, "d11_h23":0, "d11_h24":0, "d12_h01":0, "d12_h02":0, "d12_h03":1270, "d12_h04":1270, "d12_h05":1270, "d12_h06":1270, "d12_h07":1270, "d12_h08":1270, "d12_h09":1270, "d12_h10":1270, "d12_h11":1270, "d12_h12":1270, "d12_h13":1270, "d12_h14":1270, "d12_h15":1270, "d12_h16":0, "d12_h17":0, "d12_h18":0, "d12_h19":0, "d12_h20":1270, "d12_h21":1270, "d12_h22":1270, "d12_h23":1270, "d12_h24":1270, "d13_h01":1270, "d13_h02":1270, "d13_h03":1270, "d13_h04":1270, "d13_h05":1270, "d13_h06":1270, "d13_h07":1270, "d13_h08":1270, "d13_h09":1270, "d13_h10":0, "d13_h11":0, "d13_h12":0, "d13_h13":0, "d13_h14":1270, "d13_h15":1270, "d13_h16":1270, "d13_h17":1270, "d13_h18":1270, "d13_h19":1270, "d13_h20":1270, "d13_h21":1270, "d13_h22":1270, "d13_h23":1270, "d13_h24":1270, "d14_h01":1270, "d14_h02":1270, "d14_h03":0, "d14_h04":0, "d14_h05":0, "d14_h06":0, "d14_h07":0, "d14_h08":0, "d14_h09":0, "d14_h10":1270, "d14_h11":1270, "d14_h12":1270, "d14_h13":1270, "d14_h14":1270, "d14_h15":1270, "d14_h16":1270, "d14_h17":1270, "d14_h18":1270, "d14_h19":1270, "d14_h20":1270, "d14_h21":1270, "d14_h22":1270, "d14_h23":1270, "d14_h24":0}}
+modelo_1 = Model_p1()
+modelo_1.modelo(cenario, solver, horas_D14, produtos_conc, horas_Dm3_D14, de_para_produtos_mina_conc, min_estoque_pulmao_concentrador, max_estoque_pulmao_concentrador, 
+               numero_faixas_producao, max_taxa_alimentacao, parametros_mina, taxa_producao_britagem, produtos_britagem, produtos_mina, faixas_producao_concentrador, 
+               estoque_pulmao_inicial_concentrador, parametros_calculados, fatorGeracaoLama, parametros_mineroduto_ubu, estoque_eb06_d0, dias, args)
+
+modelo_2 = Model_p2()
+modelo_2.modelo(cenario, solver, horas_D14, produtos_conc, horas_Dm3_D14, varBombeado, parametros_calculados, navios, parametros_mineroduto_ubu, 
+                dias, max_producao_sem_incorporacao, args, produtos_usina, de_para_produtos_conc_usina, parametros_ubu, tempo_mineroduto, min_estoque_polpa_ubu, 
+                max_estoque_polpa_ubu, max_taxa_envio_patio, max_taxa_retorno_patio_usina, min_estoque_patio_usina, max_estoque_patio_usina, estoque_polpa_ubu, 
+                estoque_inicial_patio_usina, fator_limite_excesso_patio, parametros_navios, capacidade_carreg_porto_por_dia, navios_ate_d14, produtos_de_cada_navio, 
+                estoque_produto_patio_d0)
+
 
 # Criando um dicionário com os resultados para salvar os resultados
 resultados = {'variaveis':{}}
@@ -1908,7 +1933,7 @@ if not os.path.exists(args.pasta_saida):
 # Salvando os dados em arquivo binário usando pickels
 nome_arquivo_saida = gerar_nome_arquivo_saida(f"{cenario['geral']['nome']}_resultados")
 print(f'[OK]\nGerando arquivo {nome_arquivo_saida}...   ', end='')
-with open(f'{args.pasta_saida}/{nome_arquivo_saida}', 'wb') as f:
-    pickle.dump(resultados, f)
+with open(f'{args.pasta_saida}/{nome_arquivo_saida}', 'w', encoding='utf8') as f:
+    json.dump(resultados, f)
 
 print('[OK]')

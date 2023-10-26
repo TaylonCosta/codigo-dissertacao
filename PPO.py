@@ -7,16 +7,13 @@ from stable_baselines3.common.vec_env import VecNormalize
 from stable_baselines3 import PPO
 import itertools
 
-INSTANCIA_UNICA = False
+INSTANCIA_UNICA = True
 SEMENTE_INSTANCIA_UNICA = 51
 PASSOS_TREINAMENTO = 500000
 USAR_LOG_TENSORBOARD = True # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
-FACTOR = 25
-TAMANHO_TOTAL = 100
-TAMANHO = 5
-MAXIMO = 200
 SEMENTE = 5
-TROCAS = int(np.round(0.3*TAMANHO))
+ALEATORIO = FALSE
+TAMANHO = 24
 
 if not INSTANCIA_UNICA:
    SEMENTE_INSTANCIA_UNICA = None
@@ -24,162 +21,33 @@ if not INSTANCIA_UNICA:
 class CustomizedEnv(gym.Env):
 
   
-  def Avalia(self, lista, distancia):
-    FO = 0
-    n = len(lista)
-    ListaD = [0 for x in lista]
-    my_list0 = [x for x in lista if x != -1]
-    lista_original  = self.Lista_inicial.copy()
+  def Avalia(self, BombeamentoPolpa):
+    return estoque_eb06, estoque_ubu, prod_concentrador, prod_usina  = Learning.function(BombeamentoPolpa)
 
-    my_list = [x for x in lista_original if x not in my_list0]
-    subset = distancia[:, my_list] 
-
-    for i in range(n-1):
-        if lista[i] != -1 and lista[i+1] != -1:
-          FO = FO + distancia[lista[i], lista[i+1]]
-        else:
-          if lista[i] !=-1 and lista[i+1] == -1:
-            FO = FO + np.max(subset[lista[i],:])
-          if lista[i] ==-1 and lista[i+1] != -1:
-            FO = FO + np.max(subset[lista[i+1],:])
-          if lista[i] ==-1 and lista[i+1] == -1:
-            FO = FO + self.Dmax_instancia
-        ListaD[i] = FO
-    if lista[n-1] != -1 and lista[0] != -1:
-      FO = FO + distancia[lista[i], lista[i+1]]
-    else:
-      if lista[n-1] !=-1 and lista[0] == -1:
-        FO = FO + np.max(subset[lista[n-1],:])
-      if lista[n-1] ==-1 and lista[0] != -1:
-        FO = FO + np.max(subset[lista[0],:])
-      if lista[n-1] ==-1 and lista[0] == -1:
-        FO = FO + self.Dmax_instancia
-    ListaD[i] = FO
-
-    return FO,ListaD
-
-  def Swap (self, ListaI, ListaF, distancia, action):
-
-    a = action[0]
-    b = action[1]
-    valor = ListaI[a]
-    ListaI[a] = -1
-    ListaF[b] = valor
-
-    FOnew,ListaD = self.Avalia(ListaF, distancia)
-
-    return ListaI,ListaF,ListaD, FOnew
-    
-  def escolher_subconjunto_de_posicoes(self,matriz, tamanho_subconjunto):
-      """
-      Escolhe um subconjunto de posições de uma matriz aleatoriamente.
-
-      Args:
-          matriz: A matriz a partir da qual as posições serão escolhidas.
-          tamanho_subconjunto: O tamanho do subconjunto a ser escolhido.
-
-      Returns:
-          Um subconjunto de posições da matriz.
-      """
-
-      # Gera um vetor de números aleatórios entre 0 e o tamanho da matriz.
-      numeros_aleatorios = self.rand_generator.choice(range(0, matriz.shape[0]), size = tamanho_subconjunto, replace=False)
-
-      # Retorna as posições correspondentes aos números aleatórios.
-      return numeros_aleatorios
 
   def criar_instancia(self):
-    self.Distancia_inicial = self.gerar_matriz_distancias_aleatorias(TAMANHO_TOTAL, MAXIMO, SEMENTE)
-    #self.rand_generator.randint(5,self.Dmax, size=(TAMANHO,TAMANHO))
-    subconjunto_de_posicoes = self.escolher_subconjunto_de_posicoes(self.Distancia_inicial, TAMANHO)
-    self.Distancia = self.Distancia_inicial[subconjunto_de_posicoes,:]
-    self.Distancia = self.Distancia[:,subconjunto_de_posicoes]
-
-    diagonal_mask = np.diag_indices_from(self.Distancia)
-    Distancia_temp  =  self.Distancia.copy()
-    Distancia_temp[diagonal_mask] = -1
-    self.Dmax_instancia = Distancia_temp.max()
-    self.UB_Geral = sum(list(Distancia_temp.max(axis=1)))
-    Distancia_temp[diagonal_mask] = 1000
-    self.Dmin_instancia = Distancia_temp.min()
-
-    diagonal_mask = np.diag_indices_from(self.Distancia_inicial)
-    Distancia_temp  =  self.Distancia_inicial.copy()
-    Distancia_temp[diagonal_mask] = -1
-    self.DmaxG_instancia = Distancia_temp.max()
-    Distancia_temp[diagonal_mask] = 1000
-    self.DminG_instancia = Distancia_temp.min()
-
-    diagonal_mask = np.diag_indices_from(self.Distancia)
-    Distancia_temp  =  self.Distancia.copy()
-    Distancia_temp[diagonal_mask] = 0
-    self.Media_instancia = Distancia_temp.mean()
-
-    #self.UB_Geral = sum(list(self.Distancia.max(axis=1)))
-    self.LB_inicial = sum(list(self.Distancia.min(axis=1)))    
-    self.Lista_inicial =  sorted(subconjunto_de_posicoes)
-    self.Lista_Final =  list(map(lambda x: -1, self.Lista_inicial))
-    self.FO_Best_inicial = self.UB_Geral
-    self.FO_inicial = self.UB_Geral
-    self.FO_Best = self.FO_Best_inicial
-    self.ListaD_Inicial =  [self.DmaxG_instancia for i in range(TAMANHO)]
-    self.ListaD_Inicial = list(itertools.accumulate(self.ListaD_Inicial))
+    self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs  = Inicializar(ALEATORIO)
+    self.MaxCon = max(self.disp_conc_inicial)
+    self.MaxUbu= max(self.disp_usina_inicial)
 
   def usar_instancia(self):
-    self.Distancia = self.Distancia_inicial.copy()
-    self.LB = self.LB_inicial
-    self.ListaI = self.Lista_inicial.copy()
-    self.ListaF = self.Lista_Final.copy()
-    self.FO = self.UB_Geral
-    self.FO_Best = self.FO
-    self.ListaD = self.ListaD_Inicial
+    self.estoque_eb06 = self.estoque_eb06_inicial.copy() #Volume 
+    self.estoque_ubu = self.estoque_ubu_inicial.copy() #Volume
+    self.disp_conc = self.disp_conc_inicial.copy() #Produção Max Hora 
+    self.disp_usina = self.disp_usina_inicial.copy() #Produção Max Hora
 
-  def gerar_matriz_distancias_aleatorias(self, n, maximo, seed):
-      """
-      Gera uma matriz de distâncias aleatórias com n pontos e semente fixa.
-
-      Args:
-          n: O número de pontos na matriz.
-          seed: A semente para o gerador de números aleatórios.
-
-      Returns:
-          Uma matriz de distâncias aleatórias.
-      """
-
-      # Inicializa o gerador de números aleatórios com a semente fornecida.
-      np.random.seed(seed)
-
-      # Gera as coordenadas dos pontos.
-      pontos = np.random.rand(n, 2)
-
-      # Calcula as distâncias entre todos os pares de pontos.
-      distancias = np.linalg.norm(pontos - pontos[:, np.newaxis], axis=2)*FACTOR
-    
-      # Itera sobre a matriz.
-      for i in range(distancias.shape[0]):
-        # Define a distância para ele mesmo como infinito.
-        distancias[i, i] = float("inf")
-
-      # Limita as distâncias ao máximo especificado.
-      distancias = np.clip(distancias, 0, maximo)
-
-      return distancias
 
   def __init__(self, instancia_unica=False, seed=None):
     super(CustomizedEnv, self).__init__()
 
     print(f"Criando ambiente: {instancia_unica=} {seed=}" )  
     
-    tam = TAMANHO
-    self.Dmax = 10*tam
-    
-    self.Lista0 = [0]*tam
-
     size = int(TAMANHO) #int(2*TAMANHO)
     # Define action and observation space
-    self.action_space = spaces.MultiDiscrete(np.array([tam,tam]))
+    n_actions = 2
+    self.action_space = spaces.MultiBinary(n_actions)
     #self.observation_space = spaces.Box(len(self.Lista0)*[tam]+len(self.Lista0)*[self.Dmax])
-    self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(3*size+1,), dtype=np.float64)
+    self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(4*size), dtype=np.float64)
 
     self.seed(seed)
     self.instancia_unica = instancia_unica
@@ -195,16 +63,17 @@ class CustomizedEnv(gym.Env):
     estado_temp = estado.copy()
 
     for i in range(TAMANHO):
-      estado_temp[i] = estado_temp[i]/(TAMANHO_TOTAL)
+      estado_temp[i] = estado_temp[i]/(self.MaxE06)
     
     for i in range(TAMANHO, 2*TAMANHO):
-      estado_temp[i] = estado_temp[i]/(TAMANHO_TOTAL)
+      estado_temp[i] = estado_temp[i]/(self.MaxEUBU)
 
     for i in range(2*TAMANHO, 3*TAMANHO):
-      estado_temp[i] = estado_temp[i]/TAMANHO*(self.Dmax_instancia - self.Dmin_instancia)
+      estado_temp[i] = estado_temp[i]/(self.MaxCon)
 
-    estado_temp[3*TAMANHO] =   estado_temp[TAMANHO]/(self.DmaxG_instancia-self.DminG_instancia)
-   
+    for i in range(3*TAMANHO, 4*TAMANHO):
+      estado_temp[i] = estado_temp[i]/(self.disp_usina)
+
     return np.clip(np.array(estado_temp)*2 - 1, self.observation_space.low, self.observation_space.high) 
 
   def reset(self):
@@ -216,50 +85,74 @@ class CustomizedEnv(gym.Env):
 
     self.usar_instancia()
     self.passo = 0
-    self.iter = 0
+    self.nBatchsP = 0
+    self.nBatchsA = 0
     self.ultima_acao = None
     self.ultima_recompensa = 0
-    # self.ListaD = self.GeraListaD(self.Lista)
-    self.oldAction = [0,0]
-    return self.normalizar_estado(self.ListaI + self.ListaF + self.ListaD + [self.Media_instancia])
+    self.BombeamentoPolpa = [0]*TAMANHO
+    self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = Avalia(self.BombeamentoPolpa)
+    self.FO_Inicial = sum(self.prod_usina)
+    self.FO_Best = self.FO_Inicial
+    return self.normalizar_estado(self.estoque_eb06 + self.estoque_ubu + self.disp_conc + self.disp_usina)
   
+  self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs
   
   def step(self, action):
     
     FIM = TAMANHO
 
-    if self.ListaI[action[0]] == -1 or self.ListaF[action[1]] != -1:
-      recompensa = -100000
-    else:
-      self.iter =  self.iter + 1
-      self.FO_anterior = self.FO
-      self.ListaI, self.ListaF, self.ListaD, self.FO = self.Swap(self.ListaI, self.ListaF, self.Distancia_inicial, action)
+    Erro = False
+
+    if action == 1:
+      if self.nBatchsP + 1 > self.PolpaLs:
+        recompensa = -100000000
+        Erro = True
+      elif self.nBatchsA >0 and self.nBatchsA < self.AguaLi:
+        recompensa = -100000000
+        Erro = True
+      if Erro == False:
+        recompensa = 1
+        self.nBatchsP += 1
+        self.nBatchsA = 0
+
+    if action == 0:
+      if self.nBatchsA + 1 > self.AguaLs:
+        recompensa = -100000000
+        Erro = True
+      elif self.nBatchsP >0 and self.nBatchsP < self.PolpaLi:
+        recompensa = -100000000
+        Erro = True
+      if Erro == False:
+        recompensa = 1
+        self.nBatchsP = 0
+        self.nBatchsA += 0    
+
+    if Erro == False:
+      self.BombeamentoPolpa[self.passo] = action
+      self.passo +=1
+      
+      self.FO_anterior = sum(self.prod_usina)
+
+      self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = Avalia(self.BombeamentoPolpa)
+      
+      self.FO = sum(self.prod_usina)
+
+      if self.FO > self.FO_Best:
+        self.FO_Best = self.FO_Inicial
+
+      recompensa = float(self.FO - self.FO_anterior)
+
       self.ultima_acao = action
 
-      recompensa = float(self.FO_anterior - self.FO)
 
-      if self.FO_Best > self.FO:
-        self.FO_Best = self.FO
-        recompensa = 100*recompensa
-      else:
-        if recompensa < 0:
-          recompensa = -10*recompensa
-        else:
-          recompensa = 10*recompensa
-
-    self.oldAction = action
-
-    #recompensa = (0.66)*self.ultima_recompensa + (0.33)*recompensa
     self.ultima_recompensa = recompensa
-    # self.ListaD = self.GeraListaD(self.Lista)
-    terminou_episodio = bool(self.FO == self.LB or self.iter == FIM)
+   
+    terminou_episodio = bool(self.passo == FIM)
 
     # Optionally we can pass additional info, we are not using that for now
     info = {}
 
-    self.passo += 1
-
-    return self.normalizar_estado(self.ListaI + self.ListaF + self.ListaD + [self.Media_instancia]), recompensa, terminou_episodio, info
+    return self.normalizar_estado(self.estoque_eb06 + self.estoque_ubu + self.disp_conc + self.disp_usina), recompensa, terminou_episodio, info
   
   def render(self, mode='console'):
     if mode != 'console':
@@ -271,8 +164,7 @@ class CustomizedEnv(gym.Env):
       print('Instância:')
     
     print(f'\tÚltima ação: {self.ultima_acao}, FO: {self.FO}')
-    print(f'\tLista: {self.Lista}')
-    print(f'\tListaD: {self.ListaD}')
+    print(f'\tLista: {self.BombeamentoPolpa}')
     print(f'\tRecompensa: {self.ultima_recompensa}')
 
   def close(self):
@@ -318,7 +210,7 @@ else:
 # Train the agent
 model = PPO('MlpPolicy', vec_env, verbose=1, tensorboard_log=tensorboard_log).learn(PASSOS_TREINAMENTO)
 
-model.save("ppo_Routing_v2")
+model.save("ppo_Mineroduto")
 
 #model = PPO.load("ppo_Routing", env=env)
 
@@ -350,7 +242,7 @@ def evaluate_results(model, env, seeds, render=False):
       obs, reward, done, info = env.step(action)
       if render: env.render()
     
-    results.append({'FO_Best': env.FO_Best, 'FO_inicial': env.FO_inicial, 'LB': env.LB})  
+    results.append({'FO_Best': env.FO_Best, 'FO_inicial': env.FO_inicial})  
     FO_bests.append(env.FO_Best)
   
   return np.average(FO_bests), results
@@ -368,27 +260,9 @@ SEMENTES_AVALIACAO = SEMENTES_FIXAS_AVALIACAO[:qtde_avaliacoes]
 
 PPO_avg_FO_bests, PPO_results = evaluate_results(model, env, SEMENTES_AVALIACAO, render=False)
 #random_avg_FO_bests, random_results = evaluate_results(RandomAgent(env), env, SEMENTES_AVALIACAO, render=False)
-
 myfile = open("resultados.txt", "w")
 myfile.write(str(PPO_avg_FO_bests) +"\n")
-myfile.write("-------------------------"+"\n")
-myfile.write(str(random_results) +"\n")
 myfile.close()
 
 
-print(f"Done! Resultado: {env.FO_Best} (inicial: {env.FO_inicial}, LB: {env.LB})")
-
-print()
-print(f"{'Execução':^20}{'FO_Best PPO':^20}{'FO_Best Random':^20}{'FO_inicial PPO':^20}{'FO_inicial Random':^20}{'LB PPO':^20}{'LB Random':^20}")
-for i in range(len(PPO_results)):
-  print(f"{i+1:^20}", end="")
-  print(f"{PPO_results[i]['FO_Best']:^20}", end="")
-  print(f"{random_results[i]['FO_Best']:^20}", end="")
-  print(f"{PPO_results[i]['FO_inicial']:^20}", end="")
-  print(f"{random_results[i]['FO_inicial']:^20}", end="")
-  print(f"{PPO_results[i]['LB']:^20}", end="")
-  print(f"{random_results[i]['LB']:^20}")
-
-print()
-print(f"FO_Best médio do PPO: {PPO_avg_FO_bests}")
-print(f"FO_Best médio do Random: {random_avg_FO_bests}")
+print(f"Done! Resultado: {env.FO_Best} (inicial: {env.FO_inicial})")

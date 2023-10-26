@@ -123,7 +123,6 @@ class CustomizedEnv(gym.Env):
         recompensa = -100000000
         Erro = True
       if Erro == False:
-        recompensa = 1
         self.nBatchsP = 0
         self.nBatchsA += 0    
 

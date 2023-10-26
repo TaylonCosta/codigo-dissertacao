@@ -30,7 +30,7 @@ def gerar_nome_arquivo_saida(nome_base_arquivo):
     return f"{nome_base_arquivo}_{contador}.json"
 
 parser = argparse.ArgumentParser(description='Otimizador Plano Semanal')
-parser.add_argument('-s', '--solver', default='GUROBI', type=str, help='Nome do otimizador a ser usado')
+parser.add_argument('-s', '--solver', default='GUROBI_CMD', type=str, help='Nome do otimizador a ser usado')
 parser.add_argument('-c', '--cenario', default='cenarios/ws0.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
 parser.add_argument('-o', '--pasta-saida', default='experimentos', type=str, help='Pasta onde serão salvos os arquivos de resultados')
 args = parser.parse_args()
@@ -527,7 +527,28 @@ resultados_modelo2 = modelo_2.modelo(cenario, solver, horas_D14, produtos_conc, 
                 estoque_produto_patio_d0, parametros_mineroduto_md3)
 print('[OK]')
 
-function = Learning.function(varBombeamentoPolpa, resultados_modelo1, resultados_modelo2)
+estoque_eb06 = {}
+estoque_ubu = {}
+
+for v in range(1,24):
+    if v<10:
+        dia_esotque_eb06 = f'Estoque_EB06_PRDT_C_d01_h0'+str(v)
+    else:
+        dia_esotque_eb06 = f'Estoque_EB06_PRDT_C_d01_h'+str(v)
+
+    if v<10:
+        dia_estoque_ubu = f'Estoque_Polpa_Ubu_PRDT_C_d01_h0'+str(v)
+    else:
+        dia_estoque_ubu = f'Estoque_Polpa_Ubu_PRDT_C_d01_h'+str(v)
+    
+    
+    estoque_eb06[v] = resultados_modelo1['variaveis'][dia_esotque_eb06]
+    estoque_ubu[v] = resultados_modelo2['variaveis'][dia_estoque_ubu]
+
+prod_concentrador = resultados_modelo1['variaveis']['Producao___C3___Prog_PRDT_C_d01_h01']
+prod_usina = resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h01']
+
+function = Learning.function(varBombeamentoPolpa, estoque_eb06, estoque_ubu, prod_concentrador, prod_usina)
 
 #
 #ter uma função como entrada o vetor resultado do mineroduto, dos tanques (eb06 e tanque concentrador), taxa de prod conc e taxa de prod usina

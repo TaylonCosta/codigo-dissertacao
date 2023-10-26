@@ -530,6 +530,4 @@ class Model_p1():
         with open(f'{args.pasta_saida}/{nome_arquivo_saida}', "w", encoding="utf8") as f:
             json.dump(resultados, f)
 
-        print(varEstoqueEB06[produto][horas_D14[0]])
-
         return resultados

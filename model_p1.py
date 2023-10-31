@@ -23,10 +23,29 @@ class Model_p1():
         return f"{nome_base_arquivo}_{contador}.json"
 
 
-    def modelo(self, cenario, solver, horas_D14, produtos_conc, horas_Dm3_D14, de_para_produtos_mina_conc, min_estoque_pulmao_concentrador, max_estoque_pulmao_concentrador, 
-               numero_faixas_producao, max_taxa_alimentacao, parametros_mina, taxa_producao_britagem, produtos_britagem, produtos_mina, faixas_producao_concentrador, 
-               estoque_pulmao_inicial_concentrador, parametros_calculados, fatorGeracaoLama, parametros_mineroduto_ubu, estoque_eb06_d0, dias, args, varBombeamentoPolpa):
-        
+    def modelo(self, cenario, solver, data, varBombeamentoPolpa):
+        # variaveis utilizadas no modelo
+        horas_D14 = data['horas_D14']
+        produtos_conc = data['produtos_conc']
+        horas_Dm3_D14 = ['horas_Dm3_D14'] 
+        de_para_produtos_mina_conc = data['de_para_produtos_mina_conc']
+        min_estoque_pulmao_concentrador = data['min_estoque_pulmao_concentrador'] 
+        max_estoque_pulmao_concentrador = data['max_estoque_pulmao_concentrador'] 
+        numero_faixas_producao = data['numero_faixas_producao']
+        max_taxa_alimentacao = data['max_taxa_alimentacao']
+        parametros_mina = data['parametros_mina']
+        taxa_producao_britagem = data['taxa_producao_britagem']
+        produtos_britagem = data['produtos_britagem']
+        produtos_mina = data['produtos_mina'] 
+        faixas_producao_concentrador = data['faixas_producao_concentrador'] 
+        estoque_pulmao_inicial_concentrador = data['estoque_pulmao_inicial_concentrador']
+        parametros_calculados = data['parametros_calculados']
+        fatorGeracaoLama = data['fatorGeracaoLama']
+        parametros_mineroduto_ubu = data['parametros_mineroduto_ubu']
+        estoque_eb06_d0 = data['estoque_eb06_d0'] 
+        dias = data['dias']
+        args = data['args']
+
         BIG_M = 10e6
         modelo = LpProblem("Plano Semanal", LpMaximize)
 

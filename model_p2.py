@@ -22,11 +22,38 @@ class Model_p2():
             contador += 1
         return f"{nome_base_arquivo}_{contador}.json"
 
-    def modelo(self, cenario, solver, horas_D14, produtos_conc, horas_Dm3, horas_Dm3_D14, parametros_calculados, navios, parametros_mineroduto_ubu, varBombeamentoPolpa,
-                dias, max_producao_sem_incorporacao, args, produtos_usina, de_para_produtos_conc_usina, parametros_ubu, tempo_mineroduto, min_estoque_polpa_ubu, 
-                max_estoque_polpa_ubu, max_taxa_envio_patio, max_taxa_retorno_patio_usina, min_estoque_patio_usina, max_estoque_patio_usina, estoque_polpa_ubu, 
-                estoque_inicial_patio_usina, fator_limite_excesso_patio, parametros_navios, capacidade_carreg_porto_por_dia, navios_ate_d14, produtos_de_cada_navio, 
-                estoque_produto_patio_d0, parametros_mineroduto_md3):
+    def modelo(self, cenario, solver, data, varBombeamentoPolpa):
+        
+        # variaveis utilizadas pelo modelo
+        horas_D14 = data['horas_D14']
+        produtos_conc = data['produtos_conc']
+        horas_Dm3 = data['horas_Dm3']
+        horas_Dm3_D14 = data['horas_Dm3_D14']
+        parametros_calculados = data['parametros_calculados']
+        navios = data['navios']
+        parametros_mineroduto_ubu = data['parametros_mineroduto_ubu'] 
+        dias = data['dias']
+        max_producao_sem_incorporacao = data['max_producao_sem_incorporacao']
+        args = data['args']
+        produtos_usina = data['produtos_usina']
+        de_para_produtos_conc_usina = data['de_para_produtos_conc_usina']
+        parametros_ubu = data['parametros_ubu']
+        tempo_mineroduto = data['tempo_mineroduto']
+        min_estoque_polpa_ubu = data['min_estoque_polpa_ubu'] 
+        max_estoque_polpa_ubu = data['max_estoque_polpa_ubu']
+        max_taxa_envio_patio = data['max_taxa_envio_patio']
+        max_taxa_retorno_patio_usina = data['max_taxa_retorno_patio_usina']
+        min_estoque_patio_usina = data['min_estoque_patio_usina']
+        max_estoque_patio_usina = data['max_estoque_patio_usina'] 
+        estoque_polpa_ubu = data['estoque_polpa_ubu'] 
+        estoque_inicial_patio_usina = data['estoque_inicial_patio_usina']
+        fator_limite_excesso_patio = data['fator_limite_excesso_patio']
+        parametros_navios = data['parametros_navios']
+        capacidade_carreg_porto_por_dia = data['capacidade_carreg_porto_por_dia']
+        navios_ate_d14 = data['navios_ate_d14'] 
+        produtos_de_cada_navio = data['produtos_de_cada_navio'] 
+        estoque_produto_patio_d0 = data['estoque_produto_patio_d0']
+        parametros_mineroduto_md3 = data['parametros_mineroduto_md3']
         
         BIG_M = 10e6
         modelo = LpProblem("Plano Semanal", LpMaximize)

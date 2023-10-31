@@ -6,43 +6,64 @@ from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.vec_env import VecNormalize
 from stable_baselines3 import PPO
 import itertools
+from ai import Learning
+import random
+from PPO import Load_data
 
-INSTANCIA_UNICA = True
-SEMENTE_INSTANCIA_UNICA = 51
-PASSOS_TREINAMENTO = 500000
+UNIQUE_INSTANCE = True
+UNIQUE_INSTANCE_SEED = 51
+TRAINING_STEPS = 500000
 USAR_LOG_TENSORBOARD = True # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
 SEMENTE = 5
-ALEATORIO = FALSE
-TAMANHO = 24
+RANDOM = False
+SIZE = 24
 
-if not INSTANCIA_UNICA:
-   SEMENTE_INSTANCIA_UNICA = None
+if not UNIQUE_INSTANCE:
+   UNIQUE_INSTANCE_SEED = None
 
 class CustomizedEnv(gym.Env):
+  
+  def initialize(rand):
+    if rand:
+      estoque_eb06_inicial = random.randint()
+      estoque_ubu_inicial = random.randint()
+      disp_conc_inicial = random.randint()
+      disp_usina_inicial = random.randint()
+      MaxE06 = random.randint()
+      MaxEUBU = random.randint()
+      AguaLi = random.randint()
+      AguaLs = random.randint()
+      PolpaLi = random.randint()
+      PolpaLs = random.randint()
+
+    else:
+      load_data = Load_data()
+      self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs = load_data.load_simplified_data_ppo()
 
   
-  def Avalia(self, BombeamentoPolpa):
-    return estoque_eb06, estoque_ubu, prod_concentrador, prod_usina  = Learning.function(BombeamentoPolpa)
+  def evaluate(self, BombeamentoPolpa):
+    estoque_eb06, estoque_ubu, prod_concentrador, prod_usina = Learning.solve_model(BombeamentoPolpa)
+    return estoque_eb06, estoque_ubu, prod_concentrador, prod_usina
 
 
-  def criar_instancia(self):
-    self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs  = Inicializar(ALEATORIO)
+  def create_instance(self):
+    self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs = self.initialize(RANDOM)
     self.MaxCon = max(self.disp_conc_inicial)
     self.MaxUbu= max(self.disp_usina_inicial)
 
-  def usar_instancia(self):
+  def use_instance(self):
     self.estoque_eb06 = self.estoque_eb06_inicial.copy() #Volume 
     self.estoque_ubu = self.estoque_ubu_inicial.copy() #Volume
     self.disp_conc = self.disp_conc_inicial.copy() #Produção Max Hora 
     self.disp_usina = self.disp_usina_inicial.copy() #Produção Max Hora
 
 
-  def __init__(self, instancia_unica=False, seed=None):
+  def __init__(self, unique_instance=False, seed=None):
     super(CustomizedEnv, self).__init__()
 
-    print(f"Criando ambiente: {instancia_unica=} {seed=}" )  
+    print(f"Criando ambiente: {unique_instance=} {seed=}" )  
     
-    size = int(TAMANHO) #int(2*TAMANHO)
+    size = int(SIZE) #int(2*TAMANHO)
     # Define action and observation space
     n_actions = 2
     self.action_space = spaces.MultiBinary(n_actions)
@@ -50,57 +71,56 @@ class CustomizedEnv(gym.Env):
     self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(4*size), dtype=np.float64)
 
     self.seed(seed)
-    self.instancia_unica = instancia_unica
-    if self.instancia_unica: self.criar_instancia()
+    self.unique_instance = unique_instance
+    if self.unique_instance: self.create_instance()
     self.passo = 0
     self.iter = 0
     self.ultima_acao = None
-    self.ultima_recompensa = None    
-  
-
-  def normalizar_estado(self, estado):
+    self.ultima_recompensa = None
     
-    estado_temp = estado.copy()
 
-    for i in range(TAMANHO):
-      estado_temp[i] = estado_temp[i]/(self.MaxE06)
+  def normalize_state(self, state):
     
-    for i in range(TAMANHO, 2*TAMANHO):
-      estado_temp[i] = estado_temp[i]/(self.MaxEUBU)
+    temp_state = state.copy()
 
-    for i in range(2*TAMANHO, 3*TAMANHO):
-      estado_temp[i] = estado_temp[i]/(self.MaxCon)
+    for i in range(SIZE):
+      temp_state[i] = temp_state[i]/(self.MaxE06)
+    
+    for i in range(SIZE, 2*SIZE):
+      temp_state[i] = temp_state[i]/(self.MaxEUBU)
 
-    for i in range(3*TAMANHO, 4*TAMANHO):
-      estado_temp[i] = estado_temp[i]/(self.disp_usina)
+    for i in range(2*SIZE, 3*SIZE):
+      temp_state[i] = temp_state[i]/(self.MaxCon)
 
-    return np.clip(np.array(estado_temp)*2 - 1, self.observation_space.low, self.observation_space.high) 
+    for i in range(3*SIZE, 4*SIZE):
+      temp_state[i] = temp_state[i]/(self.disp_usina)
+
+    return np.clip(np.array(temp_state)*2 - 1, self.observation_space.low, self.observation_space.high) 
 
   def reset(self):
     """
     Important: the observation must be a numpy array
     :return: (np.array) 
     """
-    if not self.instancia_unica: self.criar_instancia()
+    if not self.unique_instance: self.create_instance()
 
-    self.usar_instancia()
+    self.use_instance()
     self.passo = 0
     self.nBatchsP = 0
     self.nBatchsA = 0
     self.ultima_acao = None
     self.ultima_recompensa = 0
-    self.BombeamentoPolpa = [0]*TAMANHO
-    self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = Avalia(self.BombeamentoPolpa)
+    self.BombeamentoPolpa = [0]*SIZE
+    self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa)
     self.FO_Inicial = sum(self.prod_usina)
     self.FO_Best = self.FO_Inicial
-    return self.normalizar_estado(self.estoque_eb06 + self.estoque_ubu + self.disp_conc + self.disp_usina)
+    return self.normalize_state(self.estoque_eb06 + self.estoque_ubu + self.disp_conc + self.disp_usina)
   
-  self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs
+self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs
   
   def step(self, action):
     
-    FIM = TAMANHO
-
+    FIM = SIZE
     Erro = False
 
     if action == 1:
@@ -132,7 +152,7 @@ class CustomizedEnv(gym.Env):
       
       self.FO_anterior = sum(self.prod_usina)
 
-      self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = Avalia(self.BombeamentoPolpa)
+      self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa)
       
       self.FO = sum(self.prod_usina)
 
@@ -173,50 +193,6 @@ class CustomizedEnv(gym.Env):
     self.rand_generator = np.random.RandomState(seed)
     self.action_space.seed(seed)
 
-print("===== CHECANDO AMBIENTE =====")
-
-env = CustomizedEnv(instancia_unica=INSTANCIA_UNICA, seed=SEMENTE_INSTANCIA_UNICA)
-# If the environment don't follow the interface, an error will be thrown
-check_env(env, warn=True)
-
-print()
-print("===== DEMONSTRANDO AMBIENTE =====")
-env = CustomizedEnv(instancia_unica=INSTANCIA_UNICA, seed=SEMENTE_INSTANCIA_UNICA)
-
-print(f"{env.observation_space=}")
-print(f"{env.action_space=}")
-print(f"{env.action_space.sample()=}")
-
-print()
-print("===== TREINANDO COM POO =====")
-
-if INSTANCIA_UNICA:
-   n_envs = 1
-else:
-   n_envs = 4
-
-# Cria um ambiente vetorizado considerando 4 ambientes (atores do PPO)
-vec_env = make_vec_env(CustomizedEnv, n_envs=n_envs, env_kwargs={'instancia_unica': INSTANCIA_UNICA, 'seed': SEMENTE_INSTANCIA_UNICA})
-
-# Usa um adaptador para normalizar as recompensas
-vec_env = VecNormalize(vec_env, training=True, norm_obs=False, norm_reward=True, clip_reward=10.)
-
-if USAR_LOG_TENSORBOARD:
-  tensorboard_log="./ppo_tensorboard/"
-else:
-  tensorboard_log=None
-
-# Train the agent
-model = PPO('MlpPolicy', vec_env, verbose=1, tensorboard_log=tensorboard_log).learn(PASSOS_TREINAMENTO)
-
-model.save("ppo_Mineroduto")
-
-#model = PPO.load("ppo_Routing", env=env)
-
-
-print()
-print("===== DEMONSTRANDO RESULTADO =====")
-
 class RandomAgent():
   def __init__(self, env):
     self.env = env
@@ -246,22 +222,59 @@ def evaluate_results(model, env, seeds, render=False):
   
   return np.average(FO_bests), results
 
+def run_ppo():
+  print("===== CHECANDO AMBIENTE =====")
 
-SEMENTES_FIXAS_AVALIACAO = [51, 312, 4, 207, 461, 394, 859, 639, 138, 727]
+  env = CustomizedEnv(unique_instance=UNIQUE_INSTANCE, seed=UNIQUE_INSTANCE_SEED)
+  # If the environment don't follow the interface, an error will be thrown
+  check_env(env, warn=True)
 
-if INSTANCIA_UNICA:  
-  qtde_avaliacoes = 1
-else:
-  qtde_avaliacoes = 10
+  print()
+  print("===== DEMONSTRANDO AMBIENTE =====")
+  print(f"{env.observation_space=}")
+  print(f"{env.action_space=}")
+  print(f"{env.action_space.sample()=}")
+  print("===== TREINANDO COM POO =====")
 
-#OLHAR COMO FIXAR SEED NO AMBIENTE
-SEMENTES_AVALIACAO = SEMENTES_FIXAS_AVALIACAO[:qtde_avaliacoes]
+  if UNIQUE_INSTANCE:
+    n_envs = 1
+  else:
+    n_envs = 4
 
-PPO_avg_FO_bests, PPO_results = evaluate_results(model, env, SEMENTES_AVALIACAO, render=False)
-#random_avg_FO_bests, random_results = evaluate_results(RandomAgent(env), env, SEMENTES_AVALIACAO, render=False)
-myfile = open("resultados.txt", "w")
-myfile.write(str(PPO_avg_FO_bests) +"\n")
-myfile.close()
+  # Cria um ambiente vetorizado considerando 4 ambientes (atores do PPO)
+  vec_env = make_vec_env(CustomizedEnv, n_envs=n_envs, env_kwargs={'unique_instace': UNIQUE_INSTANCE, 'seed': UNIQUE_INSTANCE_SEED})
 
+  # Usa um adaptador para normalizar as recompensas
+  vec_env = VecNormalize(vec_env, training=True, norm_obs=False, norm_reward=True, clip_reward=10.)
 
-print(f"Done! Resultado: {env.FO_Best} (inicial: {env.FO_inicial})")
+  if USAR_LOG_TENSORBOARD:
+    tensorboard_log="./ppo_tensorboard/"
+  else:
+    tensorboard_log=None
+
+  # Train the agent
+  model = PPO('MlpPolicy', vec_env, verbose=1, tensorboard_log=tensorboard_log).learn(TRAINING_STEPS)
+
+  model.save("ppo_Mineroduto")
+
+  #model = PPO.load("ppo_Routing", env=env)
+
+  print("===== DEMONSTRANDO RESULTADO =====")
+    
+  FIXED_EVALUATION_SEEDS = [51, 312, 4, 207, 461, 394, 859, 639, 138, 727]
+
+  if UNIQUE_INSTANCE:  
+    qtde_avaliacoes = 1
+  else:
+    qtde_avaliacoes = 10
+
+  #OLHAR COMO FIXAR SEED NO AMBIENTE
+  EVALUATION_SEEDS = FIXED_EVALUATION_SEEDS[:qtde_avaliacoes]
+
+  PPO_avg_FO_bests, PPO_results = evaluate_results(model, env, EVALUATION_SEEDS, render=False)
+  #random_avg_FO_bests, random_results = evaluate_results(RandomAgent(env), env, SEMENTES_AVALIACAO, render=False)
+  myfile = open("resultados.txt", "w")
+  myfile.write(str(PPO_avg_FO_bests) +"\n")
+  myfile.close()
+
+  print(f"Done! Resultado: {env.FO_Best} (inicial: {env.FO_inicial})")

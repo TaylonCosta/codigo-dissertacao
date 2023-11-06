@@ -526,14 +526,16 @@ class Load_data:
         # Abre o arquivo YAML com dados do cenário (parâmetros do problema)
         cenario = self.ler_cenario(args.cenario)
 
+        estoque_eb06_inicial = {}
         for produto, estoque in cenario['mineroduto']['estoque_inicial_eb06']:
             estoque_eb06_inicial[produto] = estoque
-        
+
+        estoque_ubu_inicial = {}
         for produto, estoque in cenario['usina']['estoque_inicial_polpa_ubu']:
             estoque_ubu_inicial[produto] = estoque
         
-        disp_conc_inicial = 1000
-        disp_usina_inicial = 1000
+        disp_conc_inicial = [1000]*24
+        disp_usina_inicial = [1000]*24
         
         MaxE06 = cenario['mineroduto']['max_capacidade_eb06']
         MaxEUBU = cenario['usina']['max_estoque_polpa_ubu']

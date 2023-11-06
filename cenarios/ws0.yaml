@@ -44,7 +44,7 @@ usina:
   min_estoque_polpa_ubu: 0
   max_estoque_polpa_ubu: 40000
   estoque_inicial_patio_usina: {"PRDT_C":3000}
-  estoque_inicial_polpa_ubu: {"PRDT_C":3000}
+  estoque_inicial_polpa_ubu: [["PRDT_C", 13595]]
   min_estoque_patio_usina: 3000
   max_estoque_patio_usina: 300000
 

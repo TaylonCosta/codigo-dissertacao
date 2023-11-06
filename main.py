@@ -6,6 +6,7 @@ from pulp import *                 # usado para resolver o problema de otimizaç
 import argparse                    # usado para tratar os argumentos do script
 # from PPO import *
 from ai import Learning
+from PPO import run_ppo
 
 def gerar_nome_arquivo_saida(nome_base_arquivo):
     """ Gera o nome padronizado do arquivo de saída """
@@ -25,9 +26,7 @@ args = parser.parse_args()
 estoque_polpa_ubu = 3000
 # print(parametros_mineroduto_md3['Bombeamento Polpa -D3'])
 # varBombeamentoPolpa = cenario['mineroduto']['bombeamento_polpa']
-varBombeamentoPolpa = 0
-L = Learning(varBombeamentoPolpa)
-L.solve_model()
+run_ppo()
 
 
 # varBombeamentoPolpa, estoque_eb06, estoque_ubu, prod_concentrador, prod_usina = Learning.function(cenario, solver, horas_D14, produtos_conc, horas_Dm3_D14, de_para_produtos_mina_conc, min_estoque_pulmao_concentrador, max_estoque_pulmao_concentrador, 

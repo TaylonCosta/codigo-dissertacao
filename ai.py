@@ -20,10 +20,13 @@ class Learning():
         
         print('[OK]')
 
-        estoque_eb06 = {}
-        estoque_ubu = {}
-        prod_concentrador = {}
-        prod_usina = {}
+        estoque_eb06 = []
+        estoque_ubu = []
+        prod_concentrador = []
+        prod_usina = []
+        estoque_eb06.append(data['estoque_eb06_d0']['PRDT_C'])
+        estoque_ubu.append(data['estoque_polpa_ubu'])
+
 
         for v in range(1,24):
             if v<10:
@@ -37,20 +40,17 @@ class Learning():
                 dia_estoque_ubu = f'Estoque_Polpa_Ubu_PRDT_C_d01_h'+str(v)
             
             
-            estoque_eb06[v] = resultados_modelo1['variaveis'][dia_esotque_eb06]
-            estoque_ubu[v] = resultados_modelo2['variaveis'][dia_estoque_ubu]
+            estoque_eb06.append(resultados_modelo1['variaveis'][dia_esotque_eb06])
+            estoque_ubu.append(resultados_modelo2['variaveis'][dia_estoque_ubu])
 
             if v<10:
-                prod_concentrador[v] = resultados_modelo1['variaveis']['Producao___C3___Prog_PRDT_C_d01_h0'+str(v)]
+                prod_concentrador.append(resultados_modelo1['variaveis']['Producao___C3___Prog_PRDT_C_d01_h0'+str(v)])
             else:
-                prod_concentrador[v] = resultados_modelo1['variaveis']['Producao___C3___Prog_PRDT_C_d01_h'+str(v)]
+                prod_concentrador.append(resultados_modelo1['variaveis']['Producao___C3___Prog_PRDT_C_d01_h'+str(v)])
             
             if v<10:
-                prod_usina[v] = resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h0'+str(v)]
+                prod_usina.append(resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h0'+str(v)])
             else:
-                prod_usina[v] = resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h'+str(v)]
-
-            
-                
+                prod_usina.append(resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h'+str(v)])             
 
         return estoque_eb06, estoque_ubu, prod_concentrador, prod_usina

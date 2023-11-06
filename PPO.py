@@ -358,7 +358,7 @@ class CustomizedEnv(gymnasium.Env):
       temp_state[i] = temp_state[i]/(self.MaxCon)
 
     for i in range(3*SIZE, 4*SIZE):
-      temp_state[i] = temp_state[i]/(self.disp_usina)
+      temp_state[i] = temp_state[i]/(self.MaxUbu)
 
     return np.clip(np.array(temp_state)*2 - 1, self.observation_space.low, self.observation_space.high) 
 

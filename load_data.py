@@ -16,7 +16,8 @@ class Load_data:
     def load(self):
         parser = argparse.ArgumentParser(description='Otimizador Plano Semanal')
         parser.add_argument('-c', '--cenario', default='cenarios/ws0.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
-        parser.add_argument('-s', '--solver', default='GUROBI_CMD', type=str, help='Nome do otimizador a ser usado')
+        parser.add_argument('-s', '--solver', default='GUROBI', type=str, help='Nome do otimizador a ser usado')
+        parser.add_argument('-o', '--pasta-saida', default='experimentos', type=str, help='Pasta onde serão salvos os arquivos de resultados')
 
         args = parser.parse_args()
 

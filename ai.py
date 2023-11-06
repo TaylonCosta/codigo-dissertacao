@@ -22,6 +22,8 @@ class Learning():
 
         estoque_eb06 = {}
         estoque_ubu = {}
+        prod_concentrador = {}
+        prod_usina = {}
 
         for v in range(1,24):
             if v<10:
@@ -38,8 +40,17 @@ class Learning():
             estoque_eb06[v] = resultados_modelo1['variaveis'][dia_esotque_eb06]
             estoque_ubu[v] = resultados_modelo2['variaveis'][dia_estoque_ubu]
 
-        prod_concentrador = resultados_modelo1['variaveis']['Producao___C3___Prog_PRDT_C_d01_h01']
-        prod_usina = resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h01']
+            if v<10:
+                prod_concentrador[v] = resultados_modelo1['variaveis']['Producao___C3___Prog_PRDT_C_d01_h0'+str(v)]
+            else:
+                prod_concentrador[v] = resultados_modelo1['variaveis']['Producao___C3___Prog_PRDT_C_d01_h'+str(v)]
+            
+            if v<10:
+                prod_usina[v] = resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h0'+str(v)]
+            else:
+                prod_usina[v] = resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h'+str(v)]
+
+            
                 
 
         return estoque_eb06, estoque_ubu, prod_concentrador, prod_usina

@@ -19,9 +19,6 @@ def gerar_nome_arquivo_saida(nome_base_arquivo):
     return f"{nome_base_arquivo}_{contador}.json"
 
 parser = argparse.ArgumentParser(description='Otimizador Plano Semanal')
-parser.add_argument('-o', '--pasta-saida', default='experimentos', type=str, help='Pasta onde serão salvos os arquivos de resultados')
-args = parser.parse_args()
-
 
 estoque_polpa_ubu = 3000
 # print(parametros_mineroduto_md3['Bombeamento Polpa -D3'])

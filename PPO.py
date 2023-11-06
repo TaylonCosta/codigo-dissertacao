@@ -69,7 +69,7 @@ class CustomizedEnv(gymnasium.Env):
     n_actions = 2
     self.action_space = spaces.MultiBinary(n_actions)
     #self.observation_space = spaces.Box(len(self.Lista0)*[tam]+len(self.Lista0)*[self.Dmax])
-    #----------------------MUDEI AQUI: shape tem que ser um array de tem max 32
+    #----------------------MUDEI AQUI: shape tem que ser um array de tem max 32/ estava shape=4*size
     self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=([0]*size), dtype=np.float64)
 
     self.seed(seed)
@@ -271,7 +271,21 @@ if not UNIQUE_INSTANCE:
    UNIQUE_INSTANCE_SEED = None
 
 class CustomizedEnv(gymnasium.Env):
-  
+
+  def convert_bombeamento_to_array(BombeamentoPolpa):
+    return True
+  def convert_bombeamento_list(self, BombeamentoPolpa, ):
+    bombeamento = {"PRDT_C":{}}
+    cont = 0
+    dias =      [f'd{dia+1:02d}' for dia in range(1)]
+    horas =     [f'h{hora+1:02d}' for hora in range(24)]
+    horas_D14 = [f'{dia}_{hora}' for dia in dias for hora in horas]
+    for i in horas_D14:
+      bombeamento['PRDT_C'].update({i: BombeamentoPolpa[cont]})
+      cont += 1
+
+    return bombeamento
+
   def initialize(self, rand):
     if rand:
       estoque_eb06_inicial = random.randint()
@@ -291,8 +305,8 @@ class CustomizedEnv(gymnasium.Env):
       return self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs
   
   def evaluate(self, BombeamentoPolpa):
-    L = Learning(BombeamentoPolpa)
-    estoque_eb06, estoque_ubu, prod_concentrador, prod_usina = L.solve_model(BombeamentoPolpa)
+    L = Learning(self.convert_bombeamento_list(BombeamentoPolpa))
+    estoque_eb06, estoque_ubu, prod_concentrador, prod_usina = L.solve_model()
     return estoque_eb06, estoque_ubu, prod_concentrador, prod_usina
 
 
@@ -319,7 +333,7 @@ class CustomizedEnv(gymnasium.Env):
     self.action_space = spaces.MultiBinary(n_actions)
     #self.observation_space = spaces.Box(len(self.Lista0)*[tam]+len(self.Lista0)*[self.Dmax])
     #----------------------MUDEI AQUI: shape tem que ser um array de tem max 32
-    self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=([0]*size), dtype=np.float64)
+    self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(4*size,), dtype=np.float64)
 
     self.seed(seed)
     self.unique_instance = unique_instance
@@ -475,6 +489,7 @@ def evaluate_results(model, env, seeds, render=False):
   return np.average(FO_bests), results
 
 def run_ppo():
+
   print("===== CHECANDO AMBIENTE =====")
 
   env = CustomizedEnv(unique_instance=UNIQUE_INSTANCE, seed=UNIQUE_INSTANCE_SEED)

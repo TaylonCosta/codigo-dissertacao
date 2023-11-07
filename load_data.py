@@ -110,6 +110,10 @@ class Load_data:
         estoque_eb07_d0 = {}
         for produto, estoque in cenario['mineroduto']['estoque_inicial_eb07']:
             estoque_eb07_d0[produto] = estoque
+        
+        estoque_ubu_inicial = {}
+        for produto, estoque in cenario['usina']['estoque_inicial_polpa_ubu']:
+            estoque_ubu_inicial[produto] = estoque
 
         bombeamento_matipo = cenario['mineroduto']['bombeamento_matipo']
 
@@ -300,7 +304,7 @@ class Load_data:
 
         # Lendo parâmetros de uma única célula
         # estoque_eb6_d0 = ws["C5"].value
-        estoque_polpa_ubu = ws["C11"].value
+        #estoque_polpa_ubu = ['estoque_inicial_polpa_ubu']
 
         # configuração das linhas onde se encontram os parâmetros da aba MINERODUTO-UBU
         conf_parametros_mineroduto_ubu = {
@@ -507,7 +511,7 @@ class Load_data:
                 'produtos_usina': produtos_usina, 'de_para_produtos_conc_usina': de_para_produtos_conc_usina, 'parametros_ubu': parametros_ubu,
                 'tempo_mineroduto': tempo_mineroduto, 'min_estoque_polpa_ubu': min_estoque_polpa_ubu, 'max_estoque_polpa_ubu': max_estoque_polpa_ubu,
                 'max_estoque_polpa_ubu': max_estoque_polpa_ubu, 'max_taxa_envio_patio': max_taxa_envio_patio, 'max_taxa_retorno_patio_usina': max_taxa_retorno_patio_usina,
-                'min_estoque_patio_usina': min_estoque_patio_usina, 'max_estoque_patio_usina': max_estoque_patio_usina, 'estoque_polpa_ubu': estoque_polpa_ubu,
+                'min_estoque_patio_usina': min_estoque_patio_usina, 'max_estoque_patio_usina': max_estoque_patio_usina, 'estoque_polpa_ubu': estoque_ubu_inicial['PRDT_C'],
                 'estoque_inicial_patio_usina': estoque_inicial_patio_usina, 'fator_limite_excesso_patio': fator_limite_excesso_patio,
                 'parametros_navios': parametros_navios, 'capacidade_carreg_porto_por_dia': capacidade_carreg_porto_por_dia, 'navios_ate_d14': navios_ate_d14,
                 'produtos_de_cada_navio': produtos_de_cada_navio, 'estoque_produto_patio_d0': estoque_produto_patio_d0, 'parametros_mineroduto_md3': parametros_mineroduto_md3,

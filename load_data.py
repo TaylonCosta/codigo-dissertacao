@@ -539,8 +539,8 @@ class Load_data:
         for produto, estoque in cenario['usina']['estoque_inicial_polpa_ubu']:
             estoque_ubu_inicial[produto] = estoque
         
-        disp_conc_inicial = [1000]*24
-        disp_usina_inicial = [1000]*24
+        disp_conc_inicial = [600]*24
+        disp_usina_inicial = [600]*24
         
         MaxE06 = cenario['mineroduto']['max_capacidade_eb06']
         MaxEUBU = cenario['usina']['max_estoque_polpa_ubu']

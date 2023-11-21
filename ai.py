@@ -1,6 +1,7 @@
 from model_p1 import Model_p1
 from model_p2 import Model_p2
 from load_data import *
+import math
 
 class Learning():
 
@@ -13,10 +14,10 @@ class Learning():
         cenario, solver, data = load_dt.load()
 
         modelo_1 = Model_p1()
-        resultados_modelo1 = modelo_1.modelo(cenario, solver, data, self.varBombeamentoPolpa)
+        status_modelo1, resultados_modelo1 = modelo_1.modelo(cenario, solver, data, self.varBombeamentoPolpa)
 
         modelo_2 = Model_p2()
-        resultados_modelo2 = modelo_2.modelo(cenario, solver, data, self.varBombeamentoPolpa)
+        status_modelo2, resultados_modelo2 = modelo_2.modelo(cenario, solver, data, self.varBombeamentoPolpa)
         
         print('[OK]')
 
@@ -51,6 +52,13 @@ class Learning():
             if v<10:
                 prod_usina.append(resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h0'+str(v)])
             else:
-                prod_usina.append(resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h'+str(v)])             
+                prod_usina.append(resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h'+str(v)])
 
-        return estoque_eb06, estoque_ubu, prod_concentrador, prod_usina
+        fo_value = 0
+
+        if status_modelo1 == -1 or status_modelo2 == -1:
+            fo_value = -math.inf
+        else:
+            fo_value = sum(prod_usina)         
+
+        return fo_value, estoque_eb06, estoque_ubu, prod_concentrador, prod_usina

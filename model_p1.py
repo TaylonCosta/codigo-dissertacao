@@ -427,14 +427,10 @@ class Model_p1():
                     varEstoqueEB06[produto][horas_D14[i]] 
                         == varEstoqueEB06[produto][horas_D14[i-1]] 
                         + varProducaoVolume[produto][horas_D14[i]] 
-                        - varBombeamentoPolpa[produto][horas_D14[i]]*parametros_mina['Vazão bombas - M3'][self.extrair_dia(horas_D14[i])]
-                        #+ varTaxaEnvioEB04EB06[produto][horas_D14[i]] 
-                        #- varTaxaEnvioEB06EB04[produto][horas_D14[i]]
-                        ,
-                        # + (varEnvioEB04EB06[produto][horas_D14[i]]-varEnvioEB06EB04[produto][horas_D14[i]])*taxa_transferencia_entre_eb,
+                        - varBombeamentoPolpa[produto][horas_D14[i]]*parametros_mina['Vazão bombas - M3'][self.extrair_dia(horas_D14[i])],
                     f"rest_define_EstoqueEB06_{produto}_{horas_D14[i]}",
                 )
-
+        
         # Define o valor de estoque de EB06, por produto, da primeira hora
         for produto in produtos_conc:
             modelo += (
@@ -515,7 +511,8 @@ class Model_p1():
 
         # The problem is solved using PuLP's choice of Solver
         solver.solve(modelo)
-
+        print(varBombeamentoPolpa)
+        print('===================================================================')
         resultados = {'variaveis':{}}
         for v in modelo.variables():
             resultados['variaveis'][v.name] = v.varValue
@@ -549,4 +546,4 @@ class Model_p1():
         with open(f'{args.pasta_saida}/{nome_arquivo_saida}', "w", encoding="utf8") as f:
             json.dump(resultados, f)
 
-        return resultados
+        return modelo.status, resultados

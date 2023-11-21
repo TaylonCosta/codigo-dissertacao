@@ -495,4 +495,4 @@ class Model_p2():
         with open(f'{args.pasta_saida}/{nome_arquivo_saida}', "w", encoding="utf8") as f:
             json.dump(resultados, f)
 
-        return resultados
+        return modelo.status, resultados

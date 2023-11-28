@@ -420,7 +420,8 @@ class Model_p1():
         #             f"rest_define_TaxaEnvioEB04EB06_{produto}_{hora}",
         #         )
         # '''
-        # Define o valor de estoque de EB06, por produto, da segunda hora em diante
+
+        #Define o valor de estoque de EB06, por produto, da segunda hora em diante
         for produto in produtos_conc:
             for i in range(1, len(horas_D14)):
                 modelo += (

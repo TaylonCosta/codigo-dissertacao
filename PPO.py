@@ -13,7 +13,7 @@ from load_data import Load_data
 
 UNIQUE_INSTANCE = True
 UNIQUE_INSTANCE_SEED = 51
-TRAINING_STEPS = 500000
+TRAINING_STEPS = 5
 USAR_LOG_TENSORBOARD = True # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
 SEMENTE = 5
 RANDOM = False
@@ -99,7 +99,7 @@ class CustomizedEnv(gymnasium.Env):
 
     for i in range(SIZE):
       temp_state[i] = temp_state[i]/(self.MaxE06)
-    
+
     for i in range(SIZE, 2*SIZE):
       temp_state[i] = temp_state[i]/(self.MaxEUBU)
 
@@ -218,20 +218,21 @@ class RandomAgent():
 def evaluate_results(model, env, seeds, render=False):
   results = []
   FO_bests = []
+  c=1
   
   for seed in seeds:
     env.seed(seed)
-    obs = env.reset()
+    obs, info = env.reset()
     if render: env.render()
     done = False
     while not done:
+      print('++++++++++++++++++'+str(c))
       action, _ = model.predict(obs, deterministic=True)
       print(obs)
       print(action)
-      print('CHEGOU AQUI')
-      print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-      obs, reward, done, info = env.step(action)
+      obs, reward, done, tr, info = env.step(action)
       if render: env.render()
+      c=c+1
     
     results.append({'FO_Best': env.FO_Best, 'FO_inicial': env.FO_inicial})  
     FO_bests.append(env.FO_Best)

@@ -23,7 +23,7 @@ class Model_p1():
         return f"{nome_base_arquivo}_{contador}.json"
 
 
-    def modelo(self, cenario, solver, data, varBombeamentoPolpa):
+    def modelo(self, cenario, solver, data, varBombeamentoPolpaPPO):
         # variaveis utilizadas no modelo
         horas_D14 = data['horas_D14']
         produtos_conc = data['produtos_conc']
@@ -166,7 +166,7 @@ class Model_p1():
         # for idx_manut in range(len(duracao_manutencoes_britagem)):
         #     modelo += (
         #         lpSum([varInicioManutencoesBritagem[idx_manut][horas_D14[idx_hora]] 
-        #             for idx_hora in range(0, janela_planejamento*24)]) == 1,
+        #             for idx_hora in range(0, janela_planejamento*6)]) == 1,
         #         f"rest_define_InicioManutencoesBritagem_{idx_manut}",
         #     )
 
@@ -174,7 +174,7 @@ class Model_p1():
         # for idx_manut in range(len(duracao_manutencoes_britagem)):
         #     modelo += (
         #         lpSum([varInicioManutencoesBritagem[idx_manut][horas_D14[idx_hora]] 
-        #             for idx_hora in range(janela_planejamento*24, len(horas_D14))]) == 0,
+        #             for idx_hora in range(janela_planejamento*6, len(horas_D14))]) == 0,
         #         f"rest_evita_InicioManutencoesBritagem_{idx_manut}",
         #     )
 
@@ -237,7 +237,7 @@ class Model_p1():
         # for idx_manut in range(len(duracao_manutencoes_concentrador)):
         #     modelo += (
         #         lpSum([varInicioManutencoesConcentrador[idx_manut][horas_D14[idx_hora]] 
-        #             for idx_hora in range(0, janela_planejamento*24)]) == 1,
+        #             for idx_hora in range(0, janela_planejamento*6)]) == 1,
         #         f"rest_define_InicioManutencoesConcentrador_{idx_manut}",
         #     )
 
@@ -245,7 +245,7 @@ class Model_p1():
         # for idx_manut in range(len(duracao_manutencoes_concentrador)):
         #     modelo += (
         #         lpSum([varInicioManutencoesConcentrador[idx_manut][horas_D14[idx_hora]] 
-        #             for idx_hora in range(janela_planejamento*24, len(horas_D14))]) == 0,
+        #             for idx_hora in range(janela_planejamento*6, len(horas_D14))]) == 0,
         #         f"rest_evita_InicioManutencoesConcentrador_{idx_manut}",
         #     )
 
@@ -379,7 +379,7 @@ class Model_p1():
         #varEstoqueEB04 = LpVariable.dicts("Estoque EB04", (produtos_conc, horas_D14), 0, None, LpContinuous)
 
         # Indica se há bombeamento de polpa em cada hora
-        #varBombeamentoPolpa = LpVariable.dicts("Bombeamento Polpa", (horas_Dm3_D14), 0, 1, LpInteger)
+        varBombeamentoPolpa = LpVariable.dicts("Bombeamento Polpa", (produtos_conc, horas_D14), 0, 1, LpInteger)
 
         # Restrição de capacidade do estoque EB06
         for hora in horas_D14:
@@ -482,6 +482,15 @@ class Model_p1():
         #         f"rest_define_tranferencia_por_enchimento_tanque_{hora}",
         #     )
         # '''
+            
+        for produto in produtos_conc:
+            for horas in horas_D14[0:24]:
+                if varBombeamentoPolpaPPO[produto][horas] == 0 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
+                    modelo += (varBombeamentoPolpa[produto][horas] <=0, f"rest_fixado2_{produto}_{horas}")
+                if varBombeamentoPolpaPPO[produto][horas] == 1 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
+                    modelo += (varBombeamentoPolpa[produto][horas] >=1, f"rest_fixado2_{produto}_{horas}")
+
+        
         print(f'[OK]\nDefinindo função objetivo...   ', end='')
 
         for fo in cenario['geral']['funcao_objetivo']:

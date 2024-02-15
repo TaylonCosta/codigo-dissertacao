@@ -42,9 +42,9 @@ class Load_data:
 
         print(f'[OK]\nCriando índices...   ', end='')
         dias =      [f'd{dia+1:02d}' for dia in range(1)]    # d01, d02, ...   , d14
-        horas =     [f'h{hora+1:02d}' for hora in range(24)]  # h01, h02, ...   , h24
-        horas_D14 = [f'{dia}_{hora}' for dia in dias for hora in horas] # d01_h01, d01_h02, ...   , d14_h24
-        horas_Dm3 = [f'dm{dia+1:02d}_h{hora+1:02d}' for dia in range(-4,-1) for hora in range(len(horas))] # dm-3_h01, dm-3_h02, ...   , dm-1_h24
+        horas =     [f'h{hora+1:02d}' for hora in range(24)]  # h01, h02, ...   , h6
+        horas_D14 = [f'{dia}_{hora}' for dia in dias for hora in horas] # d01_h01, d01_h02, ...   , d14_h6
+        horas_Dm3 = [f'dm{dia+1:02d}_h{hora+1:02d}' for dia in range(-4,-1) for hora in range(len(horas))] # dm-3_h01, dm-3_h02, ...   , dm-1_h6
         horas_Dm3_D14 = horas_Dm3 + horas_D14
         produtos_conc = cenario['concentrador']['produtos_conc']
         produtos_usina = cenario['usina']['produtos_usina']

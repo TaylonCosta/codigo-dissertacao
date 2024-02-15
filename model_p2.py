@@ -127,7 +127,7 @@ class Model_p2():
         # for idx_manut in range(len(duracao_manutencoes_usina)):
         #     modelo += (
         #         lpSum([varInicioManutencoesUsina[idx_manut][horas_D14[idx_hora]] 
-        #             for idx_hora in range(0, janela_planejamento*24)]) == 1,
+        #             for idx_hora in range(0, janela_planejamento*6)]) == 1,
         #         f"rest_define_InicioManutencoesUsina_{idx_manut}",
         #     )
 
@@ -135,7 +135,7 @@ class Model_p2():
         # for idx_manut in range(len(duracao_manutencoes_usina)):
         #     modelo += (
         #         lpSum([varInicioManutencoesUsina[idx_manut][horas_D14[idx_hora]] 
-        #             for idx_hora in range(janela_planejamento*24, len(horas_D14))]) == 0,
+        #             for idx_hora in range(janela_planejamento*6, len(horas_D14))]) == 0,
         #         f"rest_evita_InicioManutencoesUsina_{idx_manut}",
         #     )
 

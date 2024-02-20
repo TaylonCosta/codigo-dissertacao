@@ -17,10 +17,10 @@ from sb3_contrib.common.maskable.utils import get_action_masks
 
 UNIQUE_INSTANCE = True
 UNIQUE_INSTANCE_SEED = 51
-TRAINING_STEPS = 500000
+TRAINING_STEPS = 50000
 USAR_LOG_TENSORBOARD = True # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
 SEMENTE = 5
-RANDOM = False
+RANDOM = True
 SIZE = 1
 SIZE_BOMBEAMENTO = 24
 SAVE = True
@@ -45,22 +45,22 @@ class CustomizedEnv(gymnasium.Env):
 
   def initialize(self, rand):
     if rand:
-      self.estoque_eb06_inicial = random.randint()
-      self.estoque_ubu_inicial = random.randint()
-      self.disp_conc_inicial = random.randint()
-      self.disp_usina_inicial = random.randint()
-      self.MaxE06 = random.randint()
-      self.MaxEUBU = random.randint()
-      self.AguaLi = random.randint()
-      self.AguaLs = random.randint()
-      self.PolpaLi = random.randint()
-      self.PolpaLs = random.randint()
+      self.estoque_eb06_inicial = random.randint(0, 10000)
+      self.estoque_ubu_inicial = random.randint(0, 10000)
+      self.disp_conc_inicial = [random.randint(0, 10000)]*24
+      self.disp_usina_inicial = [random.randint(0, 10000)]*24
+      self.MaxE06 = random.randint(0, 10000)
+      self.MaxEUBU = random.randint(0, 10000)
+      self.AguaLi = random.randint(0, 10)
+      self.AguaLs = random.randint(0, 15)
+      self.PolpaLi = random.randint(0, 7)
+      self.PolpaLs = random.randint(0, 4)
     
-    #TODO:alterar tudo para vetor de estados receber a informacao por hora
     else:
       load_data = Load_data()
       self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs = load_data.load_simplified_data_ppo()
-      return self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs
+    
+    return self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs
   
   def evaluate(self, BombeamentoPolpa):
     L = Learning(self.convert_bombeamento_list(BombeamentoPolpa))

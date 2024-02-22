@@ -31,7 +31,7 @@ class Learning():
         estoque_ubu.append(sheet_data['estoque_polpa_ubu'])
 
 
-        for v in range(1,24):
+        for v in range(1,25):
             if v<10:
                 dia_esotque_eb06 = f'Estoque_EB06_PRDT_C_d01_h0'+str(v)
             else:
@@ -55,6 +55,7 @@ class Learning():
                 prod_usina.append(resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h0'+str(v)])
             else:
                 prod_usina.append(resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h'+str(v)])
+
 
         fo_value = 0
 

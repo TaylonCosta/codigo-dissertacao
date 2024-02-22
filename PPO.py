@@ -152,12 +152,11 @@ class CustomizedEnv(gymnasium.Env):
 
   def step(self, action):
 
-    FIM = SIZE
+    FIM = SIZE_BOMBEAMENTO-1
     Erro = False
     self.Agua = 1
     self.Polpa = 1
     self.actual_state = []
-
     if action == 1:
       self.nBatchsP += 1
       self.nBatchsA = 0
@@ -195,14 +194,16 @@ class CustomizedEnv(gymnasium.Env):
 
     self.BombeamentoPolpa[self.passo] = action
     self.passo +=1
+    terminou_episodio = bool(self.passo == FIM)
 
     self.FO_anterior = sum(self.prod_usina)
-
     self.fo_value, self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa, self.data)
     self.actual_state.append(self.estoque_eb06[self.passo])
     self.actual_state.append(self.estoque_ubu[self.passo])
     self.actual_state.append(self.prod_concentrador[self.passo])
     self.actual_state.append(self.prod_usina[self.passo])
+
+
 
     self.FO = self.fo_value
 
@@ -213,10 +214,9 @@ class CustomizedEnv(gymnasium.Env):
 
     self.ultima_acao = action
 
-
     self.ultima_recompensa = recompensa
 
-    terminou_episodio = bool(self.passo == FIM)
+
     truncated = False
 
     # Optionally we can pass additional info, we are not using that for now

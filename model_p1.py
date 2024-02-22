@@ -442,46 +442,6 @@ class Model_p1():
                 f"rest_define_EstoqueEB06_{produto}_{horas_D14[0]}",
             )
 
-        # '''
-        # # Define o valor de estoque de EB04, por produto, da segunda hora em diante
-        # for produto in produtos_conc:
-        #     for i in range(1, len(horas_D14)):
-        #         modelo += (
-        #             varEstoqueEB04[produto][horas_D14[i]]
-        #                 == varEstoqueEB04[produto][horas_D14[i-1]]
-        #                 - varTaxaEnvioEB04EB06[produto][horas_D14[i]]
-        #                 + varTaxaEnvioEB06EB04[produto][horas_D14[i]],
-        #                 # + (varEnvioEB06EB04[produto][horas_D14[i]] - varEnvioEB04EB06[produto][horas_D14[i]])*taxa_transferencia_entre_eb,
-        #             f"rest_define_EstoqueEB04_{produto}_{horas_D14[i]}",
-        #         )
-
-        # # Define o valor de estoque de EB04, por produto, da primeira hora
-        # for produto in produtos_conc:
-        #     modelo += (
-        #         varEstoqueEB04[produto][horas_D14[0]]
-        #             == estoque_eb04_d0[produto] +
-        #                 - varTaxaEnvioEB04EB06[produto][horas_D14[0]]
-        #                 + varTaxaEnvioEB06EB04[produto][horas_D14[0]],
-        #                 # (varEnvioEB06EB04[produto][horas_D14[0]] - varEnvioEB04EB06[produto][horas_D14[0]])*taxa_transferencia_entre_eb,
-        #         f"rest_define_EstoqueEB04_{produto}_{horas_D14[0]}",
-        #     )
-
-        # # Restrição de transferência em unico sentido
-        # for hora in horas_D14:
-        #     modelo += (
-        #         lpSum(varEnvioEB04EB06[produto][hora] + varEnvioEB06EB04[produto][hora] for produto in produtos_conc) <= 1,
-        #         f"rest_tranferencia_sentido_unico_{hora}",
-        #     )
-
-        # # Restricao de transferencia em enchimento de tanque
-        # for hora in horas_D14:
-        #     modelo += (
-        #         fator_limite_excesso_EB04*parametros_mineroduto_ubu['Capacidade EB06'][hora]
-        #             - lpSum(varEstoqueEB06[produto][hora] for produto in produtos_conc)
-        #             <= BIG_M * (1 - lpSum(varEnvioEB06EB04[produto][hora] for produto in produtos_conc)),
-        #         f"rest_define_tranferencia_por_enchimento_tanque_{hora}",
-        #     )
-        # '''
 
         for produto in produtos_conc:
             for horas in horas_D14[0:24]:
@@ -496,18 +456,11 @@ class Model_p1():
 
         # Definindo a função objetivo
         fo = 0
-        #if 'min_atr_nav' in cenario['geral']['funcao_objetivo']:
-        #    fo += - (lpSum([varVolumeAtrasadoNavio[navio] for navio in navios_ate_d14]))
+
         if 'max_conc' in cenario['geral']['funcao_objetivo']:
             fo += lpSum([varTaxaAlim[produto_conc][hora] for produto_conc in produtos_conc for hora in horas_D14])
-        #if 'max_usina' in cenario['geral']['funcao_objetivo']:
-        #    fo += lpSum([varProducaoSemIncorporacao[produto_usina][hora] for produto_usina in produtos_usina for hora in horas_D14])
-        #if 'max_est_polpa' in cenario['geral']['funcao_objetivo']:
-        #    fo += lpSum([varEstoquePolpaUbu[produto_conc][hora] for produto_conc in produtos_conc for hora in horas_D14])
-        #if 'min_est_patio' in cenario['geral']['funcao_objetivo']:
-        #    fo += - (lpSum([varEstoquePatio[hora] for hora in horas_D14]))
-        if 'max_brit' in cenario['geral']['funcao_objetivo']:
-            fo += (lpSum([varTaxaBritagem[produto_mina][hora] for produto_mina in produtos_mina for hora in horas_D14]))
+        # if 'max_brit' in cenario['geral']['funcao_objetivo']:
+        #     fo += (lpSum([varTaxaBritagem[produto_mina][hora] for produto_mina in produtos_mina for hora in horas_D14]))
 
         modelo += (fo, "FO",)
 

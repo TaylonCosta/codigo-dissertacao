@@ -23,8 +23,6 @@ class Learning():
         modelo_2 = Model_p2()
         status_modelo2, resultados_modelo2 = modelo_2.modelo(cenario, solver, sheet_data, self.varBombeamentoPolpa)
 
-        print('[OK]')
-
         estoque_eb06 = []
         estoque_ubu = []
         prod_concentrador = []

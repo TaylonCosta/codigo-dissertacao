@@ -490,9 +490,6 @@ class Model_p1():
                 if varBombeamentoPolpaPPO[produto][horas] == 1 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
                     modelo += (varBombeamentoPolpa[produto][horas] >=1, f"rest_fixado2_{produto}_{horas}")
 
-
-        print(f'[OK]\nDefinindo função objetivo...   ', end='')
-
         for fo in cenario['geral']['funcao_objetivo']:
             if not fo in ['max_brit', 'min_atr_nav', 'max_conc', 'max_usina', 'max_est_polpa', 'max_pf', 'min_est_patio']:
                 raise Exception(f"Função objetivo {fo} não implementada!")
@@ -516,8 +513,6 @@ class Model_p1():
 
         # The problem data is written to an .lp file
         # prob.writeLP("PSemanal.lp")
-
-        print(f'[OK]\nRESOLVENDO o modelo...   ', end='')
 
         # The problem is solved using PuLP's choice of Solver
         solver.solve(modelo)
@@ -550,7 +545,6 @@ class Model_p1():
 
         # Salvando os dados em arquivo binário usando pickels
         nome_arquivo_saida = self.gerar_nome_arquivo_saida(f"{cenario['geral']['nome']}_resultados_1")
-        print(f'[OK]\nGerando arquivo {nome_arquivo_saida}...   ', end='')
         with open(f'{args.pasta_saida}/{nome_arquivo_saida}', "w", encoding="utf8") as f:
             json.dump(resultados, f)
 

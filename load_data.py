@@ -28,7 +28,7 @@ class Load_data:
         # -----------------------------------------------------------------------------
         # Solver
         print(f'[OK]\nInstanciando solver {args.solver}...   ', end='')
-        solver = getSolver(args.solver, timeLimit=cenario['geral']['timeLimit'])
+        solver = getSolver(args.solver, timeLimit=cenario['geral']['timeLimit'], msg=False)
 
         #------------------------------------------------------------------------------
 

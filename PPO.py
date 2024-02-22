@@ -20,7 +20,7 @@ UNIQUE_INSTANCE_SEED = 51
 TRAINING_STEPS = 100000
 USAR_LOG_TENSORBOARD = True # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
 SEMENTE = 5
-RANDOM = True
+RANDOM = False
 SIZE = 1
 SIZE_BOMBEAMENTO = 24
 SAVE = True
@@ -220,8 +220,11 @@ class CustomizedEnv(gymnasium.Env):
     truncated = False
 
     # Optionally we can pass additional info, we are not using that for now
+    print(f'Passo {self.passo}')
+    print(f'\tÚltima ação: {self.ultima_acao}, FO: {self.FO}')
+    print(f'\tLista: {self.BombeamentoPolpa}')
+    print(f'\tRecompensa: {self.ultima_recompensa}')
     info = {}
-
     return self.normalize_state(self.actual_state), recompensa, terminou_episodio, truncated, info
 
   def render(self, mode='console'):
@@ -259,7 +262,7 @@ class RandomAgent():
 def mask_fn(env: gymnasium.Env) -> np.ndarray:
     return env.valid_action_mask()
 
-def evaluate_results(model, env, seeds, render=False):
+def evaluate_results(model, env, seeds, render=True):
   results = []
   FO_bests = []
 

@@ -16,7 +16,7 @@ class Load_data:
     def load(self):
         parser = argparse.ArgumentParser(description='Otimizador Plano Semanal')
         parser.add_argument('-c', '--cenario', default='cenarios/ws0.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
-        parser.add_argument('-s', '--solver', default='GUROBI', type=str, help='Nome do otimizador a ser usado')
+        parser.add_argument('-s', '--solver', default='PULP_CBC_CMD', type=str, help='Nome do otimizador a ser usado')
         parser.add_argument('-o', '--pasta-saida', default='experimentos', type=str, help='Pasta onde serão salvos os arquivos de resultados')
 
         args = parser.parse_args()
@@ -28,7 +28,7 @@ class Load_data:
         # -----------------------------------------------------------------------------
         # Solver
         print(f'[OK]\nInstanciando solver {args.solver}...   ', end='')
-        solver = getSolver(args.solver, timeLimit=cenario['geral']['timeLimit'], options=[("MIPgap", cenario['geral']['mipgap'])])
+        solver = getSolver(args.solver, timeLimit=cenario['geral']['timeLimit'])
 
         #------------------------------------------------------------------------------
 
@@ -62,15 +62,15 @@ class Load_data:
 
         janela_planejamento = cenario['geral']['janela_planejamento']
 
-        #verificar se não vai mesmo britagem 
+        #verificar se não vai mesmo britagem
 
         taxa_alimentacao_britagem = cenario['mina']['taxa_alimentacao_britagem']
         disponibilidade_britagem = cenario['mina']['disponibilidade_britagem']
         utilizacao_britagem = cenario['mina']['utilizacao_britagem']
 
-        taxa_producao_britagem = {dias[d]: taxa_alimentacao_britagem[d] * 
-                                        disponibilidade_britagem[d]/100 * 
-                                        utilizacao_britagem[d]/100 
+        taxa_producao_britagem = {dias[d]: taxa_alimentacao_britagem[d] *
+                                        disponibilidade_britagem[d]/100 *
+                                        utilizacao_britagem[d]/100
                                 for d in range(len(dias))}
 
         # Mina
@@ -110,7 +110,7 @@ class Load_data:
         estoque_eb07_d0 = {}
         for produto, estoque in cenario['mineroduto']['estoque_inicial_eb07']:
             estoque_eb07_d0[produto] = estoque
-        
+
         estoque_ubu_inicial = {}
         for produto, estoque in cenario['usina']['estoque_inicial_polpa_ubu']:
             estoque_ubu_inicial[produto] = estoque
@@ -285,7 +285,7 @@ class Load_data:
 
         # Lendo os parâmetros da planilha
         for parametro in conf_parametros_mineroduto_md3:
-            linha = conf_parametros_mineroduto_md3[parametro]    
+            linha = conf_parametros_mineroduto_md3[parametro]
             parametros_mineroduto_md3[parametro] = {}
             for idx, cell in enumerate(ws[f'{get_column_name(coluna_hora_inicial_mD3)}{linha}:{get_column_name(coluna_hora_final_mD3)}{linha}'][0]):
                 parametros_mineroduto_md3[parametro][horas_Dm3[idx]] = cell.value
@@ -471,7 +471,7 @@ class Load_data:
 
         parametros_calculados['Rendimento Operacional - C3'] = {}
         for dia in dias:
-            parametros_calculados['Rendimento Operacional - C3'][dia] = parametros_mina['UD - C3'][dia] * parametros_mina['DF - C3'][dia] 
+            parametros_calculados['Rendimento Operacional - C3'][dia] = parametros_mina['UD - C3'][dia] * parametros_mina['DF - C3'][dia]
 
         parametros_calculados['% Sólidos - EB06'] = {}
         parametros_calculados['Densidade Polpa - EB06'] = {}
@@ -486,7 +486,7 @@ class Load_data:
         parametros_calculados['H20'] = {}
         for dia in dias:
             parametros_calculados['H20'][dia] = 3.296 + (0.002986*parametros_ubu['SE'][dia]) + (0.615*parametros_ubu['PPC'][dia])
-        
+
         parametros_calculados['Bombeamento Acumulado Polpa final semana anterior'] = 0
         for idx_hora in range(len(horas_Dm3)-1,-1,-1):
             if parametros_mineroduto_md3['Bombeamento Polpa -D3'][idx_hora] == 'H20':
@@ -501,7 +501,7 @@ class Load_data:
             else:
                 break;
 
-        data = {'horas_D14': horas_D14, 'produtos_conc': produtos_conc, 'horas_Dm3_D14': horas_Dm3_D14, 'de_para_produtos_mina_conc': de_para_produtos_mina_conc, 
+        data = {'horas_D14': horas_D14, 'produtos_conc': produtos_conc, 'horas_Dm3_D14': horas_Dm3_D14, 'de_para_produtos_mina_conc': de_para_produtos_mina_conc,
                 'min_estoque_pulmao_concentrador': min_estoque_pulmao_concentrador, 'max_estoque_pulmao_concentrador': max_estoque_pulmao_concentrador,
                 'numero_faixas_producao': numero_faixas_producao, 'max_taxa_alimentacao': max_taxa_alimentacao, 'parametros_mina': parametros_mina,
                 'taxa_producao_britagem': taxa_producao_britagem, 'produtos_britagem': produtos_britagem, 'produtos_mina': produtos_mina,
@@ -517,9 +517,9 @@ class Load_data:
                 'produtos_de_cada_navio': produtos_de_cada_navio, 'estoque_produto_patio_d0': estoque_produto_patio_d0, 'parametros_mineroduto_md3': parametros_mineroduto_md3,
                 'horas_Dm3': horas_Dm3, 'navios': navios
                 }
-         
+
         return cenario, solver, data
-    
+
     def load_simplified_data_ppo(self):
         parser = argparse.ArgumentParser(description='Otimizador Plano Semanal')
         parser.add_argument('-c', '--cenario', default='cenarios/ws0.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
@@ -538,10 +538,10 @@ class Load_data:
         estoque_ubu_inicial = {}
         for produto, estoque in cenario['usina']['estoque_inicial_polpa_ubu']:
             estoque_ubu_inicial[produto] = estoque
-        
+
         disp_conc_inicial = [600]*24
         disp_usina_inicial = [600]*24
-        
+
         MaxE06 = cenario['mineroduto']['max_capacidade_eb06']
         MaxEUBU = cenario['usina']['max_estoque_polpa_ubu']
         AguaLi = cenario['mineroduto']['janela_min_bombeamento_agua']

@@ -17,7 +17,7 @@ from sb3_contrib.common.maskable.utils import get_action_masks
 
 UNIQUE_INSTANCE = True
 UNIQUE_INSTANCE_SEED = 51
-TRAINING_STEPS = 50000
+TRAINING_STEPS = 100000
 USAR_LOG_TENSORBOARD = True # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
 SEMENTE = 5
 RANDOM = True
@@ -55,15 +55,14 @@ class CustomizedEnv(gymnasium.Env):
       self.AguaLs = random.randint(0, 15)
       self.PolpaLi = random.randint(0, 7)
       self.PolpaLs = random.randint(0, 4)
-    
+
     else:
-      load_data = Load_data()
-      self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs = load_data.load_simplified_data_ppo()
-    
+      self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs = self.inital_data_ppo
+
     return self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs
-  
-  def evaluate(self, BombeamentoPolpa):
-    L = Learning(self.convert_bombeamento_list(BombeamentoPolpa))
+
+  def evaluate(self, BombeamentoPolpa, data):
+    L = Learning(self.convert_bombeamento_list(BombeamentoPolpa), data)
     status, estoque_eb06, estoque_ubu, prod_concentrador, prod_usina = L.solve_model()
     return status, estoque_eb06, estoque_ubu, prod_concentrador, prod_usina
 
@@ -74,24 +73,26 @@ class CustomizedEnv(gymnasium.Env):
     self.MaxUbu= max(self.disp_usina_inicial)
 
   def use_instance(self):
-    self.estoque_eb06 = self.estoque_eb06_inicial #Volume 
+    self.estoque_eb06 = self.estoque_eb06_inicial #Volume
     self.estoque_ubu = self.estoque_ubu_inicial #Volume
-    self.disp_conc = self.disp_conc_inicial.copy() #Produção Max Hora 
+    self.disp_conc = self.disp_conc_inicial.copy() #Produção Max Hora
     self.disp_usina = self.disp_usina_inicial.copy() #Produção Max Hora
 
 
   def __init__(self, unique_instance=False, seed=None):
     super(CustomizedEnv, self).__init__()
 
-    print(f"Criando ambiente: {unique_instance=} {seed=}" )  
-    
+    print(f"Criando ambiente: {unique_instance=} {seed=}" )
+
     size = int(SIZE) #int(2*TAMANHO)
     # Define action and observation space
     n_actions = 1
     self.action_space = spaces.Discrete(2)
     #self.observation_space = spaces.Box(len(self.Lista0)*[tam]+len(self.Lista0)*[self.Dmax])
     self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(4*size,), dtype=np.float64)
-
+    load_data = Load_data()
+    self.inital_data_ppo = load_data.load_simplified_data_ppo()
+    self.data = load_data.load()
     self.seed(seed)
     self.unique_instance = unique_instance
     if self.unique_instance: self.create_instance()
@@ -101,10 +102,10 @@ class CustomizedEnv(gymnasium.Env):
     self.ultima_recompensa = None
     self.Agua = 1
     self.Polpa = 1
-    
+
 
   def normalize_state(self, state):
-    
+
     temp_state = state
 
     for i in range(SIZE):
@@ -119,14 +120,13 @@ class CustomizedEnv(gymnasium.Env):
     for i in range(3*SIZE, 4*SIZE):
       temp_state[i] = temp_state[i]/(self.MaxUbu)
 
-    return np.clip(np.array(temp_state)*2 - 1, self.observation_space.low, self.observation_space.high) 
+    return np.clip(np.array(temp_state)*2 - 1, self.observation_space.low, self.observation_space.high)
 
   def reset(self, seed=None, options=None):
     """
     Important: the observation must be a numpy array
-    :return: (np.array) 
+    :return: (np.array)
     """
-    print("entrou reset")
     if not self.unique_instance: self.create_instance()
     self.seedNum = seed
     info = {}
@@ -141,7 +141,7 @@ class CustomizedEnv(gymnasium.Env):
     self.ultima_acao = None
     self.ultima_recompensa = 0
     self.BombeamentoPolpa = [0]*SIZE_BOMBEAMENTO
-    self.fo_value, self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa)
+    self.fo_value, self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa, self.data)
     self.state.append(self.estoque_eb06[0])
     self.state.append(self.estoque_ubu[0])
     self.state.append(self.prod_concentrador[0])
@@ -151,7 +151,7 @@ class CustomizedEnv(gymnasium.Env):
     return self.normalize_state(self.state), info
 
   def step(self, action):
-    
+
     FIM = SIZE
     Erro = False
     self.Agua = 1
@@ -183,7 +183,7 @@ class CustomizedEnv(gymnasium.Env):
       #   Erro = True
       # if Erro == False:
       #   self.nBatchsP = 0
-      #   self.nBatchsA += 0    
+      #   self.nBatchsA += 0
 
     if self.nBatchsP >= self.PolpaLs or (self.nBatchsA < self.AguaLi and self.nBatchsA > 0):
       self.Polpa = 0
@@ -192,13 +192,13 @@ class CustomizedEnv(gymnasium.Env):
       self.Agua = 0
       self.Polpa = 1
 
-    
+
     self.BombeamentoPolpa[self.passo] = action
     self.passo +=1
-    
+
     self.FO_anterior = sum(self.prod_usina)
 
-    self.fo_value, self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa)
+    self.fo_value, self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa, self.data)
     self.actual_state.append(self.estoque_eb06[self.passo])
     self.actual_state.append(self.estoque_ubu[self.passo])
     self.actual_state.append(self.prod_concentrador[self.passo])
@@ -215,7 +215,7 @@ class CustomizedEnv(gymnasium.Env):
 
 
     self.ultima_recompensa = recompensa
-   
+
     terminou_episodio = bool(self.passo == FIM)
     truncated = False
 
@@ -223,23 +223,23 @@ class CustomizedEnv(gymnasium.Env):
     info = {}
 
     return self.normalize_state(self.actual_state), recompensa, terminou_episodio, truncated, info
-  
+
   def render(self, mode='console'):
     if mode != 'console':
       raise NotImplementedError()
-    
-    if (self.passo > 0): 
-      print(f'Passo {self.passo}') 
-    else: 
+
+    if (self.passo > 0):
+      print(f'Passo {self.passo}')
+    else:
       print('Instância:')
-    
+
     print(f'\tÚltima ação: {self.ultima_acao}, FO: {self.FO}')
     print(f'\tLista: {self.BombeamentoPolpa}')
     print(f'\tRecompensa: {self.ultima_recompensa}')
 
   def close(self):
     pass
-  
+
   def seed(self, seed=None):
     self.rand_generator = np.random.RandomState(seed)
     self.action_space.seed(seed)
@@ -262,7 +262,7 @@ def mask_fn(env: gymnasium.Env) -> np.ndarray:
 def evaluate_results(model, env, seeds, render=False):
   results = []
   FO_bests = []
-  
+
   for seed in seeds:
     env.seed(seed)
     obs, info = env.reset()
@@ -278,10 +278,10 @@ def evaluate_results(model, env, seeds, render=False):
       obs, reward, done, truncated, info  = env.step(action)
       #obs, reward, done, tr, info = env.step(action)
       if render: env.render()
-    
-    results.append({'FO_Best': env.FO_Best, 'FO_inicial': env.FO_Inicial})  
+
+    results.append({'FO_Best': env.FO_Best, 'FO_inicial': env.FO_Inicial})
     FO_bests.append(env.FO_Best)
-  
+
   return np.average(FO_bests), results
 
 def run_ppo():
@@ -320,7 +320,7 @@ def run_ppo():
   # Train the agent
   if SAVE:
     model = MaskablePPO(MaskableActorCriticPolicy, env, verbose=1, tensorboard_log=tensorboard_log).learn(TRAINING_STEPS)
-  
+
   if SAVE:
     model.save('model_ppo')
 
@@ -330,10 +330,10 @@ def run_ppo():
   # model.save("ppo_Mineroduto")
 
   print("===== DEMONSTRANDO RESULTADO =====")
-    
+
   FIXED_EVALUATION_SEEDS = [51, 312, 4, 207, 461, 394, 859, 639, 138, 727]
 
-  if UNIQUE_INSTANCE:  
+  if UNIQUE_INSTANCE:
     qtde_avaliacoes = 1
   else:
     qtde_avaliacoes = 10

@@ -43,6 +43,7 @@ class Model_p2():
         estoque_polpa_ubu = data['estoque_polpa_ubu']
         estoque_inicial_patio_usina = data['estoque_inicial_patio_usina']
         fator_limite_excesso_patio = data['fator_limite_excesso_patio']
+        vazao_bombas = data['vazao_bombas']
 
 
         BIG_M = 10e6
@@ -51,20 +52,6 @@ class Model_p2():
         varBombeamentoPolpa = LpVariable.dicts("Bombeamento Polpa", (produtos_conc, horas_D14), 0, 1, LpInteger)
         varBombeado = LpVariable.dicts("Bombeado", (produtos_conc, horas_D14), 0, None, LpContinuous)
 
-        # Carrega os dados de D-3
-        for idx_hora in range(len(horas_D14)):
-            for produto in produtos_conc:
-                if varBombeamentoPolpa[produto][horas_D14[idx_hora]] == 1:
-                    modelo += (
-                        varBombeado[produto][horas_D14[idx_hora]] == 1,
-                        f"rest_define_Bombeado_inicial_{produto}_{horas_D14[idx_hora]}",
-                    )
-                else:
-                    modelo += (
-                        varBombeado[produto][horas_D14[idx_hora]] == 0,
-                        f"rest_define_Bombeado_inicial_{produto}_{horas_D14[idx_hora]}",
-                    )
-
         for produto in produtos_conc:
             for horas in horas_D14[0:24]:
                 if varBombeamentoPolpaPPO[produto][horas] == 0 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
@@ -72,8 +59,21 @@ class Model_p2():
                 if varBombeamentoPolpaPPO[produto][horas] == 1 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
                     modelo += (varBombeamentoPolpa[produto][horas] >=1, f"rest_fixado2_{produto}_{horas}")
 
+        for idx_hora in (horas_D14):
+            for produto in produtos_conc:
+                # if varBombeamentoPolpa[produto][idx_hora] == 1:
+                modelo += (
+                    varBombeado[produto][idx_hora] == varBombeamentoPolpa[produto][idx_hora]*vazao_bombas,
+                    f"rest_define_Bombeado_inicial_{produto}_{idx_hora}",
+                )
+                # else:
+                #     modelo += (
+                #         varBombeado[produto][horas_D14[idx_hora]] == 0,
+                #         f"rest_define_Bombeado_inicial_{produto}_{horas_D14[idx_hora]}",
+                #     )
+
         # Indica chegada de polpa em Ubu, por produto, por hora
-        varPolpaUbu = LpVariable.dicts("Polpa Ubu (65Hs)", (produtos_conc, horas_D14), 0, None, LpContinuous)
+        varPolpaUbu = LpVariable.dicts("Polpa Ubu ", (produtos_conc, horas_D14), 0, None, LpContinuous)
 
         # Define a chegada de polpa em Ubu
         for produto in produtos_conc:
@@ -94,14 +94,13 @@ class Model_p2():
         #for produto in produtos_usina:
         #    for hora in horas_D14:
 
-
         # Define a produção em Ubu
         for produto_c in produtos_conc:
             for produto_u in produtos_usina:
                 for hora in horas_D14:
                     if de_para_produtos_conc_usina[produto_c][produto_u] == 1:
                         modelo += (
-                            varProducaoUbu[produto_c][produto_u][hora] == varProducaoSemIncorporacao[produto_u][hora]*(1+parametros_ubu['Conv.'][self.extrair_dia(hora)]/100),
+                            varProducaoUbu[produto_c][produto_u][hora] == varProducaoSemIncorporacao[produto_u][hora],
                             f"rest_define_ProducaoUbu_{produto_c}_{produto_u}_{hora}",
                         )
                     else:
@@ -195,7 +194,7 @@ class Model_p2():
                                                         ,
                     f"rest_define_EstoqueRetornoPatio_{produto}_{horas_D14[i]}",
                 )
-        
+
         # Define o estoque do pátio de retorno da usina da primeira hora
         for produto in produtos_conc:
             modelo += (

@@ -41,8 +41,7 @@ class Learning():
                 estoque_eb06.append(resultados_modelo1['variaveis']['Estoque_EB06_PRDT_C_d01_h'+str(v)])
                 estoque_ubu.append(resultados_modelo2['variaveis']['Estoque_Polpa_Ubu_PRDT_C_d01_h'+str(v)])
                 prod_concentrador.append(resultados_modelo1['variaveis']['Producao___C3___Prog_PRDT_C_d01_h'+str(v)])
-                prod_usina.append(resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h'+str(v)])                
-
+                prod_usina.append(resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h'+str(v)])
         fo_value = 0
 
         if status_modelo1 == -1 or status_modelo2 == -1:

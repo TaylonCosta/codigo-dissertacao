@@ -158,22 +158,23 @@ class Load_data:
         max_taxa_envio_patio = cenario['mineroduto']['max_taxa_envio_patio']
 
         fator_limite_excesso_patio = cenario['mineroduto']['fator_limite_excesso_patio']
+        vazao_bombas = cenario['mineroduto']['vazao_bombas']
+
 
         # Paradas de manutenção
-        inicio_manutencoes_britagem = cenario['mina']['inicio_manutencoes_britagem']
-        duracao_manutencoes_britagem = cenario['mina']['duracao_manutencoes_britagem']
-
-        inicio_manutencoes_concentrador = cenario['concentrador']['inicio_manutencoes_concentrador']
-        duracao_manutencoes_concentrador = cenario['concentrador']['duracao_manutencoes_concentrador']
-
-        inicio_manutencoes_mineroduto = cenario['mineroduto']['inicio_manutencoes_mineroduto']
-        duracao_manutencoes_mineroduto = cenario['mineroduto']['duracao_manutencoes_mineroduto']
-
-        inicio_manutencoes_usina = cenario['usina']['inicio_manutencoes_usina']
-        duracao_manutencoes_usina = cenario['usina']['duracao_manutencoes_usina']
+        # inicio_manutencoes_britagem = cenario['mina']['inicio_manutencoes_britagem']
+        # duracao_manutencoes_britagem = cenario['mina']['duracao_manutencoes_britagem']
+        #
+        # inicio_manutencoes_concentrador = cenario['concentrador']['inicio_manutencoes_concentrador']
+        # duracao_manutencoes_concentrador = cenario['concentrador']['duracao_manutencoes_concentrador']
+        #
+        # inicio_manutencoes_mineroduto = cenario['mineroduto']['inicio_manutencoes_mineroduto']
+        # duracao_manutencoes_mineroduto = cenario['mineroduto']['duracao_manutencoes_mineroduto']
+        #
+        # inicio_manutencoes_usina = cenario['usina']['inicio_manutencoes_usina']
+        # duracao_manutencoes_usina = cenario['usina']['duracao_manutencoes_usina']
 
         def extrair_dia(hora):
-            ''' Retorna o dia de uma hora no formato dXX_hYY '''
             return hora.split('_')[0]
 
         def extrair_hora(dia):
@@ -270,7 +271,6 @@ class Load_data:
         }
 
         def get_column_name(column_number):
-            ''' Retorna o nome de uma coluna de excel correspondente ao índice passado'''
             column_name = ""
             while column_number > 0:
                 column_number, remainder = divmod(column_number - 1, 26)
@@ -515,7 +515,7 @@ class Load_data:
                 'estoque_inicial_patio_usina': estoque_inicial_patio_usina, 'fator_limite_excesso_patio': fator_limite_excesso_patio,
                 'parametros_navios': parametros_navios, 'capacidade_carreg_porto_por_dia': capacidade_carreg_porto_por_dia, 'navios_ate_d14': navios_ate_d14,
                 'produtos_de_cada_navio': produtos_de_cada_navio, 'estoque_produto_patio_d0': estoque_produto_patio_d0, 'parametros_mineroduto_md3': parametros_mineroduto_md3,
-                'horas_Dm3': horas_Dm3, 'navios': navios
+                'horas_Dm3': horas_Dm3, 'navios': navios, 'vazao_bombas': vazao_bombas,
                 }
 
         return cenario, solver, data
@@ -539,8 +539,8 @@ class Load_data:
         for produto, estoque in cenario['usina']['estoque_inicial_polpa_ubu']:
             estoque_ubu_inicial[produto] = estoque
 
-        disp_conc_inicial = [600]*24
-        disp_usina_inicial = [600]*24
+        disp_conc_inicial = [10000]*24
+        disp_usina_inicial = [10000]*24
 
         MaxE06 = cenario['mineroduto']['max_capacidade_eb06']
         MaxEUBU = cenario['usina']['max_estoque_polpa_ubu']

@@ -43,6 +43,7 @@ class Model_p1():
         fatorGeracaoLama = data['fatorGeracaoLama']
         parametros_mineroduto_ubu = data['parametros_mineroduto_ubu']
         estoque_eb06_d0 = data['estoque_eb06_d0']
+        vazao_bombas = data['vazao_bombas']
         dias = data['dias']
         args = data['args']
 
@@ -158,172 +159,6 @@ class Model_p1():
                     f"rest_amarra_varTaxaAlim_{produto_conc}_{hora}",
                 )
 
-        # '''
-        # # Indica a hora de início das manutenções da britagem
-        # varInicioManutencoesBritagem = LpVariable.dicts("Início Manutenção Britagem", (range(len(duracao_manutencoes_britagem)), horas_Dm3_D14), 0, 1, LpInteger)
-
-        # # Restrição para garantir que a manutenção da britagem se inicia uma única vez
-        # for idx_manut in range(len(duracao_manutencoes_britagem)):
-        #     modelo += (
-        #         lpSum([varInicioManutencoesBritagem[idx_manut][horas_D14[idx_hora]]
-        #             for idx_hora in range(0, janela_planejamento*6)]) == 1,
-        #         f"rest_define_InicioManutencoesBritagem_{idx_manut}",
-        #     )
-
-        # # Restrição que impede que as manutenções ocorram na segunda semana
-        # for idx_manut in range(len(duracao_manutencoes_britagem)):
-        #     modelo += (
-        #         lpSum([varInicioManutencoesBritagem[idx_manut][horas_D14[idx_hora]]
-        #             for idx_hora in range(janela_planejamento*6, len(horas_D14))]) == 0,
-        #         f"rest_evita_InicioManutencoesBritagem_{idx_manut}",
-        #     )
-
-        # # Restrições para evitar que manutenções ocorram ao mesmo tempo
-        # for idx_hora in range(len(horas_D14)):
-        #     for idx_manut in range(len(duracao_manutencoes_britagem)):
-        #         modelo += (
-        #             varInicioManutencoesBritagem[idx_manut][horas_D14[idx_hora]] +
-        #             lpSum(varInicioManutencoesBritagem[s][horas_D14[j]]
-        #                 for j in range(idx_hora-duracao_manutencoes_britagem[idx_manut]+1,idx_hora)
-        #                 for s in range(len(duracao_manutencoes_britagem))
-        #                 if s != idx_manut
-        #                 )
-        #             <= 1,
-        #         f"rest_separa_manutencoesBritagem_{idx_manut}_{idx_hora}",
-        #         )
-
-        # # Fixa o horário de início da manutenção do britagem se foi escolhido pelo usuário
-        # for idx_manut, inicio in enumerate(inicio_manutencoes_britagem):
-        #     if inicio != 'livre':
-        #         modelo += (
-        #             varInicioManutencoesBritagem[idx_manut][inicio] == 1,
-        #             f"rest_fixa_InicioManutencaoBritagem_{idx_manut}",
-        #         )
-
-        # # Restrição tratar manutenção, lower bound e valor fixo de taxa de produção da britagem
-
-        # for idx_hora in range(len(horas_D14)):
-        #     # se está em manutenção, zera a taxa de produção da britagem
-        #     for idx_manut in range(len(duracao_manutencoes_britagem)):
-        #         modelo += (
-        #             lpSum([varTaxaBritagem[produto][horas_D14[idx_hora]] for produto in produtos_mina])
-        #                 <= BIG_M*(1 - lpSum(varInicioManutencoesBritagem[idx_manut][horas_D14[j]]
-        #                                     for j in range(idx_hora - duracao_manutencoes_britagem[idx_manut] + 1, idx_hora))),
-        #             f"rest_manutencao_britagem_{idx_manut}_{horas_D14[idx_hora]}",
-        #     )
-
-        #     # Define lower bound
-        #     # (não parece ser necessário, pois não há limite mínimo da britagem)
-        #     # modelo += (
-        #     #     varTaxaBritagem[horas_D14[idx_hora]] >= 0 # min_taxa_britagem
-        #     #                                         - BIG_M*(lpSum(varInicioManutencoesBritagem[idx_manut][horas_D14[j]]
-        #     #                                                     for idx_manut in range(len(duracao_manutencoes_britagem))
-        #     #                                                     for j in range(idx_hora - duracao_manutencoes_britagem[idx_manut] + 1, idx_hora))),
-        #     #     f"rest_LB_taxa_alim1_{horas_D14[idx_hora]}",
-        #     # )
-        #     modelo += (
-        #         lpSum([varTaxaBritagem[produto][horas_D14[idx_hora]] for produto in produtos_mina])
-        #             <= BIG_M*(1 - lpSum(varInicioManutencoesBritagem[idx_manut][horas_D14[j]]
-        #                                 for idx_manut in range(len(duracao_manutencoes_britagem))
-        #                                 for j in range(idx_hora - duracao_manutencoes_britagem[idx_manut] + 1, idx_hora))),
-        #         f"rest_UB_taxa_britagem_{horas_D14[idx_hora]}",
-        #     )
-        # '''
-        # '''
-        # # Indica a hora de início das manutenções do concentrador
-        # varInicioManutencoesConcentrador = LpVariable.dicts("Início Manutenção Concentrador", (range(len(duracao_manutencoes_concentrador)), horas_Dm3_D14), 0, 1, LpInteger)
-
-        # # Restrição para garantir que a manutenção do concentrador se inicia uma única vez
-        # for idx_manut in range(len(duracao_manutencoes_concentrador)):
-        #     modelo += (
-        #         lpSum([varInicioManutencoesConcentrador[idx_manut][horas_D14[idx_hora]]
-        #             for idx_hora in range(0, janela_planejamento*6)]) == 1,
-        #         f"rest_define_InicioManutencoesConcentrador_{idx_manut}",
-        #     )
-
-        # # Restrição que impede que as manutenções ocorram na segunda semana
-        # for idx_manut in range(len(duracao_manutencoes_concentrador)):
-        #     modelo += (
-        #         lpSum([varInicioManutencoesConcentrador[idx_manut][horas_D14[idx_hora]]
-        #             for idx_hora in range(janela_planejamento*6, len(horas_D14))]) == 0,
-        #         f"rest_evita_InicioManutencoesConcentrador_{idx_manut}",
-        #     )
-
-        # # Restrições para evitar que manutenções ocorram ao mesmo tempo
-        # for idx_hora in range(len(horas_D14)):
-        #     for idx_manut in range(len(duracao_manutencoes_concentrador)):
-        #         modelo += (
-        #             varInicioManutencoesConcentrador[idx_manut][horas_D14[idx_hora]] +
-        #             lpSum(varInicioManutencoesConcentrador[s][horas_D14[j]]
-        #                 for j in range(idx_hora-duracao_manutencoes_concentrador[idx_manut]+1,idx_hora)
-        #                 for s in range(len(duracao_manutencoes_concentrador))
-        #                 if s != idx_manut
-        #                 )
-        #             <= 1,
-        #         f"rest_separa_manutencoesConcentrador_{idx_manut}_{idx_hora}",
-        #         )
-
-        # # Fixa o horário de início da manutenção do concentrador se foi escolhido pelo usuário
-        # for idx_manut, inicio in enumerate(inicio_manutencoes_concentrador):
-        #     if inicio != 'livre':
-        #         modelo += (
-        #             varInicioManutencoesConcentrador[idx_manut][inicio] == 1,
-        #             f"rest_fixa_InicioManutencaoConcentrador_{idx_manut}",
-        #         )
-
-        # # Restrição tratar manutenção, lower bound e valor fixo de taxa de alimentação
-
-        # for idx_hora in range(len(horas_D14)):
-        #     # se está em manutenção, zera a taxa de alimentação
-        #     for idx_manut in range(len(duracao_manutencoes_concentrador)):
-        #         modelo += (
-        #             lpSum([varTaxaAlim[produto][horas_D14[idx_hora]] for produto in produtos_conc])
-        #                 <= BIG_M*(1 - lpSum(varInicioManutencoesConcentrador[idx_manut][horas_D14[j]]
-        #                                     for j in range(idx_hora - duracao_manutencoes_concentrador[idx_manut] + 1, idx_hora))),
-        #             f"rest_manutencao_concentrador_{idx_manut}_{horas_D14[idx_hora]}",
-        #     )
-
-        #     # Define lower bound
-        #     modelo += (
-        #         lpSum([varTaxaAlim[produto][horas_D14[idx_hora]] for produto in produtos_conc])
-        #             >= min_taxa_alimentacao - BIG_M*(lpSum(varInicioManutencoesConcentrador[idx_manut][horas_D14[j]]
-        #                                                 for idx_manut in range(len(duracao_manutencoes_concentrador))
-        #                                                 for j in range(idx_hora - duracao_manutencoes_concentrador[idx_manut] + 1, idx_hora))),
-        #         f"rest_LB_taxa_alim1_{horas_D14[idx_hora]}",
-        #     )
-        #     modelo += (
-        #         lpSum([varTaxaAlim[produto][horas_D14[idx_hora]] for produto in produtos_conc])
-        #             <= BIG_M*(1 - lpSum(varInicioManutencoesConcentrador[idx_manut][horas_D14[j]]
-        #                                 for idx_manut in range(len(duracao_manutencoes_concentrador))
-        #                                 for j in range(idx_hora - duracao_manutencoes_concentrador[idx_manut] + 1, idx_hora))),
-        #         f"rest_LB_taxa_alim2_{horas_D14[idx_hora]}",
-        #     )
-
-        #     # se a taxa de alimentacao é fixada pelo modelo ou pelo usuário
-        #     if fixar_taxa_alimentacao in ['fixado_pelo_modelo','fixado_pelo_usuario']:
-        #         taxa_fixa = taxa_alimentacao_fixa
-        #         if fixar_taxa_alimentacao == 'fixado_pelo_modelo':
-        #             varTaxaAlimFixa = LpVariable("Taxa Alimentacao - C3 Fixa", 0, max_taxa_alimentacao, LpContinuous)
-        #             taxa_fixa = varTaxaAlimFixa
-        #         modelo += (
-        #             lpSum([varTaxaAlim[produto][horas_D14[idx_hora]] for produto in produtos_conc])
-        #                 >= taxa_fixa - BIG_M*(lpSum(varInicioManutencoesConcentrador[idx_manut][horas_D14[j]]
-        #                                     for idx_manut in range(len(duracao_manutencoes_concentrador))
-        #                                     for j in range(idx_hora - duracao_manutencoes_concentrador[idx_manut] + 1, idx_hora))),
-        #             f"rest_taxa_alim_fixa1_{horas_D14[idx_hora]}",
-        #         )
-        #         modelo += (
-        #             lpSum([varTaxaAlim[produto][horas_D14[idx_hora]] for produto in produtos_conc])
-        #                 <= BIG_M*(1 - lpSum(varInicioManutencoesConcentrador[idx_manut][horas_D14[j]]
-        #                                     for idx_manut in range(len(duracao_manutencoes_concentrador))
-        #                                     for j in range(idx_hora - duracao_manutencoes_concentrador[idx_manut] + 1, idx_hora))),
-        #             f"rest_taxa_alim_fixa2_{horas_D14[idx_hora]}",
-        #         )
-        #         modelo += (
-        #             lpSum([varTaxaAlim[produto][horas_D14[idx_hora]] for produto in produtos_conc]) <= taxa_fixa,
-        #             f"rest_taxa_alim_fixa3_{horas_D14[idx_hora]}",
-        #         )
-        # '''
         # Puxada, por dia, é calculada a partir da taxa de alimentação e demais parâmetros
         varPuxada = LpVariable.dicts("Puxada - C3 - Prog", (horas_D14), 0, None, LpContinuous)
         for hora in horas_D14:
@@ -428,7 +263,7 @@ class Model_p1():
                     varEstoqueEB06[produto][horas_D14[i]]
                         == varEstoqueEB06[produto][horas_D14[i-1]]
                         + varProducaoVolume[produto][horas_D14[i]]
-                        - varBombeamentoPolpa[produto][horas_D14[i]]*parametros_mina['Vazão bombas - M3'][self.extrair_dia(horas_D14[i])],
+                        - varBombeamentoPolpa[produto][horas_D14[i]]*vazao_bombas,
                     f"rest_define_EstoqueEB06_{produto}_{horas_D14[i]}",
                 )
 
@@ -450,22 +285,19 @@ class Model_p1():
                 if varBombeamentoPolpaPPO[produto][horas] == 1 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
                     modelo += (varBombeamentoPolpa[produto][horas] >=1, f"rest_fixado2_{produto}_{horas}")
 
+
         for fo in cenario['geral']['funcao_objetivo']:
             if not fo in ['max_brit', 'min_atr_nav', 'max_conc', 'max_usina', 'max_est_polpa', 'max_pf', 'min_est_patio']:
                 raise Exception(f"Função objetivo {fo} não implementada!")
 
         # Definindo a função objetivo
         fo = 0
-
         if 'max_conc' in cenario['geral']['funcao_objetivo']:
             fo += lpSum([varTaxaAlim[produto_conc][hora] for produto_conc in produtos_conc for hora in horas_D14])
         # if 'max_brit' in cenario['geral']['funcao_objetivo']:
         #     fo += (lpSum([varTaxaBritagem[produto_mina][hora] for produto_mina in produtos_mina for hora in horas_D14]))
 
         modelo += (fo, "FO",)
-
-        # The problem data is written to an .lp file
-        # prob.writeLP("PSemanal.lp")
 
         # The problem is solved using PuLP's choice of Solver
         solver.solve(modelo)

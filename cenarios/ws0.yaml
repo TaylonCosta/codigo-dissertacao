@@ -20,7 +20,7 @@ mina:
 
 concentrador:
   produtos_conc: ['PRDT_C']
-  estoque_pulmao_inicial_concentrador: [["PRDT", 100000]]
+  estoque_pulmao_inicial_concentrador: [["PRDT", 0]]
   min_estoque_pulmao_concentrador: 0
   max_estoque_pulmao_concentrador: 100000
   faixas_producao_concentrador: 625
@@ -56,8 +56,8 @@ mineroduto:
   bombeamento_polpa_dm3: ['H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'PRDT_C']
   #bombeamento_matipo: [1300, 1300, 1300, 1300, 1300, 1300, 1300, 1300, 1300, 1300, 1300, 1300, 1300, 1300]
   bombeamento_matipo: {'d01': 1270, 'd02': 1270, 'd03': 1270, 'd04': 1270, 'd05': 1270, 'd06': 1270, 'd07': 1270, 'd08': 1270, 'd09': 1270, 'd10': 1270, 'd11': 1270, 'd12': 1270, 'd13': 1270, 'd14': 1270}
-  janela_min_bombeamento_polpa: 13
-  janela_max_bombeamento_polpa: 15
+  janela_min_bombeamento_polpa: 7
+  janela_max_bombeamento_polpa: 11
   fixar_janela_bombeamento: livre
   janela_fixa_bombeamento_polpa: 13
   bombeamento_restante_janela_anterior_polpa: 1
@@ -84,10 +84,11 @@ mineroduto:
   fator_limite_excesso_patio: 0.8
 
   estoque_inicial_eb07: [["PRDT_C", 0]]
-  estoque_inicial_eb06: [["PRDT_C", 1000]]
+  estoque_inicial_eb06: [["PRDT_C", 0]]
   min_capacidade_eb07: 0.2
   max_capacidade_eb06: 10250
   max_capacidade_eb07: 30000
+  vazao_bombas: 1270
 
 porto:
   capacidade_carreg_porto_por_dia:  1

@@ -17,7 +17,7 @@ from sb3_contrib.common.maskable.utils import get_action_masks
 
 UNIQUE_INSTANCE = True
 UNIQUE_INSTANCE_SEED = 51
-TRAINING_STEPS = 100000
+TRAINING_STEPS = 2
 USAR_LOG_TENSORBOARD = True # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
 SEMENTE = 5
 RANDOM = False
@@ -68,6 +68,9 @@ class CustomizedEnv(gymnasium.Env):
 
 
   def create_instance(self):
+    randomness = 0.2
+    if random.random() < randomness:
+        RANDOM = True
     self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs = self.initialize(RANDOM)
     self.MaxCon = max(self.disp_conc_inicial)
     self.MaxUbu= max(self.disp_usina_inicial)
@@ -196,7 +199,7 @@ class CustomizedEnv(gymnasium.Env):
     self.passo +=1
     terminou_episodio = bool(self.passo == FIM)
 
-    self.FO_anterior = sum(self.prod_usina)
+    self.FO_anterior = self.fo_value
     self.fo_value, self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa, self.data)
     self.actual_state.append(self.estoque_eb06[self.passo])
     self.actual_state.append(self.estoque_ubu[self.passo])
@@ -208,7 +211,7 @@ class CustomizedEnv(gymnasium.Env):
     self.FO = self.fo_value
 
     if self.FO > self.FO_Best:
-      self.FO_Best = self.FO_Inicial
+      self.FO_Best = self.FO
 
     recompensa = float(self.FO - self.FO_anterior)
 
@@ -221,7 +224,7 @@ class CustomizedEnv(gymnasium.Env):
 
     # Optionally we can pass additional info, we are not using that for now
     print(f'Passo {self.passo}')
-    print(f'\tÚltima ação: {self.ultima_acao}, FO: {self.FO}')
+    print(f'\tÚltima ação: {self.ultima_acao}, FO: {self.FO}, Melhor FO: {self.FO_Best}')
     print(f'\tLista: {self.BombeamentoPolpa}')
     print(f'\tRecompensa: {self.ultima_recompensa}')
     info = {}
@@ -321,9 +324,7 @@ def run_ppo():
     tensorboard_log=None
 
   # Train the agent
-  if SAVE:
-    model = MaskablePPO(MaskableActorCriticPolicy, env, verbose=1, tensorboard_log=tensorboard_log).learn(TRAINING_STEPS)
-
+  model = MaskablePPO(MaskableActorCriticPolicy, env, verbose=1, tensorboard_log=tensorboard_log).learn(TRAINING_STEPS)
   if SAVE:
     model.save('model_ppo')
 
@@ -349,5 +350,5 @@ def run_ppo():
   myfile = open("resultados.txt", "w")
   myfile.write(str(PPO_avg_FO_bests) +"\n")
   myfile.close()
-
+  model.summary()
   print(f"Done! Resultado: {env.FO_Best} (inicial: {env.FO_Inicial})")

@@ -45,7 +45,7 @@ class Learning():
         fo_value = 0
 
         if status_modelo1 == -1 or status_modelo2 == -1:
-            fo_value = -math.inf
+            fo_value = -999999
         else:
             fo_value = sum(prod_usina)
 

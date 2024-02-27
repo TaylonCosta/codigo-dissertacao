@@ -17,7 +17,7 @@ from sb3_contrib.common.maskable.utils import get_action_masks
 
 UNIQUE_INSTANCE = True
 UNIQUE_INSTANCE_SEED = 51
-TRAINING_STEPS = 2
+TRAINING_STEPS = 100000
 USAR_LOG_TENSORBOARD = True # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
 SEMENTE = 5
 RANDOM = False
@@ -68,7 +68,8 @@ class CustomizedEnv(gymnasium.Env):
 
 
   def create_instance(self):
-    randomness = 0.2
+    randomness = 0.1
+    RANDOM = False
     if random.random() < randomness:
         RANDOM = True
     self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs = self.initialize(RANDOM)
@@ -350,5 +351,4 @@ def run_ppo():
   myfile = open("resultados.txt", "w")
   myfile.write(str(PPO_avg_FO_bests) +"\n")
   myfile.close()
-  model.summary()
   print(f"Done! Resultado: {env.FO_Best} (inicial: {env.FO_Inicial})")

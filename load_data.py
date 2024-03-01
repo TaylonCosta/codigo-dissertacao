@@ -49,10 +49,11 @@ class Load_data:
         produtos_conc = cenario['concentrador']['produtos_conc']
         produtos_usina = cenario['usina']['produtos_usina']
 
-        de_para_produtos_mina_conc = {'PRDT1': {'PRDT_C1': 1, 'PRDT_C2': 1, 'PRDT_C3': 0}, 'PRDT2': {'PRDT_C1': 0, 'PRDT_C2': 0, 'PRDT_C3': 1}}
+        de_para_produtos_mina_conc = {'PRDT1': {'PRDT_C1': 1, 'PRDT_C2': 1, 'PRDT_C3': 0}, 
+                                      'PRDT2': {'PRDT_C1': 0, 'PRDT_C2': 0, 'PRDT_C3': 1}}
         de_para_produtos_conc_usina = {'PRDT_C1': {'PRDT_U1': 0, 'PRDT_U2':0, 'PRDT_U3':0, 'PRDT_U4':1},
                                     'PRDT_C2': {'PRDT_U1': 0, 'PRDT_U2':1, 'PRDT_U3':1, 'PRDT_U4':0},
-                                    'PRDT_C2': {'PRDT_U1': 1, 'PRDT_U2':0, 'PRDT_U3':0, 'PRDT_U4':0}}
+                                    'PRDT_C3': {'PRDT_U1': 1, 'PRDT_U2':0, 'PRDT_U3':0, 'PRDT_U4':0}}
 
         # Obs.: índices dos navios são definidos ao ler os dados da aba NAVIOS
 
@@ -105,7 +106,7 @@ class Load_data:
 
         # Mineroduto
 
-        estoque_eb06_d0 = {}
+        estoque_eb06_d0 = {"PRDT_C1":0, "PRDT_C2":0, "PRDT_C3":0}
         for produto, estoque in cenario['mineroduto']['estoque_inicial_eb06']:
             estoque_eb06_d0[produto] = estoque
 

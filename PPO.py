@@ -46,6 +46,10 @@ class CustomizedEnv(gymnasium.Env):
                 bombeamento['PRDT_C2'].update({i: BombeamentoPolpa[cont]})
             elif BombeamentoPolpa[cont] == 3:
                 bombeamento['PRDT_C3'].update({i: BombeamentoPolpa[cont]})
+            else:
+               bombeamento['PRDT_C1'].update({i: BombeamentoPolpa[cont]})
+               bombeamento['PRDT_C2'].update({i: BombeamentoPolpa[cont]})
+               bombeamento['PRDT_C3'].update({i: BombeamentoPolpa[cont]})    
             cont += 1
 
         return bombeamento
@@ -102,7 +106,7 @@ class CustomizedEnv(gymnasium.Env):
         size = int(SIZE) #int(2*TAMANHO)
         # Define action and observation space
         n_actions = 1
-        self.action_space = spaces.Discrete(4)
+        self.action_space = spaces.Discrete(3)
         #self.observation_space = spaces.Box(len(self.Lista0)*[tam]+len(self.Lista0)*[self.Dmax])
         self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(4*size,), dtype=np.float64)
         load_data = Load_data()

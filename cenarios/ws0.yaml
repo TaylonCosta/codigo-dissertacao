@@ -20,7 +20,7 @@ mina:
 
 concentrador:
   produtos_conc: ['PRDT_C1', 'PRDT_C2', 'PRDT_C3']
-  estoque_pulmao_inicial_concentrador: [["PRDT1", 0], ["PRDT2", 0]]
+  estoque_pulmao_inicial_concentrador: [["PRDT1", 10000], ["PRDT2", 10000]]
   min_estoque_pulmao_concentrador: 0
   max_estoque_pulmao_concentrador: 100000
   faixas_producao_concentrador: 625
@@ -44,7 +44,7 @@ usina:
   min_estoque_polpa_ubu: 0
   max_estoque_polpa_ubu: 40000
   estoque_inicial_patio_usina: {"PRDT_C1":0, "PRDT_C2":0, "PRDT_C3":0}
-  estoque_inicial_polpa_ubu: [["PRDT_C3", 0], ["PRDT_C2", 0], ["PRDT_C1", 0]]
+  estoque_inicial_polpa_ubu: [["PRDT_C1", 10000], ["PRDT_C2", 10000], ["PRDT_C3", 10000]]
   min_estoque_patio_usina: 0
   max_estoque_patio_usina: 300000
 
@@ -84,7 +84,7 @@ mineroduto:
   fator_limite_excesso_patio: 0.8
 
   estoque_inicial_eb07: [["PRDT_C", 0]]
-  estoque_inicial_eb06: [["PRDT_C", 0]]
+  estoque_inicial_eb06: [["PRDT_C1", 0], ["PRDT_C2", 0], ["PRDT_C3", 100]]
   min_capacidade_eb07: 0.2
   max_capacidade_eb06: 10250
   max_capacidade_eb07: 30000

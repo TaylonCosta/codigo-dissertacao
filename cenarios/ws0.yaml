@@ -8,7 +8,7 @@ geral:
   timeLimit: 120
 
 mina:
-  campanha: [["PRDT", "d01_h01"]]
+  campanha: [["PRDT1", "d01_h01"]]
   # campanha_c3: [["RLS", "d01_h01"], ["RNS", "d02_h01"], ["RLS", "d03_h01"], ["RNS", "d04_h01"], ["RLS", "d05_h01"], ["RNS", "d06_h01"], ["RLS", "d07_h01"]]
   #taxa_alimentacao_britagem: [3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000]
   taxa_alimentacao_britagem: [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000]
@@ -19,8 +19,8 @@ mina:
   duracao_manutencoes_britagem: []
 
 concentrador:
-  produtos_conc: ['PRDT_C']
-  estoque_pulmao_inicial_concentrador: [["PRDT", 0]]
+  produtos_conc: ['PRDT_C1', 'PRDT_C2', 'PRDT_C3']
+  estoque_pulmao_inicial_concentrador: [["PRDT1", 0], ["PRDT2", 0]]
   min_estoque_pulmao_concentrador: 0
   max_estoque_pulmao_concentrador: 100000
   faixas_producao_concentrador: 625
@@ -33,7 +33,7 @@ concentrador:
   duracao_manutencoes_concentrador:  []
 
 usina:
-  produtos_usina: ['PRDT_U']
+  produtos_usina: ['PRDT_U1', 'PRDT_U2', 'PRDT_U3', 'PRDT_U4']
   max_producao_sem_incorporacao: 1062.5
   min_producao_sem_incorporacao: 0
   fixar_producao_sem_incorporacao: livre
@@ -43,8 +43,8 @@ usina:
   max_taxa_retorno_patio_usina: 4000
   min_estoque_polpa_ubu: 0
   max_estoque_polpa_ubu: 40000
-  estoque_inicial_patio_usina: {"PRDT_C":0}
-  estoque_inicial_polpa_ubu: [["PRDT_C", 0]]
+  estoque_inicial_patio_usina: {"PRDT_C1":0, "PRDT_C2":0, "PRDT_C3":0}
+  estoque_inicial_polpa_ubu: [["PRDT_C3", 0], ["PRDT_C2", 0], ["PRDT_C1", 0]]
   min_estoque_patio_usina: 0
   max_estoque_patio_usina: 300000
 

@@ -1,4 +1,4 @@
-from model_p1 import Model_p1
+from model_p1 import Model_p1 as Model
 from model_p2 import Model_p2
 from load_data import *
 import math
@@ -17,11 +17,11 @@ class Learning():
         solver = self.solver
         sheet_data = self.data
 
-        modelo_1 = Model_p1()
-        status_modelo1, resultados_modelo1 = modelo_1.modelo(cenario, solver, sheet_data, self.varBombeamentoPolpa)
+        modelo = Model()
+        status_modelo, resultados_modelo = modelo.modelo(cenario, solver, sheet_data, self.varBombeamentoPolpa)
 
-        modelo_2 = Model_p2()
-        status_modelo2, resultados_modelo2 = modelo_2.modelo(cenario, solver, sheet_data, self.varBombeamentoPolpa)
+        # modelo_2 = Model_p2()
+        # status_modelo2, resultados_modelo2 = modelo_2.modelo(cenario, solver, sheet_data, self.varBombeamentoPolpa)
 
         estoque_eb06 = []
         estoque_ubu = []
@@ -33,18 +33,18 @@ class Learning():
 
         for v in range(1,25):
             if v<10:
-                estoque_eb06.append(resultados_modelo1['variaveis']['Estoque_EB06_PRDT_C_d01_h0'+str(v)])
-                estoque_ubu.append(resultados_modelo2['variaveis']['Estoque_Polpa_Ubu_PRDT_C_d01_h0'+str(v)])
-                prod_concentrador.append(resultados_modelo1['variaveis']['Producao___C3___Prog_PRDT_C_d01_h0'+str(v)])
-                prod_usina.append(resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h0'+str(v)])
+                estoque_eb06.append(resultados_modelo['variaveis']['Estoque_EB06_PRDT_C_d01_h0'+str(v)])
+                estoque_ubu.append(resultados_modelo['variaveis']['Estoque_Polpa_Ubu_PRDT_C_d01_h0'+str(v)])
+                prod_concentrador.append(resultados_modelo['variaveis']['Producao___C3___Prog_PRDT_C_d01_h0'+str(v)])
+                prod_usina.append(resultados_modelo['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h0'+str(v)])
             else:
-                estoque_eb06.append(resultados_modelo1['variaveis']['Estoque_EB06_PRDT_C_d01_h'+str(v)])
-                estoque_ubu.append(resultados_modelo2['variaveis']['Estoque_Polpa_Ubu_PRDT_C_d01_h'+str(v)])
-                prod_concentrador.append(resultados_modelo1['variaveis']['Producao___C3___Prog_PRDT_C_d01_h'+str(v)])
-                prod_usina.append(resultados_modelo2['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h'+str(v)])
+                estoque_eb06.append(resultados_modelo['variaveis']['Estoque_EB06_PRDT_C_d01_h'+str(v)])
+                estoque_ubu.append(resultados_modelo['variaveis']['Estoque_Polpa_Ubu_PRDT_C_d01_h'+str(v)])
+                prod_concentrador.append(resultados_modelo['variaveis']['Producao___C3___Prog_PRDT_C_d01_h'+str(v)])
+                prod_usina.append(resultados_modelo['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h'+str(v)])
         fo_value = 0
 
-        if status_modelo1 == -1 or status_modelo2 == -1:
+        if status_modelo:
             fo_value = -999999
         else:
             fo_value = sum(prod_usina)

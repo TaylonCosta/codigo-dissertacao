@@ -49,8 +49,10 @@ class Load_data:
         produtos_conc = cenario['concentrador']['produtos_conc']
         produtos_usina = cenario['usina']['produtos_usina']
 
-        de_para_produtos_mina_conc = {'PRDT': {'PRDT_C': 1}}
-        de_para_produtos_conc_usina = {'PRDT_C': {'PRDT_U': 1}}
+        de_para_produtos_mina_conc = {'PRDT1': {'PRDT_C1': 1, 'PRDT_C2': 1, 'PRDT_C3': 0}, 'PRDT2': {'PRDT_C1': 0, 'PRDT_C2': 0, 'PRDT_C3': 1}}
+        de_para_produtos_conc_usina = {'PRDT_C1': {'PRDT_U1': 0, 'PRDT_U2':0, 'PRDT_U3':0, 'PRDT_U4':1},
+                                    'PRDT_C2': {'PRDT_U1': 0, 'PRDT_U2':1, 'PRDT_U3':1, 'PRDT_U4':0},
+                                    'PRDT_C2': {'PRDT_U1': 1, 'PRDT_U2':0, 'PRDT_U3':0, 'PRDT_U4':0}}
 
         # Obs.: índices dos navios são definidos ao ler os dados da aba NAVIOS
 
@@ -511,7 +513,7 @@ class Load_data:
                 'produtos_usina': produtos_usina, 'de_para_produtos_conc_usina': de_para_produtos_conc_usina, 'parametros_ubu': parametros_ubu,
                 'tempo_mineroduto': tempo_mineroduto, 'min_estoque_polpa_ubu': min_estoque_polpa_ubu, 'max_estoque_polpa_ubu': max_estoque_polpa_ubu,
                 'max_estoque_polpa_ubu': max_estoque_polpa_ubu, 'max_taxa_envio_patio': max_taxa_envio_patio, 'max_taxa_retorno_patio_usina': max_taxa_retorno_patio_usina,
-                'min_estoque_patio_usina': min_estoque_patio_usina, 'max_estoque_patio_usina': max_estoque_patio_usina, 'estoque_polpa_ubu': estoque_ubu_inicial['PRDT_C'],
+                'min_estoque_patio_usina': min_estoque_patio_usina, 'max_estoque_patio_usina': max_estoque_patio_usina, 'estoque_polpa_ubu': estoque_ubu_inicial,
                 'estoque_inicial_patio_usina': estoque_inicial_patio_usina, 'fator_limite_excesso_patio': fator_limite_excesso_patio,
                 'parametros_navios': parametros_navios, 'capacidade_carreg_porto_por_dia': capacidade_carreg_porto_por_dia, 'navios_ate_d14': navios_ate_d14,
                 'produtos_de_cada_navio': produtos_de_cada_navio, 'estoque_produto_patio_d0': estoque_produto_patio_d0, 'parametros_mineroduto_md3': parametros_mineroduto_md3,
@@ -549,4 +551,4 @@ class Load_data:
         PolpaLi = cenario['mineroduto']['janela_min_bombeamento_polpa']
         PolpaLs = cenario['mineroduto']['janela_max_bombeamento_polpa']
 
-        return estoque_eb06_inicial['PRDT_C'], estoque_ubu_inicial['PRDT_C'], disp_conc_inicial, disp_usina_inicial, MaxE06, MaxEUBU, AguaLi, AguaLs, PolpaLi, PolpaLs
+        return estoque_eb06_inicial, estoque_ubu_inicial, disp_conc_inicial, disp_usina_inicial, MaxE06, MaxEUBU, AguaLi, AguaLs, PolpaLi, PolpaLs

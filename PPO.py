@@ -14,282 +14,290 @@ from sb3_contrib.common.maskable.policies import MaskableActorCriticPolicy
 from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.ppo_mask import MaskablePPO
 from sb3_contrib.common.maskable.utils import get_action_masks
+from datetime import datetime
 
 UNIQUE_INSTANCE = True
 UNIQUE_INSTANCE_SEED = 51
-TRAINING_STEPS = 100000
-USAR_LOG_TENSORBOARD = True # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
+TRAINING_STEPS = 2
+USAR_LOG_TENSORBOARD = False # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
 SEMENTE = 5
 RANDOM = False
 SIZE = 1
 SIZE_BOMBEAMENTO = 24
-SAVE = True
+SAVE = False
 LOAD = False
+
 
 if not UNIQUE_INSTANCE:
    UNIQUE_INSTANCE_SEED = None
 
 class CustomizedEnv(gymnasium.Env):
 
-  def convert_bombeamento_list(self, BombeamentoPolpa, ):
-    bombeamento = {"PRDT_C":{}}
-    cont = 0
-    dias =      [f'd{dia+1:02d}' for dia in range(1)]
-    horas =     [f'h{hora+1:02d}' for hora in range(24)]
-    horas_D14 = [f'{dia}_{hora}' for dia in dias for hora in horas]
-    for i in horas_D14:
-      bombeamento['PRDT_C'].update({i: BombeamentoPolpa[cont]})
-      cont += 1
+    def convert_bombeamento_list(self, BombeamentoPolpa, ):
+        bombeamento = {"PRDT_C1":{}, "PRDT_C2":{}, "PRDT_C3":{}}
+        cont = 0
+        dias =      [f'd{dia+1:02d}' for dia in range(1)]
+        horas =     [f'h{hora+1:02d}' for hora in range(24)]
+        horas_D14 = [f'{dia}_{hora}' for dia in dias for hora in horas]
+        for i in horas_D14:
+            if BombeamentoPolpa[cont] == 1:
+                bombeamento['PRDT_C1'].update({i: BombeamentoPolpa[cont]})
+            elif BombeamentoPolpa[cont] == 2:
+                bombeamento['PRDT_C2'].update({i: BombeamentoPolpa[cont]})
+            elif BombeamentoPolpa[cont] == 3:
+                bombeamento['PRDT_C3'].update({i: BombeamentoPolpa[cont]})
+            cont += 1
 
-    return bombeamento
+        return bombeamento
 
-  def initialize(self, rand):
-    if rand:
-      self.estoque_eb06_inicial = random.randint(0, 10000)
-      self.estoque_ubu_inicial = random.randint(0, 10000)
-      self.disp_conc_inicial = [random.randint(0, 10000)]*24
-      self.disp_usina_inicial = [random.randint(0, 10000)]*24
-      self.MaxE06 = random.randint(0, 10000)
-      self.MaxEUBU = random.randint(0, 10000)
-      self.AguaLi = random.randint(0, 10)
-      self.AguaLs = random.randint(0, 15)
-      self.PolpaLi = random.randint(0, 7)
-      self.PolpaLs = random.randint(0, 4)
+    def initialize(self, rand):
+        if rand:
+          self.estoque_eb06_inicial = random.randint(0, 10000)
+          self.estoque_ubu_inicial = random.randint(0, 10000)
+          self.disp_conc_inicial = [random.randint(0, 10000)]*24
+          self.disp_usina_inicial = [random.randint(0, 10000)]*24
+          self.MaxE06 = random.randint(0, 10000)
+          self.MaxEUBU = random.randint(0, 10000)
+          self.AguaLi = 4
+          self.AguaLs = 7
+          self.PolpaLi = 10
+          self.PolpaLs = 15
 
-    else:
-      self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs = self.inital_data_ppo
+        else:
+          self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs = self.inital_data_ppo
 
-    return self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs
+        return self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs
 
-  def evaluate(self, BombeamentoPolpa, data):
-    L = Learning(self.convert_bombeamento_list(BombeamentoPolpa), data)
-    status, estoque_eb06, estoque_ubu, prod_concentrador, prod_usina = L.solve_model()
-    return status, estoque_eb06, estoque_ubu, prod_concentrador, prod_usina
-
-
-  def create_instance(self):
-    randomness = 0.1
-    RANDOM = False
-    if random.random() < randomness:
-        RANDOM = True
-    self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs = self.initialize(RANDOM)
-    self.MaxCon = max(self.disp_conc_inicial)
-    self.MaxUbu= max(self.disp_usina_inicial)
-
-  def use_instance(self):
-    self.estoque_eb06 = self.estoque_eb06_inicial #Volume
-    self.estoque_ubu = self.estoque_ubu_inicial #Volume
-    self.disp_conc = self.disp_conc_inicial.copy() #Produção Max Hora
-    self.disp_usina = self.disp_usina_inicial.copy() #Produção Max Hora
+    def evaluate(self, BombeamentoPolpa, data):
+        L = Learning(self.convert_bombeamento_list(BombeamentoPolpa), data)
+        status, estoque_eb06, estoque_ubu, prod_concentrador, prod_usina = L.solve_model()
+        return status, estoque_eb06, estoque_ubu, prod_concentrador, prod_usina
 
 
-  def __init__(self, unique_instance=False, seed=None):
-    super(CustomizedEnv, self).__init__()
+    def create_instance(self):
+        randomness = 0.2
+        RANDOM = False
+        if random.random() < randomness:
+            RANDOM = True
+        self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs = self.initialize(RANDOM)
+        self.MaxCon = max(self.disp_conc_inicial)
+        self.MaxUbu= max(self.disp_usina_inicial)
 
-    print(f"Criando ambiente: {unique_instance=} {seed=}" )
+    def use_instance(self):
+        self.estoque_eb06 = self.estoque_eb06_inicial #Volume
+        self.estoque_ubu = self.estoque_ubu_inicial #Volume
+        self.disp_conc = self.disp_conc_inicial.copy() #Produção Max Hora
+        self.disp_usina = self.disp_usina_inicial.copy() #Produção Max Hora
 
-    size = int(SIZE) #int(2*TAMANHO)
-    # Define action and observation space
-    n_actions = 1
-    self.action_space = spaces.Discrete(2)
-    #self.observation_space = spaces.Box(len(self.Lista0)*[tam]+len(self.Lista0)*[self.Dmax])
-    self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(4*size,), dtype=np.float64)
-    load_data = Load_data()
-    self.inital_data_ppo = load_data.load_simplified_data_ppo()
-    self.data = load_data.load()
-    self.seed(seed)
-    self.unique_instance = unique_instance
-    if self.unique_instance: self.create_instance()
-    self.passo = 0
-    self.iter = 0
-    self.ultima_acao = None
-    self.ultima_recompensa = None
-    self.Agua = 1
-    self.Polpa = 1
+    # def arr_set_one(self, index):
+    #     self.binary_array[:] = 0
+    #     self.binary_array[index] = 1
 
+    def __init__(self, unique_instance=False, seed=None):
+        super(CustomizedEnv, self).__init__()
 
-  def normalize_state(self, state):
+        print(f"Criando ambiente: {unique_instance=} {seed=}" )
 
-    temp_state = state
-
-    for i in range(SIZE):
-      temp_state[i] = temp_state[i]/(self.MaxE06)
-
-    for i in range(SIZE, 2*SIZE):
-      temp_state[i] = temp_state[i]/(self.MaxEUBU)
-
-    for i in range(2*SIZE, 3*SIZE):
-      temp_state[i] = temp_state[i]/(self.MaxCon)
-
-    for i in range(3*SIZE, 4*SIZE):
-      temp_state[i] = temp_state[i]/(self.MaxUbu)
-
-    return np.clip(np.array(temp_state)*2 - 1, self.observation_space.low, self.observation_space.high)
-
-  def reset(self, seed=None, options=None):
-    """
-    Important: the observation must be a numpy array
-    :return: (np.array)
-    """
-    if not self.unique_instance: self.create_instance()
-    self.seedNum = seed
-    info = {}
-    self.state = []
-    self.use_instance()
-    self.passo = 0
-    self.nBatchsP = 0
-    self.nBatchsA = 0
-    self.Agua = 1
-    self.Polpa = 1
-    self.status = -1
-    self.ultima_acao = None
-    self.ultima_recompensa = 0
-    self.BombeamentoPolpa = [0]*SIZE_BOMBEAMENTO
-    self.fo_value, self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa, self.data)
-    self.state.append(self.estoque_eb06[0])
-    self.state.append(self.estoque_ubu[0])
-    self.state.append(self.prod_concentrador[0])
-    self.state.append(self.prod_usina[0])
-    self.FO_Inicial = self.fo_value
-    self.FO_Best = self.FO_Inicial
-    return self.normalize_state(self.state), info
-
-  def step(self, action):
-
-    FIM = SIZE_BOMBEAMENTO-1
-    Erro = False
-    self.Agua = 1
-    self.Polpa = 1
-    self.actual_state = []
-    if action == 1:
-      self.nBatchsP += 1
-      self.nBatchsA = 0
-      # if self.nBatchsP + 1 > self.PolpaLs:
-      #   #recompensa = -100000000
-      #   Erro = True
-      # elif self.nBatchsA >0 and self.nBatchsA < self.AguaLi:
-      #   recompensa = -100000000
-      #   Erro = True
-      # if Erro == False:
-      #   recompensa = 1
-      #   self.nBatchsP += 1
-      #   self.nBatchsA = 0
-
-    if action == 0:
-      self.nBatchsA += 1
-      self.nBatchsP = 0
-      # if self.nBatchsA + 1 > self.AguaLs:
-      #   recompensa = -100000000
-      #   Erro = True
-      # elif self.nBatchsP >0 and self.nBatchsP < self.PolpaLi:
-      #   recompensa = -100000000
-      #   Erro = True
-      # if Erro == False:
-      #   self.nBatchsP = 0
-      #   self.nBatchsA += 0
-
-    if self.nBatchsP >= self.PolpaLs or (self.nBatchsA < self.AguaLi and self.nBatchsA > 0):
-      self.Polpa = 0
-      self.Agua = 1
-    if self.nBatchsA >= self.AguaLs or (self.nBatchsP < self.PolpaLi and self.nBatchsP > 0):
-      self.Agua = 0
-      self.Polpa = 1
+        # self.binary_array = np.zeros(4, dtype=int)
+        size = int(SIZE) #int(2*TAMANHO)
+        # Define action and observation space
+        n_actions = 1
+        self.action_space = spaces.Discrete(4)
+        #self.observation_space = spaces.Box(len(self.Lista0)*[tam]+len(self.Lista0)*[self.Dmax])
+        self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(4*size,), dtype=np.float64)
+        load_data = Load_data()
+        self.inital_data_ppo = load_data.load_simplified_data_ppo()
+        self.data = load_data.load()
+        self.seed(seed)
+        self.unique_instance = unique_instance
+        if self.unique_instance: self.create_instance()
+        self.passo = 0
+        self.iter = 0
+        self.ultima_acao = None
+        self.ultima_recompensa = None
+        self.Agua = 1
+        self.Polpa = 1
 
 
-    self.BombeamentoPolpa[self.passo] = action
-    self.passo +=1
-    terminou_episodio = bool(self.passo == FIM)
+    def normalize_state(self, state):
 
-    self.FO_anterior = self.fo_value
-    self.fo_value, self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa, self.data)
-    self.actual_state.append(self.estoque_eb06[self.passo])
-    self.actual_state.append(self.estoque_ubu[self.passo])
-    self.actual_state.append(self.prod_concentrador[self.passo])
-    self.actual_state.append(self.prod_usina[self.passo])
+        temp_state = state
+
+        for i in range(SIZE):
+          temp_state[i] = temp_state[i]/(self.MaxE06)
+
+        for i in range(SIZE, 2*SIZE):
+          temp_state[i] = temp_state[i]/(self.MaxEUBU)
+
+        for i in range(2*SIZE, 3*SIZE):
+          temp_state[i] = temp_state[i]/(self.MaxCon)
+
+        for i in range(3*SIZE, 4*SIZE):
+          temp_state[i] = temp_state[i]/(self.MaxUbu)
+
+        return np.clip(np.array(temp_state)*2 - 1, self.observation_space.low, self.observation_space.high)
+
+    def reset(self, seed=None, options=None):
+        """
+        Important: the observation must be a numpy array
+        :return: (np.array)
+        """
+        if not self.unique_instance: self.create_instance()
+        self.seedNum = seed
+        info = {}
+        self.state = []
+        self.use_instance()
+        self.passo = 0
+        self.nBatchsP = 0
+        self.nBatchsA = 0
+        self.Agua = 1
+        self.Polpa = 1
+        self.status = -1
+        self.ultima_acao = None
+        self.ultima_recompensa = 0
+        self.BombeamentoPolpa = [0]*SIZE_BOMBEAMENTO
+        # self.binary_array[:] = 0
+        self.fo_value, self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa, self.data)
+        self.state.append(self.estoque_eb06[0])
+        self.state.append(self.estoque_ubu[0])
+        self.state.append(self.prod_concentrador[0])
+        self.state.append(self.prod_usina[0])
+        self.FO_Inicial = self.fo_value
+        self.FO_Best = self.FO_Inicial
+        return self.normalize_state(self.state), info
+
+    def step(self, action):
+        FIM = SIZE_BOMBEAMENTO-1
+        Erro = False
+        self.Agua = 1
+        self.Polpa = 1
+        self.actual_state = []
+        if action >= 1:
+          self.nBatchsP += 1
+          self.nBatchsA = 0
+          # if self.nBatchsP + 1 > self.PolpaLs:
+          #   #recompensa = -100000000
+          #   Erro = True
+          # elif self.nBatchsA >0 and self.nBatchsA < self.AguaLi:
+          #   recompensa = -100000000
+          #   Erro = True
+          # if Erro == False:
+          #   recompensa = 1
+          #   self.nBatchsP += 1
+          #   self.nBatchsA = 0
+
+        if action == 0:
+          self.nBatchsA += 1
+          self.nBatchsP = 0
+          # if self.nBatchsA + 1 > self.AguaLs:
+          #   recompensa = -100000000
+          #   Erro = True
+          # elif self.nBatchsP >0 and self.nBatchsP < self.PolpaLi:
+          #   recompensa = -100000000
+          #   Erro = True
+          # if Erro == False:
+          #   self.nBatchsP = 0
+          #   self.nBatchsA += 0
+
+        if self.nBatchsP >= self.PolpaLs or (self.nBatchsA < self.AguaLi and self.nBatchsA > 0):
+          self.Polpa = 0
+          self.Agua = 1
+        if self.nBatchsA >= self.AguaLs or (self.nBatchsP < self.PolpaLi and self.nBatchsP > 0):
+          self.Agua = 0
+          self.Polpa = 1
 
 
+        self.BombeamentoPolpa[self.passo] = action
+        self.passo +=1
+        terminou_episodio = bool(self.passo == FIM)
 
-    self.FO = self.fo_value
+        self.FO_anterior = self.fo_value
+        self.fo_value, self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa, self.data)
+        self.actual_state.append(self.estoque_eb06[self.passo])
+        self.actual_state.append(self.estoque_ubu[self.passo])
+        self.actual_state.append(self.prod_concentrador[self.passo])
+        self.actual_state.append(self.prod_usina[self.passo])
 
-    if self.FO > self.FO_Best:
-      self.FO_Best = self.FO
+        self.FO = self.fo_value
 
-    recompensa = float(self.FO - self.FO_anterior)
+        if self.FO > self.FO_Best:
+          self.FO_Best = self.FO
 
-    self.ultima_acao = action
+        recompensa = float(self.FO - self.FO_anterior)
 
-    self.ultima_recompensa = recompensa
+        self.ultima_acao = action
+        self.ultima_recompensa = recompensa
 
+        truncated = False
 
-    truncated = False
+        # Optionally we can pass additional info, we are not using that for now
+        print(f'Passo {self.passo}')
+        print(f'\tÚltima ação: {self.ultima_acao}, FO: {self.FO}, Melhor FO: {self.FO_Best}')
+        print(f'\tLista: {self.BombeamentoPolpa}')
+        print(f'\tRecompensa: {self.ultima_recompensa}')
+        info = {}
 
-    # Optionally we can pass additional info, we are not using that for now
-    print(f'Passo {self.passo}')
-    print(f'\tÚltima ação: {self.ultima_acao}, FO: {self.FO}, Melhor FO: {self.FO_Best}')
-    print(f'\tLista: {self.BombeamentoPolpa}')
-    print(f'\tRecompensa: {self.ultima_recompensa}')
-    info = {}
-    return self.normalize_state(self.actual_state), recompensa, terminou_episodio, truncated, info
+        return self.normalize_state(self.actual_state), recompensa, terminou_episodio, truncated, info
 
-  def render(self, mode='console'):
-    if mode != 'console':
-      raise NotImplementedError()
+    def render(self, mode='console'):
+        if mode != 'console':
+          raise NotImplementedError()
 
-    if (self.passo > 0):
-      print(f'Passo {self.passo}')
-    else:
-      print('Instância:')
+        if (self.passo > 0):
+          print(f'Passo {self.passo}')
+        else:
+          print('Instância:')
 
-    print(f'\tÚltima ação: {self.ultima_acao}, FO: {self.FO}')
-    print(f'\tLista: {self.BombeamentoPolpa}')
-    print(f'\tRecompensa: {self.ultima_recompensa}')
+        print(f'\tÚltima ação: {self.ultima_acao}, FO: {self.FO}')
+        print(f'\tLista: {self.BombeamentoPolpa}')
+        print(f'\tRecompensa: {self.ultima_recompensa}')
 
-  def close(self):
-    pass
+    def close(self):
+        pass
 
-  def seed(self, seed=None):
-    self.rand_generator = np.random.RandomState(seed)
-    self.action_space.seed(seed)
+    def seed(self, seed=None):
+        self.rand_generator = np.random.RandomState(seed)
+        self.action_space.seed(seed)
 
-  def valid_action_mask(self):
-    self.mask= np.array([self.Agua, self.Polpa])
-    return self.mask
+    def valid_action_mask(self):
+        self.mask= np.array([self.Agua, self.Polpa])
+        return self.mask
 
 class RandomAgent():
-  def __init__(self, env):
-    self.env = env
+    def __init__(self, env):
+        self.env = env
 
-  def predict(self, observation, deterministic=False):
-    # ignora o parâmetro deterministic
-    return self.env.action_space.sample(), None
+    def predict(self, observation, deterministic=False):
+        # ignora o parâmetro deterministic
+        return self.env.action_space.sample(), None
 
 def mask_fn(env: gymnasium.Env) -> np.ndarray:
     return env.valid_action_mask()
 
 def evaluate_results(model, env, seeds, render=True):
-  results = []
-  FO_bests = []
+    results = []
+    FO_bests = []
 
-  for seed in seeds:
-    env.seed(seed)
-    obs, info = env.reset()
-    if render: env.render()
-    done = False
-    while not done:
-      env = ActionMasker(env, mask_fn)
-      action_masks = get_action_masks(env)
-      #action, _ = model.predict(obs, deterministic=True)
-      # print(obs)
-      # print(action)
-      action, _ = model.predict(obs,  action_masks= action_masks, deterministic=True)
-      obs, reward, done, truncated, info  = env.step(action)
-      #obs, reward, done, tr, info = env.step(action)
-      if render: env.render()
+    for seed in seeds:
+        env.seed(seed)
+        obs, info = env.reset()
+        if render: env.render()
+        done = False
+        while not done:
+          env = ActionMasker(env, mask_fn)
+          action_masks = get_action_masks(env)
+          #action, _ = model.predict(obs, deterministic=True)
+          # print(obs)
+          # print(action)
+          action, _ = model.predict(obs,  action_masks= action_masks, deterministic=True)
+          obs, reward, done, truncated, info  = env.step(action)
+          #obs, reward, done, tr, info = env.step(action)
+          if render: env.render()
 
     results.append({'FO_Best': env.FO_Best, 'FO_inicial': env.FO_Inicial})
     FO_bests.append(env.FO_Best)
 
-  return np.average(FO_bests), results
+    return np.average(FO_bests), results
 
 def run_ppo():
 
@@ -299,7 +307,7 @@ def run_ppo():
   # If the environment don't follow the interface, an error will be thrown
   #check_env(env, warn=True)
 
-  print()
+
   print("===== DEMONSTRANDO AMBIENTE =====")
   print(f"{env.observation_space=}")
   print(f"{env.action_space=}")
@@ -351,4 +359,5 @@ def run_ppo():
   myfile = open("resultados.txt", "w")
   myfile.write(str(PPO_avg_FO_bests) +"\n")
   myfile.close()
+  print(datetime.now())
   print(f"Done! Resultado: {env.FO_Best} (inicial: {env.FO_Inicial})")

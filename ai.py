@@ -23,14 +23,14 @@ class Learning():
         # modelo_2 = Model_p2()
         # status_modelo2, resultados_modelo2 = modelo_2.modelo(cenario, solver, sheet_data, self.varBombeamentoPolpa)
 
-        estoque_eb06 = {"PRDT_C1":{}, "PRDT_C2":{}, "PRDT_C3":{}}
-        estoque_ubu = {"PRDT_C1":{}, "PRDT_C2":{}, "PRDT_C3":{}}
-        prod_concentrador = {"PRDT_C1":{}, "PRDT_C2":{}, "PRDT_C3":{}}
-        prod_usina = {"PRDT_U1":{}, "PRDT_U2":{}, "PRDT_U3":{}, "PRDT_U4":{}}
         produtos_conc = sheet_data['produtos_conc']
         produtos_usina = sheet_data['produtos_usina']
+        estoque_eb06 = {produto: {} for produto in produtos_conc}
+        estoque_ubu = {produto: {} for produto in produtos_conc}
+        prod_concentrador = {produto: {} for produto in produtos_conc}
+        prod_usina = {c: {u: {} for u in produtos_usina} for c in produtos_conc}
 
-    
+
         for produto in produtos_conc:
             estoque_eb06[produto].update({0: sheet_data['estoque_eb06_d0'][produto]})
             estoque_ubu[produto].update({0: sheet_data['estoque_polpa_ubu'][produto]})
@@ -39,14 +39,20 @@ class Learning():
                     estoque_eb06[produto].update({v: resultados_modelo['variaveis']['Estoque_EB06_'+str(produto)+'_d01_h0'+str(v)]})
                     estoque_ubu[produto].update({v: resultados_modelo['variaveis']['Estoque_Polpa_Ubu_'+str(produto)+'_d01_h0'+str(v)]})
                     prod_concentrador[produto].update({v-1: resultados_modelo['variaveis']['Producao___C3___Prog_'+str(produto)+'_d01_h0'+str(v)]})
-                    prod_usina.append(resultados_modelo['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h0'+str(v)])
                 else:
                     estoque_eb06[produto].update({v: resultados_modelo['variaveis']['Estoque_EB06_'+str(produto)+'_d01_h'+str(v)]})
                     estoque_ubu[produto].update({v: resultados_modelo['variaveis']['Estoque_Polpa_Ubu_'+str(produto)+'_d01_h'+str(v)]})
                     prod_concentrador[produto].update({v-1: resultados_modelo['variaveis']['Producao___C3___Prog_'+str(produto)+'_d01_h'+str(v)]})
-                    prod_usina.append(resultados_modelo['variaveis']['Producao_Ubu_PRDT_C_PRDT_U_d01_h'+str(v)])
-        fo_value = 0
 
+            for prdt_usina in produtos_usina:
+                for aux in range(1,25):
+                    if aux<10:
+                        prod_usina[produto][prdt_usina].update({aux-1: resultados_modelo['variaveis']['Producao_Ubu_'+str(produto)+'_'+str(prdt_usina)+'_d01_h0'+str(aux)]})
+                    else:
+                        prod_usina[produto][prdt_usina].update({aux-1: resultados_modelo['variaveis']['Producao_Ubu_'+str(produto)+'_'+str(prdt_usina)+'_d01_h'+str(aux)]})
+
+        fo_value = 0
+        print(status_modelo)
         if status_modelo:
             fo_value = -999999
         else:

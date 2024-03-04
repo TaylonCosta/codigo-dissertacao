@@ -34,24 +34,41 @@ if not UNIQUE_INSTANCE:
 class CustomizedEnv(gymnasium.Env):
 
     def convert_bombeamento_list(self, BombeamentoPolpa, ):
-        bombeamento = {"PRDT_C1":{}, "PRDT_C2":{}, "PRDT_C3":{}}
+        bombeamento = {produto: {} for produto in self.prdt_conc}
         cont = 0
         dias =      [f'd{dia+1:02d}' for dia in range(1)]
         horas =     [f'h{hora+1:02d}' for hora in range(24)]
         horas_D14 = [f'{dia}_{hora}' for dia in dias for hora in horas]
+        # for produto_c in self.prdt_conc:
+        #     for aux in range(0,len(self.prdt_conc)):
+        #       for i in horas_D14:
+        #             if BombeamentoPolpa[cont] == aux:
+        #                 bombeamento[produto_c].update({i: (int(BombeamentoPolpa[cont])/int(BombeamentoPolpa[cont]))})
+        #                 break
+        #             else:
+        #                 bombeamento[produto_c].update({i: 0})
+        #         cont += 1
+        BombeamentoPolpa[1] = 3
+        BombeamentoPolpa[2] = 3
+        BombeamentoPolpa[3] = 3
         for i in horas_D14:
             if BombeamentoPolpa[cont] == 1:
-                bombeamento['PRDT_C1'].update({i: BombeamentoPolpa[cont]})
+                bombeamento['PRDT_C1'].update({i: 1})
+                bombeamento['PRDT_C2'].update({i: 0})
+                bombeamento['PRDT_C3'].update({i: 0})
             elif BombeamentoPolpa[cont] == 2:
-                bombeamento['PRDT_C2'].update({i: BombeamentoPolpa[cont]})
+                bombeamento['PRDT_C2'].update({i: 1})
+                bombeamento['PRDT_C1'].update({i: 0})
+                bombeamento['PRDT_C3'].update({i: 0})
             elif BombeamentoPolpa[cont] == 3:
-                bombeamento['PRDT_C3'].update({i: BombeamentoPolpa[cont]})
+                bombeamento['PRDT_C3'].update({i: 1})
+                bombeamento['PRDT_C1'].update({i: 0})
+                bombeamento['PRDT_C2'].update({i: 0})
             else:
-               bombeamento['PRDT_C1'].update({i: BombeamentoPolpa[cont]})
-               bombeamento['PRDT_C2'].update({i: BombeamentoPolpa[cont]})
-               bombeamento['PRDT_C3'].update({i: BombeamentoPolpa[cont]})    
+                bombeamento['PRDT_C1'].update({i: 0})
+                bombeamento['PRDT_C2'].update({i: 0})
+                bombeamento['PRDT_C3'].update({i: 0})
             cont += 1
-
         return bombeamento
 
     def initialize(self, rand):
@@ -68,9 +85,9 @@ class CustomizedEnv(gymnasium.Env):
           self.PolpaLs = 15
 
         else:
-          self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs = self.inital_data_ppo
+          self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs, self.vazao_bombas_eb06, self.prdt_conc, self.prdt_usina = self.inital_data_ppo
 
-        return self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs
+        return self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs, self.vazao_bombas_eb06, self.prdt_conc, self.prdt_usina
 
     def evaluate(self, BombeamentoPolpa, data):
         L = Learning(self.convert_bombeamento_list(BombeamentoPolpa), data)
@@ -79,11 +96,11 @@ class CustomizedEnv(gymnasium.Env):
 
 
     def create_instance(self):
-        randomness = 0.2
-        RANDOM = False
-        if random.random() < randomness:
-            RANDOM = True
-        self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs = self.initialize(RANDOM)
+        # randomness = 0.2
+        # RANDOM = False
+        # if random.random() < randomness:
+        #     RANDOM = True
+        self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs, self.vazao_bombas_eb06, self.prdt_conc, self.prdt_usina = self.initialize(RANDOM)
         self.MaxCon = max(self.disp_conc_inicial)
         self.MaxUbu= max(self.disp_usina_inicial)
 
@@ -106,7 +123,7 @@ class CustomizedEnv(gymnasium.Env):
         size = int(SIZE) #int(2*TAMANHO)
         # Define action and observation space
         n_actions = 1
-        self.action_space = spaces.Discrete(3)
+        self.action_space = spaces.Discrete(4)
         #self.observation_space = spaces.Box(len(self.Lista0)*[tam]+len(self.Lista0)*[self.Dmax])
         self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(4*size,), dtype=np.float64)
         load_data = Load_data()
@@ -121,23 +138,25 @@ class CustomizedEnv(gymnasium.Env):
         self.ultima_recompensa = None
         self.Agua = 1
         self.Polpa = 1
+        self.n_produtos_conc = len(self.prdt_conc)
+        self.n_produtos_usina = len(self.prdt_usina)
 
 
     def normalize_state(self, state):
 
         temp_state = state
-
-        for i in range(SIZE):
+        for i in range(SIZE*self.n_produtos_conc):
           temp_state[i] = temp_state[i]/(self.MaxE06)
 
-        for i in range(SIZE, 2*SIZE):
+        for i in range(SIZE*self.n_produtos_conc, 2*SIZE*self.n_produtos_conc):
           temp_state[i] = temp_state[i]/(self.MaxEUBU)
 
-        for i in range(2*SIZE, 3*SIZE):
+        for i in range(2*SIZE*self.n_produtos_conc, 3*SIZE*self.n_produtos_conc):
           temp_state[i] = temp_state[i]/(self.MaxCon)
 
-        for i in range(3*SIZE, 4*SIZE):
+        for i in range(3*SIZE*self.n_produtos_conc, len(temp_state)):
           temp_state[i] = temp_state[i]/(self.MaxUbu)
+
 
         return np.clip(np.array(temp_state)*2 - 1, self.observation_space.low, self.observation_space.high)
 
@@ -162,10 +181,12 @@ class CustomizedEnv(gymnasium.Env):
         self.BombeamentoPolpa = [0]*SIZE_BOMBEAMENTO
         # self.binary_array[:] = 0
         self.fo_value, self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa, self.data)
-        self.state.append(self.estoque_eb06[0])
-        self.state.append(self.estoque_ubu[0])
-        self.state.append(self.prod_concentrador[0])
-        self.state.append(self.prod_usina[0])
+        for produto_conc in self.prdt_conc:
+            self.state.append(self.estoque_eb06[produto_conc][0])
+            self.state.append(self.estoque_ubu[produto_conc][0])
+            self.state.append(self.prod_concentrador[produto_conc][0])
+            for produto_usina in self.prdt_usina:
+                self.state.append(self.prod_usina[produto_conc][produto_usina][0])
         self.FO_Inicial = self.fo_value
         self.FO_Best = self.FO_Inicial
         return self.normalize_state(self.state), info
@@ -203,6 +224,19 @@ class CustomizedEnv(gymnasium.Env):
           #   self.nBatchsP = 0
           #   self.nBatchsA += 0
 
+        if action == 1 and (self.estoque_eb06['PRDT_C1'][self.passo]+self.prod_concentrador['PRDT_C1'][self.passo]-self.vazao_bombas_eb06<0):
+            self.Polpa = 0
+            self.Agua = 1
+        if action == 2 and (self.estoque_eb06['PRDT_C2'][self.passo]+self.prod_concentrador['PRDT_C2'][self.passo]-self.vazao_bombas_eb06<0):
+            self.Polpa = 0
+            self.Agua = 1
+        if action == 3 and (self.estoque_eb06['PRDT_C3'][self.passo]+self.prod_concentrador['PRDT_C3'][self.passo]-self.vazao_bombas_eb06<0):
+            self.Polpa = 0
+            self.Agua = 1
+        if action == 4 and (self.estoque_eb06['PRDT_C4'][self.passo]+self.prod_concentrador['PRDT_C4'][self.passo]-self.vazao_bombas_eb06<0):
+            self.Polpa = 0
+            self.Agua = 1
+
         if self.nBatchsP >= self.PolpaLs or (self.nBatchsA < self.AguaLi and self.nBatchsA > 0):
           self.Polpa = 0
           self.Agua = 1
@@ -217,10 +251,12 @@ class CustomizedEnv(gymnasium.Env):
 
         self.FO_anterior = self.fo_value
         self.fo_value, self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa, self.data)
-        self.actual_state.append(self.estoque_eb06[self.passo])
-        self.actual_state.append(self.estoque_ubu[self.passo])
-        self.actual_state.append(self.prod_concentrador[self.passo])
-        self.actual_state.append(self.prod_usina[self.passo])
+        for produto_conc in self.prdt_conc:
+            self.state.append(self.estoque_eb06[produto_conc][[self.passo]])
+            self.state.append(self.estoque_ubu[produto_conc][[self.passo]])
+            self.state.append(self.prod_concentrador[produto_conc][[self.passo]])
+            for produto_usina in self.prdt_usina:
+                self.state.append(self.prod_usina[produto_conc][produto_usina][[self.passo]])
 
         self.FO = self.fo_value
 

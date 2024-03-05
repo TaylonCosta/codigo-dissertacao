@@ -27,9 +27,9 @@ class Learning():
         produtos_usina = sheet_data['produtos_usina']
         estoque_eb06 = {produto: {} for produto in produtos_conc}
         estoque_ubu = {produto: {} for produto in produtos_conc}
+        consumo_prod_ubu = {produto: {d: 0 for d in range(0,24)} for produto in produtos_conc}
         prod_concentrador = {produto: {} for produto in produtos_conc}
-        prod_usina = {c: {u: {} for u in produtos_usina} for c in produtos_conc}
-
+        # prod_usina = {c: {u: {} for u in produtos_usina} for c in produtos_conc}
 
         for produto in produtos_conc:
             estoque_eb06[produto].update({0: sheet_data['estoque_eb06_d0'][produto]})
@@ -45,17 +45,16 @@ class Learning():
                     prod_concentrador[produto].update({v-1: resultados_modelo['variaveis']['Producao___C3___Prog_'+str(produto)+'_d01_h'+str(v)]})
 
             for prdt_usina in produtos_usina:
-                for aux in range(1,25):
-                    if aux<10:
-                        prod_usina[produto][prdt_usina].update({aux-1: resultados_modelo['variaveis']['Producao_Ubu_'+str(produto)+'_'+str(prdt_usina)+'_d01_h0'+str(aux)]})
+                for aux in range(0,24):
+                    if aux < 9:
+                        consumo_prod_ubu[produto][aux]+=resultados_modelo['variaveis']['Producao_Ubu_'+str(produto)+'_'+str(prdt_usina)+'_d01_h0'+str(aux+1)]
                     else:
-                        prod_usina[produto][prdt_usina].update({aux-1: resultados_modelo['variaveis']['Producao_Ubu_'+str(produto)+'_'+str(prdt_usina)+'_d01_h'+str(aux)]})
+                        consumo_prod_ubu[produto][aux]+=resultados_modelo['variaveis']['Producao_Ubu_'+str(produto)+'_'+str(prdt_usina)+'_d01_h'+str(aux+1)]
 
         fo_value = 0
-        print(status_modelo)
-        if status_modelo:
+        if status_modelo == -1:
             fo_value = -999999
         else:
             fo_value = sum(prod_usina)
 
-        return fo_value, estoque_eb06, estoque_ubu, prod_concentrador, prod_usina
+        return fo_value, estoque_eb06, estoque_ubu, prod_concentrador, consumo_prod_ubu

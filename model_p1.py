@@ -239,37 +239,6 @@ class Model_p1():
                 f"rest_capacidade_EstoqueEB06_{hora}",
             )
 
-        # '''
-        # # Restrição de capacidade do estoque EB04
-        # for hora in horas_D14:
-        #     modelo += (
-        #         lpSum(varEstoqueEB04[produto][hora] for produto in produtos_conc)
-        #             <= capacidade_eb04,
-        #         f"rest_capacidade_EstoqueEB04_{hora}",
-        #     )
-
-        # # Define se ha transferencia entre os tanques
-        # varEnvioEB04EB06 = LpVariable.dicts("Envio EB04 para EB06", (produtos_conc, horas_D14), 0, 1, LpInteger)
-        # varEnvioEB06EB04 = LpVariable.dicts("Envio EB06 para EB04", (produtos_conc, horas_D14), 0, 1, LpInteger)
-        # # Define a quantidade da transferência entre os tanques
-        # varTaxaEnvioEB04EB06 = LpVariable.dicts("Taxa Envio EB04 para EB06", (produtos_conc, horas_D14), 0, taxa_transferencia_entre_eb, LpContinuous)
-        # varTaxaEnvioEB06EB04 = LpVariable.dicts("Taxa Envio EB06 para EB04", (produtos_conc, horas_D14), 0, taxa_transferencia_entre_eb, LpContinuous)
-        # '''
-
-        # # Indica se há bombeamento de polpa em cada hora
-        # #varBombeamentoPolpa = LpVariable.dicts("Bombeamento Polpa", (produtos_conc, horas_Dm3_D14), 0, 1, LpInteger)
-        # '''
-        # for produto in produtos_conc:
-        #     for hora in horas_D14:
-        #         modelo += (
-        #             varTaxaEnvioEB06EB04[produto][hora] <= taxa_transferencia_entre_eb*varEnvioEB06EB04[produto][hora],
-        #             f"rest_define_TaxaEnvioEB06EB04_{produto}_{hora}",
-        #         )
-        #         modelo += (
-        #             varTaxaEnvioEB04EB06[produto][hora] <= taxa_transferencia_entre_eb*varEnvioEB04EB06[produto][hora],
-        #             f"rest_define_TaxaEnvioEB04EB06_{produto}_{hora}",
-        #         )
-        # '''
 
         #Define o valor de estoque de EB06, por produto, da segunda hora em diante
         for produto in produtos_conc:
@@ -307,6 +276,7 @@ class Model_p1():
                 if varBombeamentoPolpaPPO[produto][horas] == 1 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
                     modelo += (varBombeamentoPolpa[produto][horas] >=1, f"rest_fixado2_{produto}_{horas}")
 
+
         varBombeado = LpVariable.dicts("Bombeado", (produtos_conc, horas_D14), 0, None, LpContinuous)
         for idx_hora in (horas_D14):
             for produto in produtos_conc:
@@ -339,9 +309,6 @@ class Model_p1():
 
         # Indica a produção em Ubu, por hora
         varProducaoUbu = LpVariable.dicts("Producao Ubu", (produtos_conc, produtos_usina, horas_D14), 0, None, LpContinuous)
-
-        #for produto in produtos_usina:
-        #    for hora in horas_D14:
 
         # Define a produção em Ubu
         for produto_c in produtos_conc:

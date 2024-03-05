@@ -48,9 +48,6 @@ class CustomizedEnv(gymnasium.Env):
         #             else:
         #                 bombeamento[produto_c].update({i: 0})
         #         cont += 1
-        BombeamentoPolpa[1] = 3
-        BombeamentoPolpa[2] = 3
-        BombeamentoPolpa[3] = 3
         for i in horas_D14:
             if BombeamentoPolpa[cont] == 1:
                 bombeamento['PRDT_C1'].update({i: 1})
@@ -110,9 +107,6 @@ class CustomizedEnv(gymnasium.Env):
         self.disp_conc = self.disp_conc_inicial.copy() #Produção Max Hora
         self.disp_usina = self.disp_usina_inicial.copy() #Produção Max Hora
 
-    # def arr_set_one(self, index):
-    #     self.binary_array[:] = 0
-    #     self.binary_array[index] = 1
 
     def __init__(self, unique_instance=False, seed=None):
         super(CustomizedEnv, self).__init__()
@@ -123,24 +117,23 @@ class CustomizedEnv(gymnasium.Env):
         size = int(SIZE) #int(2*TAMANHO)
         # Define action and observation space
         n_actions = 1
-        self.action_space = spaces.Discrete(4)
         #self.observation_space = spaces.Box(len(self.Lista0)*[tam]+len(self.Lista0)*[self.Dmax])
-        self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(4*size,), dtype=np.float64)
         load_data = Load_data()
         self.inital_data_ppo = load_data.load_simplified_data_ppo()
         self.data = load_data.load()
-        self.seed(seed)
         self.unique_instance = unique_instance
         if self.unique_instance: self.create_instance()
+        self.n_produtos_conc = len(self.prdt_conc)
+        self.n_produtos_usina = len(self.prdt_usina)
+        self.action_space = spaces.Discrete(self.n_produtos_conc+1)
+        self.observation_space = spaces.Box(low=-1.0, high=1.0, shape=(4*size*self.n_produtos_conc,), dtype=np.float64)
+        self.seed(seed)
         self.passo = 0
         self.iter = 0
         self.ultima_acao = None
         self.ultima_recompensa = None
         self.Agua = 1
         self.Polpa = 1
-        self.n_produtos_conc = len(self.prdt_conc)
-        self.n_produtos_usina = len(self.prdt_usina)
-
 
     def normalize_state(self, state):
 
@@ -154,9 +147,9 @@ class CustomizedEnv(gymnasium.Env):
         for i in range(2*SIZE*self.n_produtos_conc, 3*SIZE*self.n_produtos_conc):
           temp_state[i] = temp_state[i]/(self.MaxCon)
 
-        for i in range(3*SIZE*self.n_produtos_conc, len(temp_state)):
+        #TODO: mudar isso pra taxa alimentacao/consumo da usina
+        for i in range(3*SIZE*self.n_produtos_conc, 4*SIZE*self.n_produtos_conc):
           temp_state[i] = temp_state[i]/(self.MaxUbu)
-
 
         return np.clip(np.array(temp_state)*2 - 1, self.observation_space.low, self.observation_space.high)
 
@@ -173,90 +166,73 @@ class CustomizedEnv(gymnasium.Env):
         self.passo = 0
         self.nBatchsP = 0
         self.nBatchsA = 0
-        self.Agua = 1
-        self.Polpa = 1
+        self.Agua = 0
+        self.Polpa = 0
         self.status = -1
         self.ultima_acao = None
         self.ultima_recompensa = 0
         self.BombeamentoPolpa = [0]*SIZE_BOMBEAMENTO
-        # self.binary_array[:] = 0
         self.fo_value, self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa, self.data)
         for produto_conc in self.prdt_conc:
             self.state.append(self.estoque_eb06[produto_conc][0])
             self.state.append(self.estoque_ubu[produto_conc][0])
             self.state.append(self.prod_concentrador[produto_conc][0])
-            for produto_usina in self.prdt_usina:
-                self.state.append(self.prod_usina[produto_conc][produto_usina][0])
+            self.state.append(self.prod_usina[produto_conc][0])
         self.FO_Inicial = self.fo_value
         self.FO_Best = self.FO_Inicial
         return self.normalize_state(self.state), info
 
     def step(self, action):
         FIM = SIZE_BOMBEAMENTO-1
-        Erro = False
-        self.Agua = 1
-        self.Polpa = 1
+        self.Agua = 0
+        self.Polpa = 0
         self.actual_state = []
         if action >= 1:
           self.nBatchsP += 1
           self.nBatchsA = 0
-          # if self.nBatchsP + 1 > self.PolpaLs:
-          #   #recompensa = -100000000
-          #   Erro = True
-          # elif self.nBatchsA >0 and self.nBatchsA < self.AguaLi:
-          #   recompensa = -100000000
-          #   Erro = True
-          # if Erro == False:
-          #   recompensa = 1
-          #   self.nBatchsP += 1
-          #   self.nBatchsA = 0
 
         if action == 0:
           self.nBatchsA += 1
           self.nBatchsP = 0
-          # if self.nBatchsA + 1 > self.AguaLs:
-          #   recompensa = -100000000
-          #   Erro = True
-          # elif self.nBatchsP >0 and self.nBatchsP < self.PolpaLi:
-          #   recompensa = -100000000
-          #   Erro = True
-          # if Erro == False:
-          #   self.nBatchsP = 0
-          #   self.nBatchsA += 0
 
-        if action == 1 and (self.estoque_eb06['PRDT_C1'][self.passo]+self.prod_concentrador['PRDT_C1'][self.passo]-self.vazao_bombas_eb06<0):
+        #checa se ha polpa suficiente para bombear o produto escolhido na action
+        if action != 0 and self.estoque_eb06[self.prdt_conc[action-1]][self.passo]+(self.PolpaLi*(self.prod_concentrador[self.prdt_conc[action-1]][self.passo]-self.vazao_bombas_eb06))<0:
             self.Polpa = 0
-            self.Agua = 1
-        if action == 2 and (self.estoque_eb06['PRDT_C2'][self.passo]+self.prod_concentrador['PRDT_C2'][self.passo]-self.vazao_bombas_eb06<0):
-            self.Polpa = 0
-            self.Agua = 1
-        if action == 3 and (self.estoque_eb06['PRDT_C3'][self.passo]+self.prod_concentrador['PRDT_C3'][self.passo]-self.vazao_bombas_eb06<0):
-            self.Polpa = 0
-            self.Agua = 1
-        if action == 4 and (self.estoque_eb06['PRDT_C4'][self.passo]+self.prod_concentrador['PRDT_C4'][self.passo]-self.vazao_bombas_eb06<0):
-            self.Polpa = 0
-            self.Agua = 1
+        print(action)
+        #fixa o batch no tamanho minimo para apenas um produto:
+        if self.passo == 0:
+            self.BombeamentoPolpa[self.passo] = action
 
+        elif not self.nBatchsP >= self.PolpaLs and self.ultima_acao != 0:
+            action = self.ultima_acao
+            self.BombeamentoPolpa[self.passo] = action
+
+        self.passo += 1
+        #
+        # if not self.nBatchsP >= self.PolpaLs:
+        #     for i in range(self.passo, (self.passo+self.PolpaLi)):
+        #         if i < 25:
+        #             self.BombeamentoPolpa[i] = action
+        #     self.passo += self.PolpaLi
+        #     self.nBatchsP += self.PolpaLi
+
+        #verifica se os limites minimos e maximos de polpa e agua nao estao sendo extrapolados
         if self.nBatchsP >= self.PolpaLs or (self.nBatchsA < self.AguaLi and self.nBatchsA > 0):
-          self.Polpa = 0
-          self.Agua = 1
+            self.Polpa = 0
+            self.Agua = 1
         if self.nBatchsA >= self.AguaLs or (self.nBatchsP < self.PolpaLi and self.nBatchsP > 0):
-          self.Agua = 0
-          self.Polpa = 1
+            self.Agua = 0
+            self.Polpa = 1
 
-
-        self.BombeamentoPolpa[self.passo] = action
-        self.passo +=1
         terminou_episodio = bool(self.passo == FIM)
 
         self.FO_anterior = self.fo_value
         self.fo_value, self.estoque_eb06, self.estoque_ubu, self.prod_concentrador, self.prod_usina = self.evaluate(self.BombeamentoPolpa, self.data)
         for produto_conc in self.prdt_conc:
-            self.state.append(self.estoque_eb06[produto_conc][[self.passo]])
-            self.state.append(self.estoque_ubu[produto_conc][[self.passo]])
-            self.state.append(self.prod_concentrador[produto_conc][[self.passo]])
-            for produto_usina in self.prdt_usina:
-                self.state.append(self.prod_usina[produto_conc][produto_usina][[self.passo]])
+            self.actual_state.append(self.estoque_eb06[produto_conc][self.passo])
+            self.actual_state.append(self.estoque_ubu[produto_conc][self.passo])
+            self.actual_state.append(self.prod_concentrador[produto_conc][self.passo])
+            self.actual_state.append(self.prod_usina[produto_conc][self.passo])
 
         self.FO = self.fo_value
 
@@ -300,7 +276,9 @@ class CustomizedEnv(gymnasium.Env):
         self.action_space.seed(seed)
 
     def valid_action_mask(self):
-        self.mask= np.array([self.Agua, self.Polpa])
+        self.mask= np.array([self.Agua, self.Polpa, self.Polpa, self.Polpa])
+        # for i in range(0,self.n_produtos_conc+1):
+        #     self.mask = np.append(self.mask, i)
         return self.mask
 
 class RandomAgent():
@@ -328,7 +306,7 @@ def evaluate_results(model, env, seeds, render=True):
           action_masks = get_action_masks(env)
           #action, _ = model.predict(obs, deterministic=True)
           # print(obs)
-          # print(action)
+          print(action_masks)
           action, _ = model.predict(obs,  action_masks= action_masks, deterministic=True)
           obs, reward, done, truncated, info  = env.step(action)
           #obs, reward, done, tr, info = env.step(action)

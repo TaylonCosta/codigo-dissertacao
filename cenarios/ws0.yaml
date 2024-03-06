@@ -56,16 +56,16 @@ mineroduto:
   bombeamento_polpa_dm3: ['H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'PRDT_C', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'H20', 'PRDT_C']
   #bombeamento_matipo: [1300, 1300, 1300, 1300, 1300, 1300, 1300, 1300, 1300, 1300, 1300, 1300, 1300, 1300]
   bombeamento_matipo: {'d01': 1270, 'd02': 1270, 'd03': 1270, 'd04': 1270, 'd05': 1270, 'd06': 1270, 'd07': 1270, 'd08': 1270, 'd09': 1270, 'd10': 1270, 'd11': 1270, 'd12': 1270, 'd13': 1270, 'd14': 1270}
-  janela_min_bombeamento_polpa: 7
-  janela_max_bombeamento_polpa: 11
+  janela_min_bombeamento_polpa: 3
+  janela_max_bombeamento_polpa: 4
   fixar_janela_bombeamento: livre
   janela_fixa_bombeamento_polpa: 13
   bombeamento_restante_janela_anterior_polpa: 1
   bombeamento_restante_janela_anterior_agua: 0
   considerar_janela_final: False
 
-  janela_min_bombeamento_agua: 4
-  janela_max_bombeamento_agua: 7
+  janela_min_bombeamento_agua: 3
+  janela_max_bombeamento_agua: 4
   fixar_janela_bombeamento_agua: livre
   janela_fixa_bombeamento_agua: 6
   janela_para_fixar_bombeamento_agua: 168

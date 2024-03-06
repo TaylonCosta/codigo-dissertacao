@@ -187,28 +187,41 @@ class CustomizedEnv(gymnasium.Env):
         self.Agua = 0
         self.Polpa = 0
         self.actual_state = []
-        if action >= 1:
-          self.nBatchsP += 1
-          self.nBatchsA = 0
-
-        if action == 0:
-          self.nBatchsA += 1
-          self.nBatchsP = 0
+        # if action >= 1:
+        #   self.nBatchsP += 1
+        #   self.nBatchsA = 0
+        #
+        # if action == 0:
+        #   self.nBatchsA += 1
+        #   self.nBatchsP = 0
 
         #checa se ha polpa suficiente para bombear o produto escolhido na action
         if action != 0 and self.estoque_eb06[self.prdt_conc[action-1]][self.passo]+(self.PolpaLi*(self.prod_concentrador[self.prdt_conc[action-1]][self.passo]-self.vazao_bombas_eb06))<0:
             self.Polpa = 0
+
         print(action)
         #fixa o batch no tamanho minimo para apenas um produto:
-        if self.passo == 0:
-            self.BombeamentoPolpa[self.passo] = action
+        if not self.nBatchsP >= self.PolpaLs and action != 0:
+            if self.passo+self.PolpaLi <= 24:
+                for i in range(self.passo, (self.passo+self.PolpaLi)):
+                        self.BombeamentoPolpa[i] = action
+            else:
+                for i in range(self.passo, 24):
+                        self.BombeamentoPolpa[i] = action
+            self.passo += i
+            self.nBatchsP += i
+            self.nBatchsA = 0
 
-        elif not self.nBatchsP >= self.PolpaLs and self.ultima_acao != 0:
-            action = self.ultima_acao
-            self.BombeamentoPolpa[self.passo] = action
-
-        self.passo += 1
-        #
+        elif not self.nBatchsA >= self.AguaLs and action == 0:
+            if self.passo+self.AguaLi <= 24:
+                for i in range(self.passo, (self.passo+self.AguaLi)):
+                        self.BombeamentoPolpa[i] = action
+            else:
+                for i in range(self.passo, 24):
+                        self.BombeamentoPolpa[i] = action
+            self.passo += i
+            self.nBatchsA += i
+            self.nBatchsP = 0
         # if not self.nBatchsP >= self.PolpaLs:
         #     for i in range(self.passo, (self.passo+self.PolpaLi)):
         #         if i < 25:

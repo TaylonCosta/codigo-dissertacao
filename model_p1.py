@@ -252,14 +252,14 @@ class Model_p1():
                 )
 
         # Define o valor de estoque de EB06, por produto, da primeira hora
-        for produto in produtos_conc:
-            modelo += (
-                varEstoqueEB06[produto][horas_D14[0]]
-                    == estoque_eb06_d0[produto] +
-                    varProducaoVolume[produto][horas_D14[0]] -
-                    varBombeamentoPolpa[produto][horas_D14[0]]*parametros_mina['Vazão bombas - M3'][self.extrair_dia(horas_D14[0])],
-                f"rest_define_EstoqueEB06_{produto}_{horas_D14[0]}",
-            )
+        # for produto in produtos_conc:
+        #     modelo += (
+        #         varEstoqueEB06[produto][horas_D14[0]]
+        #             == estoque_eb06_d0[produto] +
+        #             varProducaoVolume[produto][horas_D14[0]] -
+        #             varBombeamentoPolpa[produto][horas_D14[0]]*parametros_mina['Vazão bombas - M3'][self.extrair_dia(horas_D14[0])],
+        #         f"rest_define_EstoqueEB06_{produto}_{horas_D14[0]}",
+        #     )
 
         #garante um produto por vez
         for hora in horas_D14:
@@ -351,17 +351,17 @@ class Model_p1():
                     f"rest_define_EstoquePolpaUbu_{produto}_{horas_D14[i]}",
                 )
             # Define o estoque de polpa em Ubu da primeira hora
-            modelo += (
-                varEstoquePolpaUbu[produto][horas_D14[0]] == estoque_polpa_ubu  +
-                                                    varPolpaUbu[produto][horas_D14[0]] *
-                                                        parametros_calculados['% Sólidos - EB06'][self.extrair_dia(horas_D14[0])] *
-                                                        parametros_ubu['Densid.'][self.extrair_dia(horas_D14[0])]
-                                                    - lpSum(varProducaoUbu[produto][produto_u][horas_D14[0]]
-                                                            for produto_u in produtos_usina)
-                                                    - varVolumePatio[produto][horas_D14[0]]
-                                                    + varRetornoPatio[produto][horas_D14[0]],
-                f"rest_define_EstoquePolpaUbu_{produto}_{horas_D14[0]}",
-            )
+            # modelo += (
+            #     varEstoquePolpaUbu[produto][horas_D14[0]] == estoque_polpa_ubu  +
+            #                                         varPolpaUbu[produto][horas_D14[0]] *
+            #                                             parametros_calculados['% Sólidos - EB06'][self.extrair_dia(horas_D14[0])] *
+            #                                             parametros_ubu['Densid.'][self.extrair_dia(horas_D14[0])]
+            #                                         - lpSum(varProducaoUbu[produto][produto_u][horas_D14[0]]
+            #                                                 for produto_u in produtos_usina)
+            #                                         - varVolumePatio[produto][horas_D14[0]]
+            #                                         + varRetornoPatio[produto][horas_D14[0]],
+            #     f"rest_define_EstoquePolpaUbu_{produto}_{horas_D14[0]}",
+            # )
 
         # Trata a taxa máxima de transferência (retorno) de material do pátio para a usina
         for hora in horas_D14:

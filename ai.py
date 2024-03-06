@@ -50,11 +50,10 @@ class Learning():
                         consumo_prod_ubu[produto][aux]+=resultados_modelo['variaveis']['Producao_Ubu_'+str(produto)+'_'+str(prdt_usina)+'_d01_h0'+str(aux+1)]
                     else:
                         consumo_prod_ubu[produto][aux]+=resultados_modelo['variaveis']['Producao_Ubu_'+str(produto)+'_'+str(prdt_usina)+'_d01_h'+str(aux+1)]
-
         fo_value = 0
         if status_modelo == -1:
             fo_value = -999999
         else:
-            fo_value = sum(prod_usina)
+                fo_value = resultados_modelo['solver']['valor_fo']
 
         return fo_value, estoque_eb06, estoque_ubu, prod_concentrador, consumo_prod_ubu

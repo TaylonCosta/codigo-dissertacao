@@ -202,46 +202,52 @@ class CustomizedEnv(gymnasium.Env):
         print(action)
         #fixa o batch no tamanho minimo para apenas um produto:
         if not self.nBatchsP >= self.PolpaLs and action != 0:
-            if self.passo+self.PolpaLi <= 24 and self.passo+self.PolpaLi <= self.PolpaLs:
+            if self.passo+self.PolpaLi <= 23 and self.nBatchsP+self.PolpaLi <= self.PolpaLs:
                 for i in range(self.passo, (self.passo+self.PolpaLi)):
                     self.BombeamentoPolpa[i] = action
-            elif self.passo+self.PolpaLi <= 24 and self.passo+self.PolpaLi >= self.PolpaLs:
-                for i in range(self.passo, self.PolpaLs):
+                    self.passo += 1
+                    self.nBatchsP += 1
+                self.Polpa = action
+                self.Agua = 0
+            elif self.passo+self.PolpaLi <= 23 and self.nBatchsP+self.PolpaLi >= self.PolpaLs:
+                for i in range(self.passo, (self.passo+(self.PolpaLs-self.PolpaLi))):
                     self.BombeamentoPolpa[i] = action
+                    self.passo += 1
+                    self.nBatchsP += 1
             elif self.passo+self.PolpaLi >= self.PolpaLs:
-                for i in range(self.passo, 24):
+                for i in range(self.passo, 23):
                     self.BombeamentoPolpa[i] = action
-            self.passo += i+1
-            self.nBatchsP += i+1
+                    self.passo += 1
+                    self.nBatchsP += 1
             self.nBatchsA = 0
 
         elif not self.nBatchsA >= self.AguaLs and action == 0:
-            if self.passo+self.AguaLi <= 24 and self.passo+self.AguaLi <= self.AguaLs:
+            if self.passo+self.AguaLi <= 23 and self.nBatchsA+self.AguaLi <= self.AguaLs:
                 for i in range(self.passo, (self.passo+self.AguaLi)):
                     self.BombeamentoPolpa[i] = action
-            elif self.passo+self.AguaLi <= 24 and self.passo+self.AguaLi >= self.AguaLs:
-                for i in range(self.passo, self.AguaLs):
+                    self.passo += 1
+                    self.nBatchsA += 1
+                self.Polpa = 0
+                self.Agua = 1
+            elif self.passo+self.AguaLi <= 23 and self.nBatchsA+self.AguaLi >= self.AguaLs:
+                for i in range(self.passo, (self.passo+(self.AguaLs-self.AguaLi))):
                     self.BombeamentoPolpa[i] = action
+                    self.passo += 1
+                    self.nBatchsA += 1
             elif self.passo+self.AguaLi <= self.AguaLs:
-                for i in range(self.passo, 24):
+                for i in range(self.passo, 23):
                     self.BombeamentoPolpa[i] = action
-            self.passo += i+1
-            self.nBatchsA += i+1
+                    self.passo += 1
+                    self.nBatchsA += 1
             self.nBatchsP = 0
-        # if not self.nBatchsP >= self.PolpaLs:
-        #     for i in range(self.passo, (self.passo+self.PolpaLi)):
-        #         if i < 25:
-        #             self.BombeamentoPolpa[i] = action
-        #     self.passo += self.PolpaLi
-        #     self.nBatchsP += self.PolpaLi
-
-        #verifica se os limites minimos e maximos de polpa e agua nao estao sendo extrapolados
+   
+   
         if self.nBatchsP >= self.PolpaLs or (self.nBatchsA < self.AguaLi and self.nBatchsA > 0):
             self.Polpa = 0
             self.Agua = 1
         if self.nBatchsA >= self.AguaLs or (self.nBatchsP < self.PolpaLi and self.nBatchsP > 0):
             self.Agua = 0
-            self.Polpa = 1
+            # self.Polpa = 1
 
         terminou_episodio = bool(self.passo == FIM)
 

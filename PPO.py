@@ -133,7 +133,7 @@ class CustomizedEnv(gymnasium.Env):
         self.ultima_acao = None
         self.ultima_recompensa = None
         self.Agua = 1
-        self.Polpa = 1
+        self.Polpa = [1]*len(self.prdt_conc)
 
     def normalize_state(self, state):
 
@@ -147,7 +147,6 @@ class CustomizedEnv(gymnasium.Env):
         for i in range(2*SIZE*self.n_produtos_conc, 3*SIZE*self.n_produtos_conc):
           temp_state[i] = temp_state[i]/(self.MaxCon)
 
-        #TODO: mudar isso pra taxa alimentacao/consumo da usina
         for i in range(3*SIZE*self.n_produtos_conc, 4*SIZE*self.n_produtos_conc):
           temp_state[i] = temp_state[i]/(self.MaxUbu)
 
@@ -167,7 +166,7 @@ class CustomizedEnv(gymnasium.Env):
         self.nBatchsP = 0
         self.nBatchsA = 0
         self.Agua = 0
-        self.Polpa = 0
+        self.Polpa = [0]*len(self.prdt_conc)
         self.status = -1
         self.ultima_acao = None
         self.ultima_recompensa = 0
@@ -184,8 +183,8 @@ class CustomizedEnv(gymnasium.Env):
 
     def step(self, action):
         FIM = SIZE_BOMBEAMENTO-1
-        self.Agua = 0
-        self.Polpa = 0
+        self.Agua = 1
+        self.Polpa = [1]*len(self.prdt_conc)
         self.actual_state = []
         # if action >= 1:
         #   self.nBatchsP += 1
@@ -197,7 +196,7 @@ class CustomizedEnv(gymnasium.Env):
 
         #checa se ha polpa suficiente para bombear o produto escolhido na action
         if action != 0 and self.estoque_eb06[self.prdt_conc[action-1]][self.passo]+(self.PolpaLi*(self.prod_concentrador[self.prdt_conc[action-1]][self.passo]-self.vazao_bombas_eb06))<0:
-            self.Polpa = 0
+            self.Polpa[action-1] = 0
 
         print(action)
         #fixa o batch no tamanho minimo para apenas um produto:
@@ -207,18 +206,21 @@ class CustomizedEnv(gymnasium.Env):
                     self.BombeamentoPolpa[i] = action
                     self.passo += 1
                     self.nBatchsP += 1
-                self.Polpa = action
-                self.Agua = 0
-            elif self.passo+self.PolpaLi <= 23 and self.nBatchsP+self.PolpaLi >= self.PolpaLs:
-                for i in range(self.passo, (self.passo+(self.PolpaLs-self.PolpaLi))):
-                    self.BombeamentoPolpa[i] = action
-                    self.passo += 1
-                    self.nBatchsP += 1
-            elif self.passo+self.PolpaLi >= self.PolpaLs:
-                for i in range(self.passo, 23):
-                    self.BombeamentoPolpa[i] = action
-                    self.passo += 1
-                    self.nBatchsP += 1
+                    # self.Polpa = 1
+                    # self.Agua = 0
+            elif self.nBatchsP+self.PolpaLi >= self.PolpaLs:
+                # for i in range(self.passo, (self.passo+(self.PolpaLs-self.PolpaLi))):
+                self.BombeamentoPolpa[self.passo] = action
+                self.passo += 1
+                self.nBatchsP += 1
+            # elif self.passo+self.PolpaLi >= self.PolpaLs:
+            #     for i in range(self.passo, 23):
+            #         self.BombeamentoPolpa[i] = action
+            #         self.passo += 1
+            #         self.nBatchsP += 1
+            self.Polpa = [0]*len(self.prdt_conc)
+            self.Polpa[action-1] = 1
+            self.Agua = 0
             self.nBatchsA = 0
 
         elif not self.nBatchsA >= self.AguaLs and action == 0:
@@ -227,27 +229,29 @@ class CustomizedEnv(gymnasium.Env):
                     self.BombeamentoPolpa[i] = action
                     self.passo += 1
                     self.nBatchsA += 1
-                self.Polpa = 0
-                self.Agua = 1
-            elif self.passo+self.AguaLi <= 23 and self.nBatchsA+self.AguaLi >= self.AguaLs:
-                for i in range(self.passo, (self.passo+(self.AguaLs-self.AguaLi))):
-                    self.BombeamentoPolpa[i] = action
-                    self.passo += 1
-                    self.nBatchsA += 1
-            elif self.passo+self.AguaLi <= self.AguaLs:
-                for i in range(self.passo, 23):
-                    self.BombeamentoPolpa[i] = action
-                    self.passo += 1
-                    self.nBatchsA += 1
-            self.nBatchsP = 0
-   
-   
-        if self.nBatchsP >= self.PolpaLs or (self.nBatchsA < self.AguaLi and self.nBatchsA > 0):
-            self.Polpa = 0
+                # self.Polpa = 0
+                # self.Agua = 1
+            elif self.nBatchsA+self.AguaLi >= self.AguaLs:
+                # for i in range(self.passo, (self.passo+(self.AguaLs-self.AguaLi))):
+                self.BombeamentoPolpa[self.passo] = action
+                self.passo += 1
+                self.nBatchsA += 1
+            self.Polpa = [0]*len(self.prdt_conc)
             self.Agua = 1
-        if self.nBatchsA >= self.AguaLs or (self.nBatchsP < self.PolpaLi and self.nBatchsP > 0):
-            self.Agua = 0
-            # self.Polpa = 1
+            # elif self.passo+self.AguaLi <= self.AguaLs:
+            #     for i in range(self.passo, 23):
+            #         self.BombeamentoPolpa[i] = action
+            #         self.passo += 1
+            #         self.nBatchsA += 1
+            self.nBatchsP = 0
+
+
+        # if self.nBatchsP >= self.PolpaLs or (self.nBatchsA < self.AguaLi and self.nBatchsA > 0):
+        #     self.Polpa = 0
+        #     self.Agua = 1
+        # if self.nBatchsA >= self.AguaLs or (self.nBatchsP < self.PolpaLi and self.nBatchsP > 0):
+        #     self.Agua = 0
+        #     self.Polpa = 1
 
         terminou_episodio = bool(self.passo == FIM)
 
@@ -282,12 +286,12 @@ class CustomizedEnv(gymnasium.Env):
 
     def render(self, mode='console'):
         if mode != 'console':
-          raise NotImplementedError()
+            raise NotImplementedError()
 
         if (self.passo > 0):
-          print(f'Passo {self.passo}')
+            print(f'Passo {self.passo}')
         else:
-          print('Instância:')
+            print('Instância:')
 
         print(f'\tÚltima ação: {self.ultima_acao}, FO: {self.FO}')
         print(f'\tLista: {self.BombeamentoPolpa}')
@@ -301,9 +305,10 @@ class CustomizedEnv(gymnasium.Env):
         self.action_space.seed(seed)
 
     def valid_action_mask(self):
-        self.mask= np.array([self.Agua, self.Polpa, self.Polpa, self.Polpa])
-        # for i in range(0,self.n_produtos_conc+1):
-        #     self.mask = np.append(self.mask, i)
+        # self.mask= np.array([0, 0, 1, 0])
+        self.mask = np.array([self.Agua])
+        for i in range(0,len(self.Polpa)):
+            self.mask = np.append(self.mask, self.Polpa[i])
         return self.mask
 
 class RandomAgent():

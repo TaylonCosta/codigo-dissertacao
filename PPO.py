@@ -200,58 +200,43 @@ class CustomizedEnv(gymnasium.Env):
 
         print(action)
         #fixa o batch no tamanho minimo para apenas um produto:
-        if not self.nBatchsP >= self.PolpaLs and action != 0:
+        if self.nBatchsP == 0 and action != 0:
             if self.passo+self.PolpaLi <= 23 and self.nBatchsP+self.PolpaLi <= self.PolpaLs:
                 for i in range(self.passo, (self.passo+self.PolpaLi)):
                     self.BombeamentoPolpa[i] = action
                     self.passo += 1
                     self.nBatchsP += 1
-                    # self.Polpa = 1
-                    # self.Agua = 0
-            elif self.nBatchsP+self.PolpaLi >= self.PolpaLs:
-                # for i in range(self.passo, (self.passo+(self.PolpaLs-self.PolpaLi))):
-                self.BombeamentoPolpa[self.passo] = action
-                self.passo += 1
-                self.nBatchsP += 1
-            # elif self.passo+self.PolpaLi >= self.PolpaLs:
-            #     for i in range(self.passo, 23):
-            #         self.BombeamentoPolpa[i] = action
-            #         self.passo += 1
-            #         self.nBatchsP += 1
-            self.Polpa = [0]*len(self.prdt_conc)
-            self.Polpa[action-1] = 1
-            self.Agua = 0
-            self.nBatchsA = 0
 
-        elif not self.nBatchsA >= self.AguaLs and action == 0:
+        elif self.nBatchsA == 0 and action == 0:
             if self.passo+self.AguaLi <= 23 and self.nBatchsA+self.AguaLi <= self.AguaLs:
                 for i in range(self.passo, (self.passo+self.AguaLi)):
                     self.BombeamentoPolpa[i] = action
                     self.passo += 1
                     self.nBatchsA += 1
-                # self.Polpa = 0
-                # self.Agua = 1
-            elif self.nBatchsA+self.AguaLi >= self.AguaLs:
-                # for i in range(self.passo, (self.passo+(self.AguaLs-self.AguaLi))):
-                self.BombeamentoPolpa[self.passo] = action
-                self.passo += 1
-                self.nBatchsA += 1
-            self.Polpa = [0]*len(self.prdt_conc)
+
+        elif self.ultima_acao != 0 and self.nBatchsP >= self.PolpaLi and self.nBatchsP < self.PolpaLs:
+            self.BombeamentoPolpa[self.passo] = action
             self.Agua = 1
-            # elif self.passo+self.AguaLi <= self.AguaLs:
-            #     for i in range(self.passo, 23):
-            #         self.BombeamentoPolpa[i] = action
-            #         self.passo += 1
-            #         self.nBatchsA += 1
+            self.Polpa = [0]*len(self.prdt_conc)
+            self.Polpa[action-1] = 1
+            self.passo += 1
+            self.nBatchsP += 1
+            self.nBatchsA = 0
+
+        elif self.ultima_acao == 0 and self.nBatchsA >= self.AguaLi and self.nBatchsA < self.AguaLs:
+            self.BombeamentoPolpa[self.passo] = action
+            self.Agua = 1
+            self.Polpa = [1]*len(self.prdt_conc)
+            self.passo += 1
+            self.nBatchsA += 1
             self.nBatchsP = 0
 
-
-        # if self.nBatchsP >= self.PolpaLs or (self.nBatchsA < self.AguaLi and self.nBatchsA > 0):
-        #     self.Polpa = 0
-        #     self.Agua = 1
-        # if self.nBatchsA >= self.AguaLs or (self.nBatchsP < self.PolpaLi and self.nBatchsP > 0):
-        #     self.Agua = 0
-        #     self.Polpa = 1
+        if self.nBatchsP >= self.PolpaLs or (self.nBatchsA < self.AguaLi and self.nBatchsA > 0):
+            self.Polpa = [0]*len(self.prdt_conc)
+            self.Agua = 1
+        if self.nBatchsA >= self.AguaLs or (self.nBatchsP < self.PolpaLi and self.nBatchsP > 0):
+            self.Agua = 0
+            self.Polpa = [1]*len(self.prdt_conc)
 
         terminou_episodio = bool(self.passo == FIM)
 

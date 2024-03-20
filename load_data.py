@@ -75,7 +75,8 @@ class Load_data:
                                         disponibilidade_britagem[d]/100 *
                                         utilizacao_britagem[d]/100
                                 for d in range(len(dias))}
-
+        print('--------------------------')
+        print(taxa_producao_britagem)
         # Mina
         campanha_c3 = cenario['mina']['campanha']
         produtos_mina = set()
@@ -309,6 +310,7 @@ class Load_data:
         # estoque_eb6_d0 = ws["C5"].value
         #estoque_polpa_ubu = ['estoque_inicial_polpa_ubu']
 
+        estoque_polpa_ubu = cenario['usina']['estoque_inicial_polpa_ubu']
         # configuração das linhas onde se encontram os parâmetros da aba MINERODUTO-UBU
         conf_parametros_mineroduto_ubu = {
             'Capacidade EB06': 7,
@@ -423,16 +425,17 @@ class Load_data:
         # Guarda os índices dos navios
         navios = []
 
+        taxa_carregamento = cenario['porto']['taxa_carregamento']
         # Esse trecho guarda as taxas de carregamento por navio e, além disso, altera os nomes dos navios
         # pois eles podem se repetir, então é necessário adicionar um sufixo para diferenciá-los
-        parametros_navios['Taxa de Carreg.'] = {}
-        for idx in range(len(parametros_navios['NAVIOS'])):
-            navio = parametros_navios['NAVIOS'][idx] + '-L' + str(idx+2)
-            navios.append(navio)
-            parametros_navios['Taxa de Carreg.'][navio] = taxa_carreg_por_navio[parametros_navios['NAVIOS'][idx]]
-            for parametro in conf_parametros_navios:
-                parametros_navios[parametro][navio] = parametros_navios[parametro][idx]
-                del parametros_navios[parametro][idx]
+        # parametros_navios['Taxa de Carreg.'] = {}
+        # for idx in range(len(parametros_navios['NAVIOS'])):
+        #     navio = parametros_navios['NAVIOS'][idx] + '-L' + str(idx+2)
+        #     navios.append(navio)
+        #     parametros_navios['Taxa de Carreg.'][navio] = taxa_carreg_por_navio[parametros_navios['NAVIOS'][idx]]
+        #     for parametro in conf_parametros_navios:
+        #         parametros_navios[parametro][navio] = parametros_navios[parametro][idx]
+        #         del parametros_navios[parametro][idx]
 
         # Guarda os índices dos navios com data-real até D14 (ou seja não inclui os navios D+14)
         navios_ate_d14 = []
@@ -450,9 +453,9 @@ class Load_data:
 
         # PORTO
 
-        produtos_de_cada_navio = {navio:{produto_usina:0 for produto_usina in produtos_usina} for navio in navios}
-        for navio, produto_usina in cenario['porto']['produtos_de_cada_navio']:
-            produtos_de_cada_navio[navio][produto_usina] = 1
+        # produtos_de_cada_navio = {navio:{produto_usina:0 for produto_usina in produtos_usina} for navio in navios}
+        # for navio, produto_usina in cenario['porto']['produtos_de_cada_navio'][0]:
+        #     produtos_de_cada_navio[navio][produto_usina] = 1
 
         print(f'[OK]\nDefinindo parâmetros calculados...   ', end='')
 
@@ -503,6 +506,7 @@ class Load_data:
                 parametros_calculados['Bombeamento Acumulado Agua final semana anterior'] += 1;
             else:
                 break;
+        min_producao_produtos_ubu = cenario['porto']['min_producao_produtos_ubu']
 
         data = {'horas_D14': horas_D14, 'produtos_conc': produtos_conc, 'horas_Dm3_D14': horas_Dm3_D14, 'de_para_produtos_mina_conc': de_para_produtos_mina_conc,
                 'min_estoque_pulmao_concentrador': min_estoque_pulmao_concentrador, 'max_estoque_pulmao_concentrador': max_estoque_pulmao_concentrador,
@@ -516,9 +520,8 @@ class Load_data:
                 'max_estoque_polpa_ubu': max_estoque_polpa_ubu, 'max_taxa_envio_patio': max_taxa_envio_patio, 'max_taxa_retorno_patio_usina': max_taxa_retorno_patio_usina,
                 'min_estoque_patio_usina': min_estoque_patio_usina, 'max_estoque_patio_usina': max_estoque_patio_usina, 'estoque_polpa_ubu': estoque_ubu_inicial,
                 'estoque_inicial_patio_usina': estoque_inicial_patio_usina, 'fator_limite_excesso_patio': fator_limite_excesso_patio,
-                'parametros_navios': parametros_navios, 'capacidade_carreg_porto_por_dia': capacidade_carreg_porto_por_dia, 'navios_ate_d14': navios_ate_d14,
-                'produtos_de_cada_navio': produtos_de_cada_navio, 'estoque_produto_patio_d0': estoque_produto_patio_d0, 'parametros_mineroduto_md3': parametros_mineroduto_md3,
-                'horas_Dm3': horas_Dm3, 'navios': navios, 'vazao_bombas': vazao_bombas,
+                 'capacidade_carreg__por_dia': capacidade_carreg_porto_por_dia, 'navios_ate_d14': navios_ate_d14,
+                'horas_Dm3': horas_Dm3, 'navios': navios, 'vazao_bombas': vazao_bombas, 'min_producao_produtos_ubu': min_producao_produtos_ubu
                 }
 
         return cenario, solver, data

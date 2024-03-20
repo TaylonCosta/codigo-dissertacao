@@ -18,13 +18,13 @@ from datetime import datetime
 
 UNIQUE_INSTANCE = True
 UNIQUE_INSTANCE_SEED = 51
-TRAINING_STEPS = 2
-USAR_LOG_TENSORBOARD = False # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
+TRAINING_STEPS = 250000
+USAR_LOG_TENSORBOARD = True # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
 SEMENTE = 5
 RANDOM = False
 SIZE = 1
 SIZE_BOMBEAMENTO = 24
-SAVE = False
+SAVE = True
 LOAD = False
 
 
@@ -223,6 +223,7 @@ class CustomizedEnv(gymnasium.Env):
           self.Polpa = [1]*len(self.prdt_conc)
           self.nBatchsP = 0
 
+         #caso o batch ja tenha iniciado, o ppo escolhe entre o bacth anterior ou muda pra agua
         elif action != 0 and self.nBatchsP >= self.PolpaLi and self.nBatchsP < self.PolpaLs:
             self.BombeamentoPolpa[self.passo] = action
             self.Agua = 1
@@ -328,12 +329,9 @@ def evaluate_results(model, env, seeds, render=True):
         while not done:
           env = ActionMasker(env, mask_fn)
           action_masks = get_action_masks(env)
-          #action, _ = model.predict(obs, deterministic=True)
-          # print(obs)
           print(action_masks)
           action, _ = model.predict(obs,  action_masks= action_masks, deterministic=True)
           obs, reward, done, truncated, info  = env.step(action)
-          #obs, reward, done, tr, info = env.step(action)
           if render: env.render()
 
     results.append({'FO_Best': env.FO_Best, 'FO_inicial': env.FO_Inicial})

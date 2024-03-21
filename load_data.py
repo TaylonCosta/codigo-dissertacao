@@ -163,6 +163,13 @@ class Load_data:
 
         fator_limite_excesso_patio = cenario['mineroduto']['fator_limite_excesso_patio']
         vazao_bombas = cenario['mineroduto']['vazao_bombas']
+        lim_min_campanha = cenario['mina']['lim_min_campanha']
+        lim_max_campanha = cenario['mina']['lim_max_campanha']
+        lim_acum_campanha = cenario['mina']['lim_acum_campanha']
+
+        lim_min_janela = cenario['mina']['lim_min_janela']
+        lim_max_janela = cenario['mina']['lim_max_janela']
+        lim_acum_janela = cenario['mina']['lim_acum_janela']
 
 
         # Paradas de manutenção
@@ -506,7 +513,16 @@ class Load_data:
                 parametros_calculados['Bombeamento Acumulado Agua final semana anterior'] += 1;
             else:
                 break;
+        
         min_producao_produtos_ubu = cenario['porto']['min_producao_produtos_ubu']
+        AguaLi = cenario['mineroduto']['janela_min_bombeamento_agua']
+        AguaLs = cenario['mineroduto']['janela_max_bombeamento_agua']
+        PolpaLi = cenario['mineroduto']['janela_min_bombeamento_polpa']
+        PolpaLs = cenario['mineroduto']['janela_max_bombeamento_polpa']
+        carga_navios = cenario['porto']['carga_navios']
+        taxa_carreg_navios = cenario['porto']['taxa_carreg_navios']
+        estoque_produto_patio = cenario['porto']['estoque_produto_patio']
+        capacidade_carreg_porto_por_dia = cenario['porto']['capacidade_carreg_porto_por_dia']
 
         data = {'horas_D14': horas_D14, 'produtos_conc': produtos_conc, 'horas_Dm3_D14': horas_Dm3_D14, 'de_para_produtos_mina_conc': de_para_produtos_mina_conc,
                 'min_estoque_pulmao_concentrador': min_estoque_pulmao_concentrador, 'max_estoque_pulmao_concentrador': max_estoque_pulmao_concentrador,
@@ -520,8 +536,11 @@ class Load_data:
                 'max_estoque_polpa_ubu': max_estoque_polpa_ubu, 'max_taxa_envio_patio': max_taxa_envio_patio, 'max_taxa_retorno_patio_usina': max_taxa_retorno_patio_usina,
                 'min_estoque_patio_usina': min_estoque_patio_usina, 'max_estoque_patio_usina': max_estoque_patio_usina, 'estoque_polpa_ubu': estoque_ubu_inicial,
                 'estoque_inicial_patio_usina': estoque_inicial_patio_usina, 'fator_limite_excesso_patio': fator_limite_excesso_patio,
-                 'capacidade_carreg__por_dia': capacidade_carreg_porto_por_dia, 'navios_ate_d14': navios_ate_d14,
-                'horas_Dm3': horas_Dm3, 'navios': navios, 'vazao_bombas': vazao_bombas, 'min_producao_produtos_ubu': min_producao_produtos_ubu
+                'capacidade_carreg__por_dia': capacidade_carreg_porto_por_dia, 'navios_ate_d14': navios_ate_d14,
+                'horas_Dm3': horas_Dm3, 'navios': navios, 'vazao_bombas': vazao_bombas, 'min_producao_produtos_ubu': min_producao_produtos_ubu, lim_min_campanha:'lim_min_campanha',
+                'lim_max_campanha': lim_max_campanha, 'lim_acum_campanha': lim_acum_campanha, lim_min_janela: lim_min_janela, 'lim_max_janela':lim_max_janela,
+                'lim_acum_janela':lim_acum_janela, 'AguaLi': AguaLi, 'AguaLs': AguaLs, 'PolpaLi': PolpaLi, 'PolpaLs': PolpaLs, 'carga_navios': carga_navios, 
+                'taxa_carreg_navios': taxa_carreg_navios, 'estoque_produto_patio': estoque_produto_patio, 'capacidade_carreg_porto_por_dia': capacidade_carreg_porto_por_dia
                 }
 
         return cenario, solver, data

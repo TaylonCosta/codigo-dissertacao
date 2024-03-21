@@ -8,6 +8,12 @@ geral:
   timeLimit: 120
 
 mina:
+  lim_min_campanha: {"PRDT_C1":27000, "PRDT_C2":27000, "PRDT_C3":27000, "PRDT_U1":40000, "PRDT_U2":40000, "PRDT_U3":40000, "PRDT_U4":40000}
+  lim_max_campanha: {"PRDT_C1":840000, "PRDT_C2":840000, "PRDT_C3":840000, "PRDT_U1":840000, "PRDT_U2":840000, "PRDT_U3":840000, "PRDT_U4":840000}
+  lim_acum_campanha: {"PRDT_C1":0, "PRDT_C2":0, "PRDT_C3":0, "PRDT_U1":0, "PRDT_U2":0, "PRDT_U3":0, "PRDT_U4":0}
+  lim_min_janela: {"PRDT_C1":0, "PRDT_C2":0, "PRDT_C3":0, "PRDT_U1":0, "PRDT_U2":0, "PRDT_U3":0, "PRDT_U4":0}
+  lim_max_janela: {"PRDT_C1":400, "PRDT_C2":400, "PRDT_C3":400, "PRDT_U1":400, "PRDT_U2":400, "PRDT_U3":400, "PRDT_U4":400}
+  lim_acum_janela: {"PRDT_C1":0, "PRDT_C2":0, "PRDT_C3":0, "PRDT_U1":0, "PRDT_U2":0, "PRDT_U3":0, "PRDT_U4":0}
   campanha: [["PRDT1", "d01_h01"]]
   # campanha_c3: [["RLS", "d01_h01"], ["RNS", "d02_h01"], ["RLS", "d03_h01"], ["RNS", "d04_h01"], ["RLS", "d05_h01"], ["RNS", "d06_h01"], ["RLS", "d07_h01"]]
   #taxa_alimentacao_britagem: [3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000]
@@ -96,6 +102,13 @@ porto:
   produtos_de_cada_navio: [['EZDK-L2', 'PRDT_U'],
                            ['ACINDAR-L3', 'PRDT_U'],
                            ['NUCOR-L5', 'PRDT_U']]
+  taxa_carreg_navios: [['EZDK-L2', '3200'],
+                      ['ACINDAR-L3', '4000'],
+                      ['NUCOR-L5', '4500']]
+  carga_navios: [['EZDK-L2', '8000'],
+                ['ACINDAR-L3', '25000'],
+                ['NUCOR-L5', '8000']]
+  
 
 
 # {'dm-3_h01': 0, 'dm-3_h02': 0, 'dm-3_h03': 0, 'dm-3_h04': 0, 'dm-3_h05': 0, 'dm-3_h06': 0, 'dm-3_h07': 0,

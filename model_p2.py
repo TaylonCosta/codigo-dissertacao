@@ -22,7 +22,7 @@ class Model_p2():
             contador += 1
         return f"{nome_base_arquivo}_{contador}.json"
 
-    def modelo(self, cenario, solver, data, varBombeamentoPolpaPPO):
+    def modelo(self, solver, data, varBombeamentoPolpaPPO=None):
 
         # variaveis utilizadas pelo modelo
         horas_D14 = data['horas_D14']
@@ -59,24 +59,28 @@ class Model_p2():
         estoque_polpa_ubu = data['estoque_polpa_ubu']
         estoque_inicial_patio_usina = data['estoque_inicial_patio_usina']
         fator_limite_excesso_patio = data['fator_limite_excesso_patio']
-        min_producao_produtos_ubu = data['min_producao_produtos_ubu']
         lim_min_campanha = data['lim_min_campanha']
         lim_max_campanha = data['lim_max_campanha']
         lim_acum_campanha = data['lim_acum_campanha']
         lim_min_janela = data['lim_min_janela']
         lim_max_janela = data['lim_max_janela']
         lim_acum_janela = data['lim_acum_janela']
-        AguaLi = data['janela_min_bombeamento_agua']
-        AguaLs = data['janela_max_bombeamento_agua']
-        PolpaLi = data['janela_min_bombeamento_polpa']
-        PolpaLs = data['janela_max_bombeamento_polpa']
+        AguaLi = data['AguaLi']
+        AguaLs = data['AguaLs']
+        PolpaLi = data['PolpaLi']
+        PolpaLs = data['PolpaLs']
         navios = data['navios']
         navios_ate_d14 = data['navios_ate_d14']
         taxa_carreg_navios = data['taxa_carreg_navios']
         carga_navios = data['carga_navios']
         estoque_produto_patio = data['estoque_produto_patio']
         capacidade_carreg_porto_por_dia = data['capacidade_carreg_porto_por_dia']
-
+        produtos_navio = data['produtos_navio']
+        capacidade_patio_porto_min = data['capacidade_patio_porto_min']
+        capacidade_patio_porto_max = data['capacidade_patio_porto_max']
+        data_chegada_navio = data['data_chegada_navio']
+        perc_solidos = data['perc_solidos']
+        densidade = data['densidade']
 
         dias = data['dias']
         args = data['args']
@@ -350,7 +354,7 @@ class Model_p2():
                 #TODO: olha aqui
                 varPuxada[hora] == lpSum([varTaxaAlim[produto][hora] for produto in produtos_conc]) *
                                 parametros_mina['DF - C3'][self.extrair_dia(hora)] *
-                                parametros['gerais']['UF_C3'][extrair_dia(hora)] *
+                                 parametros_mina['UD - C3'][self.extrair_dia(hora)] *
                                 (1-parametros_mina['Umidade - C3'][self.extrair_dia(hora)]),
                 f"rest_define_Puxada_{hora}",
             )
@@ -375,8 +379,8 @@ class Model_p2():
             for hora in horas_D14:
                 modelo += (
                     varProducaoVolume[produto][hora]
-                        == varProducao[produto][hora] * (1/parametros_calculados['% Sólidos - EB06'])
-                                                    * (1/parametros_calculados['Densidade Polpa - EB06']),
+                        == varProducao[produto][hora] * (1/perc_solidos)
+                                                    * (1/densidade),
                     f"rest_define_ProducaoVolume_{produto}_{hora}",
                 )
 
@@ -400,7 +404,7 @@ class Model_p2():
         # Indica o estoque EB06, por hora
         varEstoqueEB06 = LpVariable.dicts("EB06_Estoque", (produtos_conc, horas_D14), 0, None, LpContinuous)
 
-        if 1:
+        if varBombeamentoPolpaPPO:
             for produto in produtos_conc:
                 for horas in horas_D14[0:24]:
                     if varBombeamentoPolpaPPO[produto][horas] == 0 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
@@ -408,11 +412,10 @@ class Model_p2():
                     if varBombeamentoPolpaPPO[produto][horas] == 1 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
                         modelo += (varBombeamentoPolpa[produto][horas] >=1, f"rest_fixado2_{produto}_{horas}")
 
-        elif not (args.heuristica_relax_and_fix or args.heuristica_otim_partes):
-            varBombeamentoPolpa = LpVariable.dicts("Mineroduto_Bombeamento_Polpa_EB06", (produtos_conc, horas_Dm3_D14), 0, 1, LpInteger)
+        elif not (args.relax_and_fix or args.opt_partes):
+            varBombeamentoPolpa = LpVariable.dicts("Mineroduto_Bombeamento_Polpa_EB06", (produtos_conc, horas_D14), 0, 1, LpInteger)
         else: # Se for rodar a heurística, a variável é relaxada
-            varBombeamentoPolpa = LpVariable.dicts("Mineroduto_Bombeamento_Polpa_EB06", (produtos_conc, horas_Dm3_D14), 0, 1, LpContinuous)
-
+            varBombeamentoPolpa = LpVariable.dicts("Mineroduto_Bombeamento_Polpa_EB06", (produtos_conc, horas_D14), 0, 1, LpContinuous)
 
 
         # Restrição de capacidade do estoque EB06
@@ -1002,7 +1005,7 @@ class Model_p2():
                 )
                 modelo += (
                     varProdSemIncorpAcumulada[produto_usina][hora] <=
-                        lim_max_campanha[produto_usina]['max'],
+                        lim_max_campanha[produto_usina],
                         f"rest_limiteMaxCampanhaPelot_{produto_usina}_{hora}",
                 )
 
@@ -1083,8 +1086,8 @@ class Model_p2():
                 modelo += (
                     varEstoquePolpaUbu[produto][horas_D14[i]] == varEstoquePolpaUbu[produto][horas_D14[i-1]]
                                                                 + varPolpaUbu[produto][horas_D14[i]] *
-                                                                    parametros_calculados['% Sólidos - EB06'][self.extrair_dia(horas_D14[i])] *
-                                                                    parametros_ubu['Densid.'][self.extrair_dia(horas_D14[i])]
+                                                                    perc_solidos *
+                                                                    densidade
                                                                 - lpSum(varProducaoUbu[produto][produto_u][horas_D14[i]]
                                                                         for produto_u in produtos_usina)
                                                                 - varVolumePraca[produto][horas_D14[i]]
@@ -1095,8 +1098,8 @@ class Model_p2():
             modelo += (
                 varEstoquePolpaUbu[produto][horas_D14[0]] == estoque_polpa_ubu[produto]  +
                                                     varPolpaUbu[produto][horas_D14[0]] *
-                                                        parametros_calculados['% Sólidos - EB06'][self.extrair_dia(horas_D14[0])] *
-                                                        parametros_ubu['Densid.'][self.extrair_dia(horas_D14[0])]
+                                                        perc_solidos*
+                                                        densidade
                                                     - lpSum(varProducaoUbu[produto][produto_u][horas_D14[0]]
                                                             for produto_u in produtos_usina)
                                                     - varVolumePraca[produto][horas_D14[0]]
@@ -1195,7 +1198,7 @@ class Model_p2():
 
         # Indica o estoque de produto no pátio de Ubu, por hora
         varEstoqueProdutoPatio = LpVariable.dicts("Porto_Estoque_Patio", (produtos_usina, horas_D14),
-                                                parametros['capacidades']['Patio_Porto']['min'], parametros['capacidades']['Patio_Porto']['max'],
+                                                capacidade_patio_porto_min, capacidade_patio_porto_max,
                                                 LpContinuous)
 
         for navio in navios:
@@ -1236,7 +1239,7 @@ class Model_p2():
         # Restrições para garantir que carregamento só começa após navio chegar
         for navio in navios_ate_d14:
             modelo += (
-            lpSum([idx_hora*varInicioCarregNavio[navio][horas_D14[idx_hora]] for idx_hora in range(len(horas_D14))]) >= extrair_hora(parametros['navios'][navio]['Data_chegada']),
+            lpSum([idx_hora*varInicioCarregNavio[navio][horas_D14[idx_hora]] for idx_hora in range(len(horas_D14))]) >= data_chegada_navio[navio],
                 f"rest_limita_DataInicioCarregNavio_{navio}",
             )
 
@@ -1249,7 +1252,7 @@ class Model_p2():
                             varProducaoSemIncorporacao[produto][horas_D14[idx_hora]] -
                             lpSum([varInicioCarregNavio[navio][horas_D14[idx_hora_s]] *
                                 taxa_carreg_navios[navio] *
-                                produtos_de_cada_navio[navio][produto]
+                                produtos_navio[navio][produto]
                                     for navio in navios
                                         for idx_hora_s in range(max(idx_hora-math.ceil(carga_navios[navio]/taxa_carreg_navios[navio])+1,1), idx_hora+1)]),
                     f"rest_define_EstoqueProdutoPatio_{produto}_{horas_D14[idx_hora]}",
@@ -1261,7 +1264,7 @@ class Model_p2():
                     varProducaoSemIncorporacao[produto][horas_D14[0]] -
                     lpSum([varInicioCarregNavio[navio][horas_D14[0]] *
                             taxa_carreg_navios[navio] *
-                            produtos_de_cada_navio[navio][produto]
+                            produtos_navio[navio][produto]
                             for navio in navios]),
                 f"rest_define_EstoqueProdutoPatio_{produto}_{horas_D14[0]}",
             )
@@ -1271,7 +1274,7 @@ class Model_p2():
         for navio in navios_ate_d14:
             modelo += (
                 varVolumeAtrasadoNavio[navio] ==
-                    (varDataInicioCarregNavio[navio] - extrair_hora(parametros['navios'][navio]['Data_chegada'])) *
+                    (varDataInicioCarregNavio[navio] - data_chegada_navio[navio]) *
                     taxa_carreg_navios[navio],
                 f"rest_define_VolumeAtrasadoNavio_{navio}",
             )
@@ -1286,22 +1289,22 @@ class Model_p2():
 
         # -----------------------------------------------------------------------------
 
-        funcao_objetivo = [fo.strip() for fo in args.funcao_objetivo[1:-1].split(',')]
+        # funcao_objetivo = [fo.strip() for fo in args.funcao_objetivo[1:-1].split(',')]
 
-        for fo in funcao_objetivo:
-            if not fo in ['max_brit', 'min_atr_nav', 'max_conc', 'max_pelot', 'max_bombEB07']:
-                raise Exception(f"Função objetivo {fo} não implementada!")
+        # for fo in funcao_objetivo:
+        #     if not fo in ['max_brit', 'min_atr_nav', 'max_conc', 'max_pelot', 'max_bombEB07']:
+        #         raise Exception(f"Função objetivo {fo} não implementada!")
 
         # Definindo a função objetivo
         fo = 0
-        if 'min_atr_nav' in funcao_objetivo:
-            fo += - (lpSum([varVolumeAtrasadoNavio[navio] for navio in navios_ate_d14]))
-        if 'max_brit' in funcao_objetivo:
-            fo += lpSum([varTaxaBritagem[produto_mina][hora] for produto_mina in produtos_mina for hora in horas_D14])
-        if 'max_conc' in funcao_objetivo:
-            fo += lpSum([varTaxaAlim[produto_conc][hora] for produto_conc in produtos_conc for hora in horas_D14])
-        if 'max_pelot' in funcao_objetivo:
-            fo += lpSum([varProducaoSemIncorporacao[produto_usina][hora] for produto_usina in produtos_usina for hora in horas_D14])
+        # if 'min_atr_nav' in funcao_objetivo:
+        fo += - (lpSum([varVolumeAtrasadoNavio[navio] for navio in navios_ate_d14]))
+        # if 'max_brit' in funcao_objetivo:
+        #     fo += lpSum([varTaxaBritagem[produto_mina][hora] for produto_mina in produtos_mina for hora in horas_D14])
+        # if 'max_conc' in funcao_objetivo:
+        #     fo += lpSum([varTaxaAlim[produto_conc][hora] for produto_conc in produtos_conc for hora in horas_D14])
+        # if 'max_pelot' in funcao_objetivo:
+        #     fo += lpSum([varProducaoSemIncorporacao[produto_usina][hora] for produto_usina in produtos_usina for hora in horas_D14])
         # if 'max_bombEB07' in funcao_objetivo:
         #     fo += lpSum([varBombeadoEB07[produto_conc][hora] for produto_conc in produtos_conc for hora in horas_D14])
 

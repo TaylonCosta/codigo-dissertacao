@@ -1,6 +1,5 @@
-from model_p1 import Model_p1 as Model
-from model_p2 import Model_p2
-from load_data import *
+from model_p1 import Model_p1
+from model_p2 import Model_p2 as Model
 import math
 
 class Learning():
@@ -12,16 +11,14 @@ class Learning():
         self.data = data[2]
 
     def solve_model(self):
-
+        
         cenario = self.cenario
         solver = self.solver
         sheet_data = self.data
 
         modelo = Model()
-        status_modelo, resultados_modelo = modelo.modelo(cenario, solver, sheet_data, self.varBombeamentoPolpa)
+        resultados_modelo = modelo.modelo(solver, sheet_data, self.varBombeamentoPolpa)
 
-        # modelo_2 = Model_p2()
-        # status_modelo2, resultados_modelo2 = modelo_2.modelo(cenario, solver, sheet_data, self.varBombeamentoPolpa)
 
         produtos_conc = sheet_data['produtos_conc']
         produtos_usina = sheet_data['produtos_usina']

@@ -4,6 +4,7 @@ from pulp import *                 # usado para resolver o problema de otimizaç
 import argparse                    # usado para tratar os argumentos do script
 from PPO import run_ppo
 from ai import *
+from load_data import *
 
 def gerar_nome_arquivo_saida(nome_base_arquivo):
     """ Gera o nome padronizado do arquivo de saída """
@@ -16,6 +17,14 @@ def gerar_nome_arquivo_saida(nome_base_arquivo):
     return f"{nome_base_arquivo}_{contador}.json"
 
 
-run_ppo()
+def main():
+    load_data = Load_data()
+    data = load_data.load()
+    
+    L = Learning(None, data)
+    L.solve_model()
 
-print("\n Finished!")
+    print("\n Finished!")
+
+if __name__ == "__main__":
+    main()

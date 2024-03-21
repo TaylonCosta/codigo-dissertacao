@@ -18,6 +18,9 @@ class Load_data:
         parser.add_argument('-c', '--cenario', default='cenarios/ws0.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
         parser.add_argument('-s', '--solver', default='PULP_CBC_CMD', type=str, help='Nome do otimizador a ser usado')
         parser.add_argument('-o', '--pasta-saida', default='experimentos', type=str, help='Pasta onde serão salvos os arquivos de resultados')
+        parser.add_argument('--relax-and-fix', action='store_true', help='Habilita a heurística Relax And Fix das variáveis do mineroduto')
+        parser.add_argument('--opt-partes', action='store_true', help='Habilita a heurística de otimização por partes')
+        parser.add_argument('--ppo', action='store_true', help='Resolve o mdoelo pelo ppo')
 
         args = parser.parse_args()
 
@@ -430,9 +433,9 @@ class Load_data:
         taxa_carreg_por_navio = excel_data_df.groupby('CUSTOMER')['Taxa de Carreg.'].mean()
 
         # Guarda os índices dos navios
-        navios = []
+        navios = cenario['porto']['navios']
 
-        taxa_carregamento = cenario['porto']['taxa_carregamento']
+        # taxa_carregamento = cenario['porto']['taxa_carregamento']
         # Esse trecho guarda as taxas de carregamento por navio e, além disso, altera os nomes dos navios
         # pois eles podem se repetir, então é necessário adicionar um sufixo para diferenciá-los
         # parametros_navios['Taxa de Carreg.'] = {}
@@ -445,24 +448,24 @@ class Load_data:
         #         del parametros_navios[parametro][idx]
 
         # Guarda os índices dos navios com data-real até D14 (ou seja não inclui os navios D+14)
-        navios_ate_d14 = []
-        for parametro in ['DATA-PLANEJADA','DATA-REAL']:
-            for navio in navios:
-                if parametros_navios[parametro][navio] != 'D+14':
-                    # Usa o mesmo formato dos índices encontrados em `dias`
-                    parametros_navios[parametro][navio] = f'd{int(parametros_navios[parametro][navio][1:]):02d}'
-                    if parametro == 'DATA-PLANEJADA':
-                        navios_ate_d14.append(navio)
-                else:
-                    parametros_navios[parametro][navio] = 'd15' # Para facilitar D+14 é tratado como d15
+        # navios_ate_d14 = []
+        # for parametro in ['DATA-PLANEJADA','DATA-REAL']:
+        #     for navio in navios:
+        #         if parametros_navios[parametro][navio] != 'D+14':
+        #             # Usa o mesmo formato dos índices encontrados em `dias`
+        #             parametros_navios[parametro][navio] = f'd{int(parametros_navios[parametro][navio][1:]):02d}'
+        #             if parametro == 'DATA-PLANEJADA':
+        #                 navios_ate_d14.append(navio)
+        #         else:
+        #             parametros_navios[parametro][navio] = 'd15' # Para facilitar D+14 é tratado como d15
 
         # -----------------------------------------------------------------------------
 
         # PORTO
 
-        # produtos_de_cada_navio = {navio:{produto_usina:0 for produto_usina in produtos_usina} for navio in navios}
-        # for navio, produto_usina in cenario['porto']['produtos_de_cada_navio'][0]:
-        #     produtos_de_cada_navio[navio][produto_usina] = 1
+        produtos_de_cada_navio = {navio:{produto_usina:0 for produto_usina in produtos_usina} for navio in navios}
+        for navio, produto_usina in cenario['porto']['produtos_de_cada_navio']:
+            produtos_de_cada_navio[navio][produto_usina] = 1
 
         print(f'[OK]\nDefinindo parâmetros calculados...   ', end='')
 
@@ -514,7 +517,13 @@ class Load_data:
             else:
                 break;
         
-        min_producao_produtos_ubu = cenario['porto']['min_producao_produtos_ubu']
+        perc_solidos = cenario['concentrador']['perc_solidos']
+        densidade = cenario['concentrador']['densidade']
+
+
+        navios_ate_d14 = []
+        # min_producao_produtos_ubu = cenario['porto']['min_producao_produtos_ubu']
+        capacidade_patio_porto_min = cenario['porto']['capacidade_patio_porto_min']
         AguaLi = cenario['mineroduto']['janela_min_bombeamento_agua']
         AguaLs = cenario['mineroduto']['janela_max_bombeamento_agua']
         PolpaLi = cenario['mineroduto']['janela_min_bombeamento_polpa']
@@ -523,6 +532,9 @@ class Load_data:
         taxa_carreg_navios = cenario['porto']['taxa_carreg_navios']
         estoque_produto_patio = cenario['porto']['estoque_produto_patio']
         capacidade_carreg_porto_por_dia = cenario['porto']['capacidade_carreg_porto_por_dia']
+        capacidade_patio_porto_min = cenario['porto']['capacidade_patio_porto_min']
+        capacidade_patio_porto_max = cenario['porto']['capacidade_patio_porto_max']
+        data_chegada_navio = cenario['porto']['data_chegada_navio']
 
         data = {'horas_D14': horas_D14, 'produtos_conc': produtos_conc, 'horas_Dm3_D14': horas_Dm3_D14, 'de_para_produtos_mina_conc': de_para_produtos_mina_conc,
                 'min_estoque_pulmao_concentrador': min_estoque_pulmao_concentrador, 'max_estoque_pulmao_concentrador': max_estoque_pulmao_concentrador,
@@ -537,10 +549,12 @@ class Load_data:
                 'min_estoque_patio_usina': min_estoque_patio_usina, 'max_estoque_patio_usina': max_estoque_patio_usina, 'estoque_polpa_ubu': estoque_ubu_inicial,
                 'estoque_inicial_patio_usina': estoque_inicial_patio_usina, 'fator_limite_excesso_patio': fator_limite_excesso_patio,
                 'capacidade_carreg__por_dia': capacidade_carreg_porto_por_dia, 'navios_ate_d14': navios_ate_d14,
-                'horas_Dm3': horas_Dm3, 'navios': navios, 'vazao_bombas': vazao_bombas, 'min_producao_produtos_ubu': min_producao_produtos_ubu, lim_min_campanha:'lim_min_campanha',
-                'lim_max_campanha': lim_max_campanha, 'lim_acum_campanha': lim_acum_campanha, lim_min_janela: lim_min_janela, 'lim_max_janela':lim_max_janela,
+                'horas_Dm3': horas_Dm3, 'navios': navios, 'vazao_bombas': vazao_bombas, 'lim_min_campanha':lim_min_campanha,
+                'lim_max_campanha': lim_max_campanha, 'lim_acum_campanha': lim_acum_campanha, 'lim_min_janela': lim_min_janela, 'lim_max_janela':lim_max_janela,
                 'lim_acum_janela':lim_acum_janela, 'AguaLi': AguaLi, 'AguaLs': AguaLs, 'PolpaLi': PolpaLi, 'PolpaLs': PolpaLs, 'carga_navios': carga_navios, 
-                'taxa_carreg_navios': taxa_carreg_navios, 'estoque_produto_patio': estoque_produto_patio, 'capacidade_carreg_porto_por_dia': capacidade_carreg_porto_por_dia
+                'taxa_carreg_navios': taxa_carreg_navios, 'estoque_produto_patio': estoque_produto_patio, 'capacidade_carreg_porto_por_dia': capacidade_carreg_porto_por_dia,
+                'produtos_navio': produtos_de_cada_navio, 'capacidade_patio_porto_min': capacidade_patio_porto_min, 'capacidade_patio_porto_max': capacidade_patio_porto_max,
+                'data_chegada_navio': data_chegada_navio, 'perc_solidos': perc_solidos, 'densidade': densidade
                 }
 
         return cenario, solver, data

@@ -17,7 +17,7 @@ class Learning():
         sheet_data = self.data
 
         modelo = Model()
-        resultados_modelo = modelo.modelo(solver, sheet_data, self.varBombeamentoPolpa)
+        resultados_modelo = modelo.modelo(cenario, solver, sheet_data, self.varBombeamentoPolpa)
 
 
         produtos_conc = sheet_data['produtos_conc']

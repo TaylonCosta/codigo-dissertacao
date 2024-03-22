@@ -31,7 +31,7 @@ class Load_data:
         # -----------------------------------------------------------------------------
         # Solver
         print(f'[OK]\nInstanciando solver {args.solver}...   ', end='')
-        solver = getSolver(args.solver, timeLimit=cenario['geral']['timeLimit'], msg=False)
+        solver = getSolver(args.solver, timeLimit=cenario['geral']['timeLimit'], msg=True)
 
         #------------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ class Load_data:
         # Índices usados pelas variáveis e parâmetros
 
         print(f'[OK]\nCriando índices...   ', end='')
-        dias =      [f'd{dia+1:02d}' for dia in range(1)]    # d01, d02, ...   , d14
+        dias =      [f'd{dia+1:02d}' for dia in range(7)]    # d01, d02, ...   , d14
         horas =     [f'h{hora+1:02d}' for hora in range(24)]  # h01, h02, ...   , h6
         horas_D14 = [f'{dia}_{hora}' for dia in dias for hora in horas] # d01_h01, d01_h02, ...   , d14_h6
         horas_Dm3 = [f'dm{dia+1:02d}_h{hora+1:02d}' for dia in range(-4,-1) for hora in range(len(horas))] # dm-3_h01, dm-3_h02, ...   , dm-1_h6
@@ -305,7 +305,7 @@ class Load_data:
                 parametros_mineroduto_md3[parametro][horas_Dm3[idx]] = cell.value
 
         # Sobrescreve o bombeamento polpa -D3 com a informação do cenário, porque agora é multiproduto
-        parametros_mineroduto_md3['Bombeamento Polpa -D3'] = cenario['mineroduto']['bombeamento_polpa_dm3']
+        # parametros_mineroduto_md3['Bombeamento Polpa -D3'] = cenario['mineroduto']['bombeamento_polpa_dm3']
 
         # print('\n CONFERINDO parâmetros da MINERODUTO(-D3)')
         # print(f'{parametros_mineroduto_md3=}')
@@ -430,7 +430,7 @@ class Load_data:
 
         # Usa Pandas porque é mais fácil para fazer agrupamento e cálculo de média de taxa de carregamento
         excel_data_df = pandas.read_excel(cenario['geral']['planilha'], sheet_name='TAXA')
-        taxa_carreg_por_navio = excel_data_df.groupby('CUSTOMER')['Taxa de Carreg.'].mean()
+        # taxa_carreg_por_navio = excel_data_df.groupby('CUSTOMER')['Taxa de Carreg.'].mean()
 
         # Guarda os índices dos navios
         navios = cenario['porto']['navios']
@@ -475,50 +475,29 @@ class Load_data:
 
         parametros_calculados['RP (Recuperação Mássica) - C3'] = {}
         for dia in dias:
-            if parametros_mina['Campanha - C3'][dia] == 'RNS':
-                valor = -10.72 + (1.6346*parametros_mina['Fe_a - C3'][dia]) \
-                        -(3.815*parametros_mina['Al2O3a - C3'][dia])        \
-                        -(0.0984*parametros_mina['Hec - C3'][dia])
-            elif parametros_mina['Campanha - C3'][dia] == 'RLS':
-                valor = -13.18 + (1.614*parametros_mina['Fe_a - C3'][dia]) \
-                        -(3.92*parametros_mina['Al2O3a - C3'][dia])        \
-                        -(0.0187*parametros_mina['Hec - C3'][dia])
-            parametros_calculados['RP (Recuperação Mássica) - C3'][dia] = valor
+            parametros_calculados['RP (Recuperação Mássica) - C3'][dia] = cenario['mina']['RP'][dia]
 
         parametros_calculados['Rendimento Operacional - C3'] = {}
         for dia in dias:
-            parametros_calculados['Rendimento Operacional - C3'][dia] = parametros_mina['UD - C3'][dia] * parametros_mina['DF - C3'][dia]
+            parametros_calculados['Rendimento Operacional - C3'][dia] = cenario['mina']['UD'][dia] * cenario['mina']['DF'][dia]
 
         parametros_calculados['% Sólidos - EB06'] = {}
         parametros_calculados['Densidade Polpa - EB06'] = {}
         parametros_calculados['Relação: tms - EB06'] = {}
         parametros_calculados['Densidade Polpa - EB07'] = {}
         for dia in dias:
-            parametros_calculados['% Sólidos - EB06'][dia] = parametros_mina['Sól - C3'][dia] - 0.012
-            parametros_calculados['Densidade Polpa - EB06'][dia] = 1/((parametros_calculados['% Sólidos - EB06'][dia]/4.75)+(1-parametros_calculados['% Sólidos - EB06'][dia]))
-            parametros_calculados['Relação: tms - EB06'][dia] = 5395*parametros_calculados['% Sólidos - EB06'][dia]*parametros_calculados['Densidade Polpa - EB06'][dia]/100
-            parametros_calculados['Densidade Polpa - EB07'][dia] = parametros_calculados['Densidade Polpa - EB06'][dia]
-
-        parametros_calculados['H20'] = {}
-        for dia in dias:
-            parametros_calculados['H20'][dia] = 3.296 + (0.002986*parametros_ubu['SE'][dia]) + (0.615*parametros_ubu['PPC'][dia])
-
-        parametros_calculados['Bombeamento Acumulado Polpa final semana anterior'] = 0
-        for idx_hora in range(len(horas_Dm3)-1,-1,-1):
-            if parametros_mineroduto_md3['Bombeamento Polpa -D3'][idx_hora] == 'H20':
-                break;
-            else:
-                parametros_calculados['Bombeamento Acumulado Polpa final semana anterior'] += 1;
-
-        parametros_calculados['Bombeamento Acumulado Agua final semana anterior'] = 0
-        for idx_hora in range(len(horas_Dm3)-1,-1,-1):
-            if parametros_mineroduto_md3['Bombeamento Polpa -D3'][idx_hora] == 'H20':
-                parametros_calculados['Bombeamento Acumulado Agua final semana anterior'] += 1;
-            else:
-                break;
+            parametros_calculados['% Sólidos - EB06'][dia] = cenario['mina']['SOL'][dia] - 0.012
+            parametros_calculados['Densidade Polpa - EB06'][dia] = 1/((cenario['mina']['SOL_EB06'][dia]/4.75)+(1- cenario['mina']['SOL_EB06'][dia]))
+            parametros_calculados['Relação: tms - EB06'][dia] = 5395* cenario['mina']['SOL_EB06'][dia]* cenario['mina']['densidade'][dia]/100
+            parametros_calculados['Densidade Polpa - EB07'][dia] =  cenario['mina']['densidade'][dia]
         
-        perc_solidos = cenario['concentrador']['perc_solidos']
-        densidade = cenario['concentrador']['densidade']
+        perc_solidos = cenario['mina']['SOL']
+        densidade = cenario['mina']['densidade']
+        DF = cenario['mina']['DF']
+        UD = cenario['mina']['UD']
+        umidade = cenario['mina']['umidade']
+        RP = cenario['mina']['RP']
+        dif_balanco = cenario['mina']['dif_balanco']
 
 
         navios_ate_d14 = []
@@ -554,7 +533,8 @@ class Load_data:
                 'lim_acum_janela':lim_acum_janela, 'AguaLi': AguaLi, 'AguaLs': AguaLs, 'PolpaLi': PolpaLi, 'PolpaLs': PolpaLs, 'carga_navios': carga_navios, 
                 'taxa_carreg_navios': taxa_carreg_navios, 'estoque_produto_patio': estoque_produto_patio, 'capacidade_carreg_porto_por_dia': capacidade_carreg_porto_por_dia,
                 'produtos_navio': produtos_de_cada_navio, 'capacidade_patio_porto_min': capacidade_patio_porto_min, 'capacidade_patio_porto_max': capacidade_patio_porto_max,
-                'data_chegada_navio': data_chegada_navio, 'perc_solidos': perc_solidos, 'densidade': densidade
+                'data_chegada_navio': data_chegada_navio, 'perc_solidos': perc_solidos, 'densidade': densidade, 'DF': DF, 'UD': UD, 'umidade': umidade, 'RP': RP,
+                'dif_balanco': dif_balanco
                 }
 
         return cenario, solver, data

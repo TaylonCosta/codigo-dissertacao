@@ -36,7 +36,7 @@ class CustomizedEnv(gymnasium.Env):
     def convert_bombeamento_list(self, BombeamentoPolpa, ):
         bombeamento = {produto: {} for produto in self.prdt_conc}
         cont = 0
-        dias =      [f'd{dia+1:02d}' for dia in range(1)]
+        dias =      [f'd{dia+1:02d}' for dia in range(7)]
         horas =     [f'h{hora+1:02d}' for hora in range(24)]
         horas_D14 = [f'{dia}_{hora}' for dia in dias for hora in horas]
         # for produto_c in self.prdt_conc:

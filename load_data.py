@@ -32,7 +32,8 @@ class Load_data:
         # Solver
         print(f'[OK]\nInstanciando solver {args.solver}...   ', end='')
         solver = getSolver(args.solver, timeLimit=cenario['geral']['timeLimit'], msg=True)
-
+        solver.gapRel=0.9
+        # solver.options.remove(("SolutionLimit", value))
         #------------------------------------------------------------------------------
 
         print(f'[OK]\nAbrindo planilha {cenario["geral"]["planilha"]}...   ', end='')
@@ -507,6 +508,8 @@ class Load_data:
         AguaLs = cenario['mineroduto']['janela_max_bombeamento_agua']
         PolpaLi = cenario['mineroduto']['janela_min_bombeamento_polpa']
         PolpaLs = cenario['mineroduto']['janela_max_bombeamento_polpa']
+        bomb_polpa_acum_semana_anterior = cenario['mineroduto']['bombeamento_polpa_acum_semana_anterior']
+        bomb_agua_acum_semana_anterior = cenario['mineroduto']['bombeamento_agua_acum_semana_anterior']        
         carga_navios = cenario['porto']['carga_navios']
         taxa_carreg_navios = cenario['porto']['taxa_carreg_navios']
         estoque_produto_patio = cenario['porto']['estoque_produto_patio']
@@ -514,6 +517,12 @@ class Load_data:
         capacidade_patio_porto_min = cenario['porto']['capacidade_patio_porto_min']
         capacidade_patio_porto_max = cenario['porto']['capacidade_patio_porto_max']
         data_chegada_navio = cenario['porto']['data_chegada_navio']
+        max_capacidade_eb06 = cenario['mineroduto']['max_capacidade_eb06']
+        tempo_germano_matipo = cenario['mineroduto']['tempo_germano_matipo']
+        tempo_germano_ubu = cenario['mineroduto']['tempo_germano_matipo']
+        prod_bomb_hora_anterior = cenario['mineroduto']['prod_polpa_hora_anterior']
+        fator_conv = cenario['usina']['fator_conv']
+        prod_polpa_hora_anterior = cenario['mineroduto']['prod_polpa_hora_anterior']
 
         data = {'horas_D14': horas_D14, 'produtos_conc': produtos_conc, 'horas_Dm3_D14': horas_Dm3_D14, 'de_para_produtos_mina_conc': de_para_produtos_mina_conc,
                 'min_estoque_pulmao_concentrador': min_estoque_pulmao_concentrador, 'max_estoque_pulmao_concentrador': max_estoque_pulmao_concentrador,
@@ -534,7 +543,9 @@ class Load_data:
                 'taxa_carreg_navios': taxa_carreg_navios, 'estoque_produto_patio': estoque_produto_patio, 'capacidade_carreg_porto_por_dia': capacidade_carreg_porto_por_dia,
                 'produtos_navio': produtos_de_cada_navio, 'capacidade_patio_porto_min': capacidade_patio_porto_min, 'capacidade_patio_porto_max': capacidade_patio_porto_max,
                 'data_chegada_navio': data_chegada_navio, 'perc_solidos': perc_solidos, 'densidade': densidade, 'DF': DF, 'UD': UD, 'umidade': umidade, 'RP': RP,
-                'dif_balanco': dif_balanco
+                'dif_balanco': dif_balanco, 'bomb_polpa_acum_semana_anterior': bomb_polpa_acum_semana_anterior, 'bomb_agua_acum_semana_anterior': bomb_agua_acum_semana_anterior,
+                'max_capacidade_eb06': max_capacidade_eb06, 'tempo_germano_matipo': tempo_germano_matipo, 'tempo_germano_ubu': tempo_germano_ubu, 'prod_bomb_hora_anterior':prod_bomb_hora_anterior,
+                'fator_conv': fator_conv, 'prod_polpa_hora_anterior': prod_polpa_hora_anterior
                 }
 
         return cenario, solver, data

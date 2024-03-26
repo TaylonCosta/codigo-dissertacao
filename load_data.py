@@ -16,7 +16,7 @@ class Load_data:
     def load(self):
         parser = argparse.ArgumentParser(description='Otimizador Plano Semanal')
         parser.add_argument('-c', '--cenario', default='cenarios/ws0.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
-        parser.add_argument('-s', '--solver', default='PULP_CBC_CMD', type=str, help='Nome do otimizador a ser usado')
+        parser.add_argument('-s', '--solver', default='GUROBI', type=str, help='Nome do otimizador a ser usado')
         parser.add_argument('-o', '--pasta-saida', default='experimentos', type=str, help='Pasta onde serão salvos os arquivos de resultados')
         parser.add_argument('--relax-and-fix', action='store_true', help='Habilita a heurística Relax And Fix das variáveis do mineroduto')
         parser.add_argument('--opt-partes', action='store_true', help='Habilita a heurística de otimização por partes')
@@ -31,8 +31,7 @@ class Load_data:
         # -----------------------------------------------------------------------------
         # Solver
         print(f'[OK]\nInstanciando solver {args.solver}...   ', end='')
-        solver = getSolver(args.solver, timeLimit=cenario['geral']['timeLimit'], msg=True)
-        solver.gapRel=0.9
+        solver = getSolver(args.solver, msg=True)
         # solver.options.remove(("SolutionLimit", value))
         #------------------------------------------------------------------------------
 

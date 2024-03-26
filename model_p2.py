@@ -1,6 +1,7 @@
 from pulp import *
 import math
 import numpy as np
+import orloge
 
 class Model_p2():
     
@@ -14,43 +15,41 @@ class Model_p2():
     def indice_da_hora(self, hora):
             return (int(hora[1:3])-1)*24+int(hora[-2:])-1
 
-    def gerar_nome_arquivo_saida(self, nome_base_arquivo):
-        if not os.path.exists(nome_base_arquivo + ".json"):
-            return nome_base_arquivo + ".json"
+    def gerar_nome_arquivo_saida(self, nome_base_arquivo, ext):
         contador = 1
-        while os.path.exists(f"{nome_base_arquivo}_{contador}.json"):
+        while os.path.exists(f"{nome_base_arquivo}_{contador}.{ext}"):
             contador += 1
-        return f"{nome_base_arquivo}_{contador}.json"
-    
+        nome_base_arquivo = f"{nome_base_arquivo}_{contador}.{ext}"
+        return nome_base_arquivo
 
-    # def verifica_status_solucao(modelo, nome_arquivo_log_solver):
-    #     status_solucao = LpStatus[modelo.status]
-    #     gap = None
-    #     valor_fo = None
+    def verifica_status_solucao(self, modelo, nome_arquivo_log_solver):
+        status_solucao = LpStatus[modelo.status]
+        gap = None
+        valor_fo = None
 
         # Obtendo os dados de log do solver como um dicionário
-        # logs_solver = orloge.get_info_solver(nome_arquivo_log_solver, 'GUROBI')
+        logs_solver = orloge.get_info_solver(nome_arquivo_log_solver, 'CBC')
 
-        # melhor_limite, melhor_solucao = logs_solver["best_bound"], logs_solver["best_solution"]
+        melhor_limite, melhor_solucao = logs_solver["best_bound"], logs_solver["best_solution"]
 
-        # if melhor_limite is not None and melhor_solucao is not None :
-        #     gap = abs(melhor_limite - melhor_solucao) / (1e-10 + abs(melhor_solucao)) * 100 # Gap in %. We add 1e-10 to avoid division by zero.
-        # else :
-        #     gap = 'N/A'
+        if melhor_limite is not None and melhor_solucao is not None :
+            gap = abs(melhor_limite - melhor_solucao) / (1e-10 + abs(melhor_solucao)) * 100 # Gap in %. We add 1e-10 to avoid division by zero.
+        else :
+            gap = 'N/A'
 
-        # if LpStatus[modelo.status] == 'Optimal':
-        #     valor_fo = modelo.objective.value()
-        #     if gap == 0:
-        #         print(f'Solução ÓTIMA encontrada: {melhor_solucao:.1f} (gap: {gap:.1f}%)')
-        #     else:
-        #         status_solucao = 'Feasible'
-        #         print(f'Solução viável encontrada: {melhor_solucao:.1f} (gap: {gap:.1f}%)')
+        if LpStatus[modelo.status] == 'Optimal':
+            valor_fo = modelo.objective.value()
+            if gap == 0:
+                print(f'Solução ÓTIMA encontrada: {melhor_solucao:.1f} (gap: {gap:.1f}%)')
+            else:
+                status_solucao = 'Feasible'
+                print(f'Solução viável encontrada: {melhor_solucao:.1f} (gap: {gap:.1f}%)')
 
-        # elif logs_solver['status'] == 'Model is infeasible':
-        #     status_solucao = 'Infeasible'
-        #     print(f'Não foi possível encontrar solução!')
-        # else:
-        #     print(f'Não foi possível encontrar solução!')
+        elif logs_solver['status'] == 'Model is infeasible':
+            status_solucao = 'Infeasible'
+            print(f'Não foi possível encontrar solução!')
+        else:
+            print(f'Não foi possível encontrar solução!')
 
         return valor_fo, status_solucao, gap
 
@@ -827,13 +826,13 @@ class Model_p2():
                 )
 
             # Define o estoque pulmão do concentrador da primeira hora
-            modelo += (
-                varEstoquePulmaoConcentrador[produto][horas_D14[0]]
-                    == estoque_pulmao_inicial_concentrador[produto]
-                        + varTaxaBritagem[produto][horas_D14[0]]
-                        - lpSum([varTaxaAlimProdMinaConc[produto][p][horas_D14[0]] for p in produtos_conc]),
-                f"rest_EstoquePulmaoConcentrador_{produto}_{horas_D14[0]}",
-            )
+            # modelo += (
+            #     varEstoquePulmaoConcentrador[produto][horas_D14[0]]
+            #         == estoque_pulmao_inicial_concentrador[produto]
+            #             + varTaxaBritagem[produto][horas_D14[0]]
+            #             - lpSum([varTaxaAlimProdMinaConc[produto][p][horas_D14[0]] for p in produtos_conc]),
+            #     f"rest_EstoquePulmaoConcentrador_{produto}_{horas_D14[0]}",
+            # )
 
         # Amarra as variáveis varTaxaAlimProdMinaConc e varTaxaAlim
         for produto_conc in produtos_conc:
@@ -1102,9 +1101,9 @@ class Model_p2():
         
 
         # if not (args.relax_and_fix or args.opt_partes):
-        #     varBombeamentoPolpa = LpVariable.dicts("Mineroduto_Bombeamento_Polpa_EB06", (produtos_conc, horas_D14), 0, 1, LpInteger)
+        varBombeamentoPolpa = LpVariable.dicts("Mineroduto_Bombeamento_Polpa_EB06", (produtos_conc, horas_D14), 0, 1, LpInteger)
         # else: # Se for rodar a heurística, a variável é relaxada
-        varBombeamentoPolpa = LpVariable.dicts("Mineroduto_Bombeamento_Polpa_EB06", (produtos_conc, horas_D14), 0, 1, LpContinuous)
+        # varBombeamentoPolpa = LpVariable.dicts("Mineroduto_Bombeamento_Polpa_EB06", (produtos_conc, horas_D14), 0, 1, LpContinuous)
 
         # Define o valor de estoque de EB06, por produto, da segunda hora em diante
         for produto in produtos_conc:
@@ -1121,17 +1120,17 @@ class Model_p2():
                 )
 
         # Define o valor de estoque de EB06, por produto, da primeira hora
-        for produto in produtos_conc:
-            modelo += (
-                varEstoqueEB06[produto][horas_D14[0]]
-                    == estoque_eb06_d0[produto] +
-                    varProducaoVolume[produto][horas_D14[0]] -
-                    varBombeamentoPolpa[produto][horas_D14[0]]*vazao_bombas,
-                    # + varTaxaEnvioEB04EB06[produto][horas_D14[0]]
-                    #     - varTaxaEnvioEB06EB04[produto][horas_D14[0]],
-                    # +(varEnvioEB04EB06[produto][horas_D14[0]] - varEnvioEB06EB04[produto][horas_D14[0]])*parametros['config']['taxa_max_transferencia_entre_eb6_eb4'],
-                f"rest_define_EstoqueEB06_{produto}_{horas_D14[0]}",
-            )
+        # for produto in produtos_conc:
+        #     modelo += (
+        #         varEstoqueEB06[produto][horas_D14[0]]
+        #             == estoque_eb06_d0[produto] +
+        #             varProducaoVolume[produto][horas_D14[0]] -
+        #             varBombeamentoPolpa[produto][horas_D14[0]]*vazao_bombas,
+        #             # + varTaxaEnvioEB04EB06[produto][horas_D14[0]]
+        #             #     - varTaxaEnvioEB06EB04[produto][horas_D14[0]],
+        #             # +(varEnvioEB04EB06[produto][horas_D14[0]] - varEnvioEB06EB04[produto][horas_D14[0]])*parametros['config']['taxa_max_transferencia_entre_eb6_eb4'],
+        #         f"rest_define_EstoqueEB06_{produto}_{horas_D14[0]}",
+        #     )
 
         # Indica o quanto foi bombeado de polpa do EB07, por produto do concentrador, em cada hora
         varBombeado = LpVariable.dicts("Mineroduto_Bombeado_Polpa", (produtos_conc, horas_D14), 0, None, LpContinuous)
@@ -2134,14 +2133,14 @@ class Model_p2():
                 )
 
         # Restrições para garantir que cada navio até D14 começa o carregamento uma única vez
-        for navio in navios_ate_d14:
+        for navio in navios:
             modelo += (
                 lpSum([varInicioCarregNavio[navio][hora] for hora in horas_D14]) == 1,
                 f"rest_define_InicioCarregNavio_{navio}",
             )
 
         for navio in navios:
-            if not navio in navios_ate_d14:
+            if not navio in navios:
                 modelo += (
                     lpSum([varInicioCarregNavio[navio][hora] for hora in horas_D14]) == 0,
                     f"rest_define_InicioCarregNavio_{navio}",
@@ -2157,7 +2156,7 @@ class Model_p2():
             )
 
         # Restrições para garantir que carregamento só começa após navio chegar
-        for navio in navios_ate_d14:
+        for navio in navios:
             # print(navio, extrair_hora(parametros['navios'][navio]['Data_chegada']))
             modelo += (
             lpSum([idx_hora*varInicioCarregNavio[navio][horas_D14[idx_hora]] for idx_hora in range(len(horas_D14))]) >= self.extrair_hora(data_chegada_navio[navio]),
@@ -2190,9 +2189,9 @@ class Model_p2():
                 f"rest_define_EstoqueProdutoPatio_{produto}_{horas_D14[0]}",
             )
 
-        varVolumeAtrasadoNavio = LpVariable.dicts("Porto_Volume_Atrasado_Navios", (navios_ate_d14), 0, None, LpContinuous)
+        varVolumeAtrasadoNavio = LpVariable.dicts("Porto_Volume_Atrasado_Navios", (navios), 0, None, LpContinuous)
 
-        for navio in navios_ate_d14:
+        for navio in navios:
             modelo += (
                 varVolumeAtrasadoNavio[navio] ==
                     (varDataInicioCarregNavio[navio] - self.extrair_hora(data_chegada_navio[navio])) *
@@ -2243,13 +2242,14 @@ class Model_p2():
         #     # nome_arquivo_log_solver = self.gerar_nome_arquivo_saida(f'{args.pasta_saida}/{args.nome}_{f"{cenario['geral']['nome']}_resultados_1_solver_completo"}, 'log', not args.nao_sobrescrever_arquivos)
         #     # solver.optionsDict['logPath'] = nome_arquivo_log_solver
         #     # The problem is solved using PuLP's choice of Solver
-        #     solver.solve(modelo)
+        solver.solve(modelo)
         #     tempo_modelo_completo = modelo.solutionTime
         #     # valor_fo_modelo_completo, status_solucao_modelo_completo, gap_modelo_completo = self.verifica_status_solucao(nome_arquivo_log_solver)
         # elif args.opt_partes:
         #     valor_fo_modelo_relaxado, tempo_modelo_relaxado, gap_modelo_relaxado, valor_fo_modelo_completo, tempo_modelo_completo, status_solucao_modelo_completo, gap_modelo_completo, nome_arquivo_log_solver = self.heuristica_otim_por_partes(modelo, f"{cenario['geral']['nome']}_resultados_1", varBombeamentoPolpa, produtos_conc, horas_D14, solver, args, fo, params_heu)
         # elif args.relax_and_fix:
-        valor_fo_modelo_relaxado, tempo_modelo_relaxado, gap_modelo_relaxado, valor_fo_modelo_completo, tempo_modelo_completo, status_solucao_modelo_completo, gap_modelo_completo, nome_arquivo_log_solver = self.heuristica_relax_and_fix(modelo, f"{cenario['geral']['nome']}_resultados_1", params_heu, varBombeamentoPolpa, produtos_conc, horas_D14, solver, args, fo, w_teste)
+        # valor_fo_modelo_relaxado, tempo_modelo_relaxado, gap_modelo_relaxado, valor_fo_modelo_completo, tempo_modelo_completo, status_solucao_modelo_completo, gap_modelo_completo, nome_arquivo_log_solver = self.heuristica_relax_and_fix(modelo, f"{cenario['geral']['nome']}_resultados_1", params_heu, varBombeamentoPolpa, produtos_conc, horas_D14, solver, args, fo, w_teste)
+        # valor_fo_modelo_completo, status_solucao_modelo_completo, gap_modelo_completo = self.verifica_status_solucao(modelo, f"experimentos/{cenario['geral']['nome']}_resultados_1.json")
 
 
         resultados = {'variaveis':{}}
@@ -2277,9 +2277,58 @@ class Model_p2():
         if not os.path.exists(args.pasta_saida):
             os.makedirs(args.pasta_saida)
 
-        nome_arquivo_saida = self.gerar_nome_arquivo_saida(f"{cenario['geral']['nome']}_resultados_1")
+        nome_arquivo_saida = self.gerar_nome_arquivo_saida(f"{cenario['geral']['nome']}_resultados_1", 'json')
         with open(f'{args.pasta_saida}/{nome_arquivo_saida}', "w", encoding="utf8") as f:
             json.dump(resultados, f)
+
+
+        print(f'Escrevendo modelo em arquivo para procurar por restrições que inviabilizam o modelo')
+        nome_arquivo_MPS = self.gerar_nome_arquivo_saida(f'{cenario["geral"]["nome"]}_resultados_1_mps', 'mps')
+        modelo.writeMPS(nome_arquivo_MPS)
+
+        nome_arquivo_ILP = self.gerar_nome_arquivo_saida(f'{cenario["geral"]["nome"]}_resultados_1_IISresults', 'ilp')
+        os.system(f'/home/taylon/opt/gurobi1002/linux64/bin/gurobi_cl ResultFile={nome_arquivo_ILP} {nome_arquivo_MPS}')
+
+        if not os.path.exists(nome_arquivo_ILP):
+            print(f'Não foi possível obter arquivo ILP do IIS!')
+        else:
+            arquivoILP = open(nome_arquivo_ILP)
+            prefixo_variaveis = ['Britagem', 'Concentrador', 'EB06', 'Mineroduto', 'Pelot', 'Porto', 'Patio', 'Ubu']
+            restricoes_limitantes = set()
+            variaveis_limitantes = set()
+            lendo_restricoes = True
+            for linha in arquivoILP.readlines():
+                linha = linha.strip()
+                if lendo_restricoes:
+                    if linha.startswith('rest_'):
+                        restricoes_limitantes.add(linha.split()[0][:-1])
+                    elif linha == 'Bounds':
+                        lendo_restricoes = False
+                else:
+                    for prefixo_variavel in prefixo_variaveis:
+                        if linha.startswith(prefixo_variavel):
+                            variaveis_limitantes.add(linha.split()[0])
+            arquivoILP.close()
+
+            def remover_sufixo_horas(conjunto_completo):
+                conjunto = set()
+                for rest_ou_variavel in conjunto_completo:
+                    pos_underscore = rest_ou_variavel.rfind('_')
+                    pos_underscore = rest_ou_variavel[:pos_underscore].rfind('_')
+                    if rest_ou_variavel[pos_underscore+1:] in horas_Dm3_D14:
+                        conjunto.add(rest_ou_variavel[:pos_underscore])
+                    else:
+                        conjunto.add(rest_ou_variavel)
+                lista = list(conjunto)
+                lista.sort()
+                return lista
+
+            restricoes_limitantes = remover_sufixo_horas(restricoes_limitantes)
+            variaveis_limitantes = remover_sufixo_horas(variaveis_limitantes)
+
+            print(f'RESTRIÇÕES que inviabilizam o modelo: {restricoes_limitantes}')
+            print(f'VARIÁVEIS cujos limites inviabilizam o modelo: {variaveis_limitantes}')
+            print(f'Veja informações mais detalhadas no arquivo {nome_arquivo_ILP}')
 
         return modelo.status, resultados
 

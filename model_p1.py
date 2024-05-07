@@ -1,5 +1,9 @@
 from pulp import *
 import json
+import csv
+import pandas as pd
+import matplotlib.pyplot as plt
+
 
 class Model_p1():
 
@@ -252,14 +256,14 @@ class Model_p1():
                 )
 
         # Define o valor de estoque de EB06, por produto, da primeira hora
-        # for produto in produtos_conc:
-        #     modelo += (
-        #         varEstoqueEB06[produto][horas_D14[0]]
-        #             == estoque_eb06_d0[produto] +
-        #             varProducaoVolume[produto][horas_D14[0]] -
-        #             varBombeamentoPolpa[produto][horas_D14[0]]*parametros_mina['Vazão bombas - M3'][self.extrair_dia(horas_D14[0])],
-        #         f"rest_define_EstoqueEB06_{produto}_{horas_D14[0]}",
-        #     )
+        for produto in produtos_conc:
+            modelo += (
+                varEstoqueEB06[produto][horas_D14[0]]
+                    == estoque_eb06_d0[produto] +
+                    varProducaoVolume[produto][horas_D14[0]] -
+                    varBombeamentoPolpa[produto][horas_D14[0]]*parametros_mina['Vazão bombas - M3'][self.extrair_dia(horas_D14[0])],
+                f"rest_define_EstoqueEB06_{produto}_{horas_D14[0]}",
+            )
 
         #garante um produto por vez
         for hora in horas_D14:
@@ -351,17 +355,17 @@ class Model_p1():
                     f"rest_define_EstoquePolpaUbu_{produto}_{horas_D14[i]}",
                 )
             # Define o estoque de polpa em Ubu da primeira hora
-            # modelo += (
-            #     varEstoquePolpaUbu[produto][horas_D14[0]] == estoque_polpa_ubu  +
-            #                                         varPolpaUbu[produto][horas_D14[0]] *
-            #                                             parametros_calculados['% Sólidos - EB06'][self.extrair_dia(horas_D14[0])] *
-            #                                             parametros_ubu['Densid.'][self.extrair_dia(horas_D14[0])]
-            #                                         - lpSum(varProducaoUbu[produto][produto_u][horas_D14[0]]
-            #                                                 for produto_u in produtos_usina)
-            #                                         - varVolumePatio[produto][horas_D14[0]]
-            #                                         + varRetornoPatio[produto][horas_D14[0]],
-            #     f"rest_define_EstoquePolpaUbu_{produto}_{horas_D14[0]}",
-            # )
+            modelo += (
+                varEstoquePolpaUbu[produto][horas_D14[0]] == estoque_polpa_ubu  +
+                                                    varPolpaUbu[produto][horas_D14[0]] *
+                                                        parametros_calculados['% Sólidos - EB06'][self.extrair_dia(horas_D14[0])] *
+                                                        parametros_ubu['Densid.'][self.extrair_dia(horas_D14[0])]
+                                                    - lpSum(varProducaoUbu[produto][produto_u][horas_D14[0]]
+                                                            for produto_u in produtos_usina)
+                                                    - varVolumePatio[produto][horas_D14[0]]
+                                                    + varRetornoPatio[produto][horas_D14[0]],
+                f"rest_define_EstoquePolpaUbu_{produto}_{horas_D14[0]}",
+            )
 
         # Trata a taxa máxima de transferência (retorno) de material do pátio para a usina
         for hora in horas_D14:
@@ -584,7 +588,43 @@ class Model_p1():
 
         # Salvando os dados em arquivo binário usando pickels
         nome_arquivo_saida = self.gerar_nome_arquivo_saida(f"{cenario['geral']['nome']}_resultados_1")
-        with open(f'{args.pasta_saida}/{nome_arquivo_saida}', "w", encoding="utf8") as f:
-            json.dump(resultados, f)
+        # with open(f'{args.pasta_saida}/{nome_arquivo_saida}', "w", encoding="utf8") as f:
+        #     json.dump(resultados, f)
+            # csv.writer(resultados)
+        # with open(nome_arquivo_saida, 'w', newline='') as csvfile:
+            # csvwriter = csv.writer(csvfile)
 
+            # Escrever o cabeçalho do CSV
+            # header = ['Variavel'] + [f'{hora}' for hora in horas_D14]
+            # csvwriter.writerow(header)
+
+            # # Escrever os valores das variáveis
+            # for variavel in resultados['variaveis']:
+            #     row = [variavel]
+            #     for hora in horas_D14:
+            #         valor = resultados[variavel]  # Se não houver valor, deixe em branco
+            #         row.append(valor)
+            #     csvwriter.writerow(row)
+
+        # Extracting values for Bombeado_PRDT_C1 and Bombeado_PRDT_C2
+        bombeado_prdt_c1_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Estoque_EB06_PRDT_C1")]
+        bombeado_prdt_c2_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Bombeado_PRDT_C2")]
+        bombeado_prdt_c3_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Bombeado_PRDT_C3")]
+
+
+        # Generating x-axis values (hours)
+        hours = range(1, 25)
+
+        # Plotting
+        plt.plot(hours, bombeado_prdt_c1_values, label='Bombeado_PRDT_C1')
+        plt.plot(hours, bombeado_prdt_c2_values, label='Bombeado_PRDT_C2')
+        plt.plot(hours, bombeado_prdt_c3_values, label='Bombeado_PRDT_C3')
+
+        # Adding labels and title
+        plt.xlabel('Hour')
+        plt.ylabel('Value')
+        plt.legend()
+
+        # Displaying the plot
+        plt.show()
         return modelo.status, resultados

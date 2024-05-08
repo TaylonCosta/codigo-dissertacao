@@ -66,6 +66,7 @@ class CustomizedEnv(gymnasium.Env):
                 bombeamento['PRDT_C2'].update({i: 0})
                 bombeamento['PRDT_C3'].update({i: 0})
             cont += 1
+        print(bombeamento)
         return bombeamento
 
     def initialize(self, rand):

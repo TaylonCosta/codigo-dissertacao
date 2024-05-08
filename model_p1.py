@@ -315,6 +315,15 @@ class Model_p1():
         # Indica a produção em Ubu, por hora
         varProducaoUbu = LpVariable.dicts("Producao Ubu", (produtos_conc, produtos_usina, horas_D14), 0, None, LpContinuous)
 
+        varProdutoPelot = LpVariable.dicts("Pelot_ConversaoProduto", (produtos_conc, produtos_usina, horas_D14),  0, 1, LpInteger)
+
+        # Restrição para garantir que a pelotização um produto por vez
+        for hora in horas_D14:
+            modelo += (
+                lpSum([varProdutoPelot[produto_c][produto_u][hora] for produto_c in produtos_conc for produto_u in produtos_usina]) <= 1,
+                f"rest_UmProdutoPelot_{hora}"
+            )
+
         # Define a produção em Ubu
         for produto_c in produtos_conc:
             for produto_u in produtos_usina:
@@ -329,6 +338,14 @@ class Model_p1():
                             varProducaoUbu[produto_c][produto_u][hora] == 0,
                             f"rest_zera_ProducaoUbu_{produto_c}_{produto_u}_{hora}",
                         )
+
+        for produto_c in produtos_conc:
+            for produto_u in produtos_usina:
+                for hora in horas_D14:
+                    modelo += (
+                        varProducaoUbu[produto_c][produto_u][hora] <= BIG_M*varProdutoPelot[produto_c][produto_u][hora],
+                        f"rest_amarra_producaoUbu_varProdPelot_{produto_c}_{produto_u}_{hora}",
+                    )
         # Indica o estoque de polpa em Ubu, por hora
         varEstoquePolpaUbu = LpVariable.dicts("Estoque Polpa Ubu", (produtos_conc, horas_D14), min_estoque_polpa_ubu, max_estoque_polpa_ubu, LpContinuous)
 
@@ -606,26 +623,4 @@ class Model_p1():
             #         valor = resultados[variavel]  # Se não houver valor, deixe em branco
             #         row.append(valor)
             #     csvwriter.writerow(row)
-
-        # Extracting values for Bombeado_PRDT_C1 and Bombeado_PRDT_C2
-        bombeado_prdt_c1_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Producao___C3___Prog_PRDT_C1")]
-        bombeado_prdt_c2_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Producao___C3___Prog_PRDT_C2")]
-        bombeado_prdt_c3_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Producao___C3___Prog_PRDT_C3")]
-
-
-        # Generating x-axis values (hours)
-        hours = range(1, 25)
-
-        # Plotting
-        plt.plot(hours, bombeado_prdt_c1_values, label='Producao___C3___Prog_PRDT_C1')
-        plt.plot(hours, bombeado_prdt_c2_values, label='Producao___C3___Prog_PRDT_C2')
-        plt.plot(hours, bombeado_prdt_c3_values, label='Producao___C3___Prog_PRDT_C3')
-
-        # Adding labels and title
-        plt.xlabel('Hour')
-        plt.ylabel('Value')
-        plt.legend()
-
-        # Displaying the plot
-        plt.show()
         return modelo.status, resultados

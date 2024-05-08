@@ -19,8 +19,17 @@ def gerar_nome_arquivo_saida(nome_base_arquivo):
 # # L = Learning(bomb)
 # L.solve_model()
 
-run_ppo()
 
+def main():
+    # load_data = Load_data()
+    # data = load_data.load()
+    
+    # L = Learning(None, data)
+    # L.solve_model()
 
+    run_ppo()
 
-print("\n Finished!")
+    print("\n Finished!")
+
+if __name__ == "__main__":
+    main()

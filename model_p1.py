@@ -3,6 +3,7 @@ import json
 import csv
 import pandas as pd
 import matplotlib.pyplot as plt
+import math
 
 
 class Model_p1():
@@ -97,7 +98,7 @@ class Model_p1():
                 # print(f'{taxa_producao_britagem[extrair_dia(hora)]}*{produtos_britagem[produto][hora]}')
                 dados[produto].append(int(taxa_producao_britagem[self.extrair_dia(hora)]*produtos_britagem[produto][hora]))
                 modelo += (
-                    varTaxaBritagem[produto][hora] <= int(taxa_producao_britagem[self.extrair_dia(hora)]*produtos_britagem[produto][hora]),
+                    varTaxaBritagem[produto][hora] <= math.floor(taxa_producao_britagem[self.extrair_dia(hora)]*produtos_britagem[produto][hora]),
                     f"rest_TaxaBritagem_{produto}_{hora}"
                 )
 
@@ -261,7 +262,7 @@ class Model_p1():
                 varEstoqueEB06[produto][horas_D14[0]]
                     == estoque_eb06_d0[produto] +
                     varProducaoVolume[produto][horas_D14[0]] -
-                    varBombeamentoPolpa[produto][horas_D14[0]]*parametros_mina['Vazão bombas - M3'][self.extrair_dia(horas_D14[0])],
+                    varBombeamentoPolpa[produto][horas_D14[0]]*vazao_bombas,
                 f"rest_define_EstoqueEB06_{produto}_{horas_D14[0]}",
             )
 
@@ -356,7 +357,7 @@ class Model_p1():
                 )
             # Define o estoque de polpa em Ubu da primeira hora
             modelo += (
-                varEstoquePolpaUbu[produto][horas_D14[0]] == estoque_polpa_ubu  +
+                varEstoquePolpaUbu[produto][horas_D14[0]] == estoque_polpa_ubu[produto] +
                                                     varPolpaUbu[produto][horas_D14[0]] *
                                                         parametros_calculados['% Sólidos - EB06'][self.extrair_dia(horas_D14[0])] *
                                                         parametros_ubu['Densid.'][self.extrair_dia(horas_D14[0])]
@@ -588,8 +589,8 @@ class Model_p1():
 
         # Salvando os dados em arquivo binário usando pickels
         nome_arquivo_saida = self.gerar_nome_arquivo_saida(f"{cenario['geral']['nome']}_resultados_1")
-        # with open(f'{args.pasta_saida}/{nome_arquivo_saida}', "w", encoding="utf8") as f:
-        #     json.dump(resultados, f)
+        with open(f'{args.pasta_saida}/{nome_arquivo_saida}', "w", encoding="utf8") as f:
+            json.dump(resultados, f)
             # csv.writer(resultados)
         # with open(nome_arquivo_saida, 'w', newline='') as csvfile:
             # csvwriter = csv.writer(csvfile)
@@ -607,18 +608,18 @@ class Model_p1():
             #     csvwriter.writerow(row)
 
         # Extracting values for Bombeado_PRDT_C1 and Bombeado_PRDT_C2
-        bombeado_prdt_c1_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Estoque_EB06_PRDT_C1")]
-        bombeado_prdt_c2_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Bombeado_PRDT_C2")]
-        bombeado_prdt_c3_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Bombeado_PRDT_C3")]
+        bombeado_prdt_c1_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Producao___C3___Prog_PRDT_C1")]
+        bombeado_prdt_c2_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Producao___C3___Prog_PRDT_C2")]
+        bombeado_prdt_c3_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Producao___C3___Prog_PRDT_C3")]
 
 
         # Generating x-axis values (hours)
         hours = range(1, 25)
 
         # Plotting
-        plt.plot(hours, bombeado_prdt_c1_values, label='Bombeado_PRDT_C1')
-        plt.plot(hours, bombeado_prdt_c2_values, label='Bombeado_PRDT_C2')
-        plt.plot(hours, bombeado_prdt_c3_values, label='Bombeado_PRDT_C3')
+        plt.plot(hours, bombeado_prdt_c1_values, label='Producao___C3___Prog_PRDT_C1')
+        plt.plot(hours, bombeado_prdt_c2_values, label='Producao___C3___Prog_PRDT_C2')
+        plt.plot(hours, bombeado_prdt_c3_values, label='Producao___C3___Prog_PRDT_C3')
 
         # Adding labels and title
         plt.xlabel('Hour')

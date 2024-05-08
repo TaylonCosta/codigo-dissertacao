@@ -70,8 +70,8 @@ mineroduto:
   janela_fixa_bombeamento_agua: 6
   janela_para_fixar_bombeamento_agua: 168
   nro_janelas_livres_agua: 3
-  janela_livre_min_bombeamento_agua: 10
-  janela_livre_max_bombeamento_agua: 1
+  janela_livre_min_bombeamento_agua: 1
+  janela_livre_max_bombeamento_agua: 10
 
   utilizacao_minima_mineroduto: 0
   janela_da_utilizacao_minima_mineroduto_horas: 168
@@ -84,7 +84,7 @@ mineroduto:
   fator_limite_excesso_patio: 0.8
 
   estoque_inicial_eb07: [["PRDT_C", 0]]
-  estoque_inicial_eb06: [["PRDT_C1", 10000], ["PRDT_C2", 10000], ["PRDT_C3", 10000]]
+  estoque_inicial_eb06: [["PRDT_C1", 1000], ["PRDT_C2", 1000], ["PRDT_C3", 1000]]
   min_capacidade_eb07: 0.2
   max_capacidade_eb06: 10250
   max_capacidade_eb07: 30000

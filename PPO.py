@@ -23,7 +23,7 @@ USAR_LOG_TENSORBOARD = False # Para ver o log, execute o comando: tensorboard --
 SEMENTE = 5
 RANDOM = False
 SIZE = 1
-SIZE_BOMBEAMENTO = 24
+SIZE_BOMBEAMENTO = 168
 SAVE = False
 LOAD = False
 
@@ -36,18 +36,9 @@ class CustomizedEnv(gymnasium.Env):
     def convert_bombeamento_list(self, BombeamentoPolpa, ):
         bombeamento = {produto: {} for produto in self.prdt_conc}
         cont = 0
-        dias =      [f'd{dia+1:02d}' for dia in range(1)]
+        dias =      [f'd{dia+1:02d}' for dia in range(7)]
         horas =     [f'h{hora+1:02d}' for hora in range(24)]
         horas_D14 = [f'{dia}_{hora}' for dia in dias for hora in horas]
-        # for produto_c in self.prdt_conc:
-        #     for aux in range(0,len(self.prdt_conc)):
-        #       for i in horas_D14:
-        #             if BombeamentoPolpa[cont] == aux:
-        #                 bombeamento[produto_c].update({i: (int(BombeamentoPolpa[cont])/int(BombeamentoPolpa[cont]))})
-        #                 break
-        #             else:
-        #                 bombeamento[produto_c].update({i: 0})
-        #         cont += 1
         for i in horas_D14:
             if BombeamentoPolpa[cont] == 1:
                 bombeamento['PRDT_C1'].update({i: 1})
@@ -66,7 +57,6 @@ class CustomizedEnv(gymnasium.Env):
                 bombeamento['PRDT_C2'].update({i: 0})
                 bombeamento['PRDT_C3'].update({i: 0})
             cont += 1
-        print(bombeamento)
         return bombeamento
 
     def initialize(self, rand):

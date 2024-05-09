@@ -20,10 +20,6 @@ class Learning():
         modelo = Model()
         status_modelo, resultados_modelo = modelo.modelo(cenario, solver, sheet_data, self.varBombeamentoPolpa)
 
-        return resultados_modelo
-        # modelo_2 = Model_p2()
-        # status_modelo2, resultados_modelo2 = modelo_2.modelo(cenario, solver, sheet_data, self.varBombeamentoPolpa)
-
         # produtos_conc = sheet_data['produtos_conc']
         # produtos_usina = sheet_data['produtos_usina']
         # estoque_eb06 = {produto: {} for produto in produtos_conc}
@@ -51,10 +47,11 @@ class Learning():
         #                 consumo_prod_ubu[produto][aux]+=resultados_modelo['variaveis']['Producao_Ubu_'+str(produto)+'_'+str(prdt_usina)+'_d01_h0'+str(aux+1)]
         #             else:
         #                 consumo_prod_ubu[produto][aux]+=resultados_modelo['variaveis']['Producao_Ubu_'+str(produto)+'_'+str(prdt_usina)+'_d01_h'+str(aux+1)]
+
         # fo_value = 0
-        # if status_modelo == -1:
+        # if resultados_modelo['solver']['status'] == 'Infeasible':
         #     fo_value = -999999
         # else:
-        #         fo_value = resultados_modelo['solver']['valor_fo']
+        #     fo_value = resultados_modelo['solver']['valor_fo']
 
         # return fo_value, estoque_eb06, estoque_ubu, prod_concentrador, consumo_prod_ubu

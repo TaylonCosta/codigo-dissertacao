@@ -16,8 +16,11 @@ class Load_data:
     def load(self):
         parser = argparse.ArgumentParser(description='Otimizador Plano Semanal')
         parser.add_argument('-c', '--cenario', default='cenarios/ws0.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
-        parser.add_argument('-s', '--solver', default='PULP_CBC_CMD', type=str, help='Nome do otimizador a ser usado')
+        parser.add_argument('-s', '--solver', default='GUROBI', type=str, help='Nome do otimizador a ser usado')
         parser.add_argument('-o', '--pasta-saida', default='experimentos', type=str, help='Pasta onde serão salvos os arquivos de resultados')
+        parser.add_argument('--relax-and-fix', action='store_true', help='Habilita a heurística Relax And Fix das variáveis do mineroduto')
+        parser.add_argument('--opt-partes', action='store_true', help='Habilita a heurística de otimização por partes')
+        parser.add_argument('--ppo', action='store_true', help='Resolve o mdoelo pelo ppo')
 
         args = parser.parse_args()
 
@@ -28,8 +31,8 @@ class Load_data:
         # -----------------------------------------------------------------------------
         # Solver
         print(f'[OK]\nInstanciando solver {args.solver}...   ', end='')
-        solver = getSolver(args.solver, timeLimit=cenario['geral']['timeLimit'], msg=False)
-
+        solver = getSolver(args.solver, msg=True)
+        # solver.options.remove(("SolutionLimit", value))
         #------------------------------------------------------------------------------
 
         print(f'[OK]\nAbrindo planilha {cenario["geral"]["planilha"]}...   ', end='')
@@ -41,7 +44,7 @@ class Load_data:
         # Índices usados pelas variáveis e parâmetros
 
         print(f'[OK]\nCriando índices...   ', end='')
-        dias =      [f'd{dia+1:02d}' for dia in range(1)]    # d01, d02, ...   , d14
+        dias =      [f'd{dia+1:02d}' for dia in range(7)]    # d01, d02, ...   , d14
         horas =     [f'h{hora+1:02d}' for hora in range(24)]  # h01, h02, ...   , h6
         horas_D14 = [f'{dia}_{hora}' for dia in dias for hora in horas] # d01_h01, d01_h02, ...   , d14_h6
         horas_Dm3 = [f'dm{dia+1:02d}_h{hora+1:02d}' for dia in range(-4,-1) for hora in range(len(horas))] # dm-3_h01, dm-3_h02, ...   , dm-1_h6
@@ -75,7 +78,8 @@ class Load_data:
                                         disponibilidade_britagem[d]/100 *
                                         utilizacao_britagem[d]/100
                                 for d in range(len(dias))}
-
+        print('--------------------------')
+        print(taxa_producao_britagem)
         # Mina
         campanha_c3 = cenario['mina']['campanha']
         produtos_mina = set()
@@ -162,6 +166,13 @@ class Load_data:
 
         fator_limite_excesso_patio = cenario['mineroduto']['fator_limite_excesso_patio']
         vazao_bombas = cenario['mineroduto']['vazao_bombas']
+        lim_min_campanha = cenario['mina']['lim_min_campanha']
+        lim_max_campanha = cenario['mina']['lim_max_campanha']
+        lim_acum_campanha = cenario['mina']['lim_acum_campanha']
+
+        lim_min_janela = cenario['mina']['lim_min_janela']
+        lim_max_janela = cenario['mina']['lim_max_janela']
+        lim_acum_janela = cenario['mina']['lim_acum_janela']
 
 
         # Paradas de manutenção
@@ -294,7 +305,7 @@ class Load_data:
                 parametros_mineroduto_md3[parametro][horas_Dm3[idx]] = cell.value
 
         # Sobrescreve o bombeamento polpa -D3 com a informação do cenário, porque agora é multiproduto
-        parametros_mineroduto_md3['Bombeamento Polpa -D3'] = cenario['mineroduto']['bombeamento_polpa_dm3']
+        # parametros_mineroduto_md3['Bombeamento Polpa -D3'] = cenario['mineroduto']['bombeamento_polpa_dm3']
 
         # print('\n CONFERINDO parâmetros da MINERODUTO(-D3)')
         # print(f'{parametros_mineroduto_md3=}')
@@ -309,6 +320,7 @@ class Load_data:
         # estoque_eb6_d0 = ws["C5"].value
         #estoque_polpa_ubu = ['estoque_inicial_polpa_ubu']
 
+        estoque_polpa_ubu = cenario['usina']['estoque_inicial_polpa_ubu']
         # configuração das linhas onde se encontram os parâmetros da aba MINERODUTO-UBU
         conf_parametros_mineroduto_ubu = {
             'Capacidade EB06': 7,
@@ -418,33 +430,34 @@ class Load_data:
 
         # Usa Pandas porque é mais fácil para fazer agrupamento e cálculo de média de taxa de carregamento
         excel_data_df = pandas.read_excel(cenario['geral']['planilha'], sheet_name='TAXA')
-        taxa_carreg_por_navio = excel_data_df.groupby('CUSTOMER')['Taxa de Carreg.'].mean()
+        # taxa_carreg_por_navio = excel_data_df.groupby('CUSTOMER')['Taxa de Carreg.'].mean()
 
         # Guarda os índices dos navios
-        navios = []
+        navios = cenario['porto']['navios']
 
+        # taxa_carregamento = cenario['porto']['taxa_carregamento']
         # Esse trecho guarda as taxas de carregamento por navio e, além disso, altera os nomes dos navios
         # pois eles podem se repetir, então é necessário adicionar um sufixo para diferenciá-los
-        parametros_navios['Taxa de Carreg.'] = {}
-        for idx in range(len(parametros_navios['NAVIOS'])):
-            navio = parametros_navios['NAVIOS'][idx] + '-L' + str(idx+2)
-            navios.append(navio)
-            parametros_navios['Taxa de Carreg.'][navio] = taxa_carreg_por_navio[parametros_navios['NAVIOS'][idx]]
-            for parametro in conf_parametros_navios:
-                parametros_navios[parametro][navio] = parametros_navios[parametro][idx]
-                del parametros_navios[parametro][idx]
+        # parametros_navios['Taxa de Carreg.'] = {}
+        # for idx in range(len(parametros_navios['NAVIOS'])):
+        #     navio = parametros_navios['NAVIOS'][idx] + '-L' + str(idx+2)
+        #     navios.append(navio)
+        #     parametros_navios['Taxa de Carreg.'][navio] = taxa_carreg_por_navio[parametros_navios['NAVIOS'][idx]]
+        #     for parametro in conf_parametros_navios:
+        #         parametros_navios[parametro][navio] = parametros_navios[parametro][idx]
+        #         del parametros_navios[parametro][idx]
 
         # Guarda os índices dos navios com data-real até D14 (ou seja não inclui os navios D+14)
-        navios_ate_d14 = []
-        for parametro in ['DATA-PLANEJADA','DATA-REAL']:
-            for navio in navios:
-                if parametros_navios[parametro][navio] != 'D+14':
-                    # Usa o mesmo formato dos índices encontrados em `dias`
-                    parametros_navios[parametro][navio] = f'd{int(parametros_navios[parametro][navio][1:]):02d}'
-                    if parametro == 'DATA-PLANEJADA':
-                        navios_ate_d14.append(navio)
-                else:
-                    parametros_navios[parametro][navio] = 'd15' # Para facilitar D+14 é tratado como d15
+        # navios_ate_d14 = []
+        # for parametro in ['DATA-PLANEJADA','DATA-REAL']:
+        #     for navio in navios:
+        #         if parametros_navios[parametro][navio] != 'D+14':
+        #             # Usa o mesmo formato dos índices encontrados em `dias`
+        #             parametros_navios[parametro][navio] = f'd{int(parametros_navios[parametro][navio][1:]):02d}'
+        #             if parametro == 'DATA-PLANEJADA':
+        #                 navios_ate_d14.append(navio)
+        #         else:
+        #             parametros_navios[parametro][navio] = 'd15' # Para facilitar D+14 é tratado como d15
 
         # -----------------------------------------------------------------------------
 
@@ -462,47 +475,53 @@ class Load_data:
 
         parametros_calculados['RP (Recuperação Mássica) - C3'] = {}
         for dia in dias:
-            if parametros_mina['Campanha - C3'][dia] == 'RNS':
-                valor = -10.72 + (1.6346*parametros_mina['Fe_a - C3'][dia]) \
-                        -(3.815*parametros_mina['Al2O3a - C3'][dia])        \
-                        -(0.0984*parametros_mina['Hec - C3'][dia])
-            elif parametros_mina['Campanha - C3'][dia] == 'RLS':
-                valor = -13.18 + (1.614*parametros_mina['Fe_a - C3'][dia]) \
-                        -(3.92*parametros_mina['Al2O3a - C3'][dia])        \
-                        -(0.0187*parametros_mina['Hec - C3'][dia])
-            parametros_calculados['RP (Recuperação Mássica) - C3'][dia] = valor
+            parametros_calculados['RP (Recuperação Mássica) - C3'][dia] = cenario['mina']['RP'][dia]
 
         parametros_calculados['Rendimento Operacional - C3'] = {}
         for dia in dias:
-            parametros_calculados['Rendimento Operacional - C3'][dia] = parametros_mina['UD - C3'][dia] * parametros_mina['DF - C3'][dia]
+            parametros_calculados['Rendimento Operacional - C3'][dia] = cenario['mina']['UD'][dia] * cenario['mina']['DF'][dia]
 
         parametros_calculados['% Sólidos - EB06'] = {}
         parametros_calculados['Densidade Polpa - EB06'] = {}
         parametros_calculados['Relação: tms - EB06'] = {}
         parametros_calculados['Densidade Polpa - EB07'] = {}
         for dia in dias:
-            parametros_calculados['% Sólidos - EB06'][dia] = parametros_mina['Sól - C3'][dia] - 0.012
-            parametros_calculados['Densidade Polpa - EB06'][dia] = 1/((parametros_calculados['% Sólidos - EB06'][dia]/4.75)+(1-parametros_calculados['% Sólidos - EB06'][dia]))
-            parametros_calculados['Relação: tms - EB06'][dia] = 5395*parametros_calculados['% Sólidos - EB06'][dia]*parametros_calculados['Densidade Polpa - EB06'][dia]/100
-            parametros_calculados['Densidade Polpa - EB07'][dia] = parametros_calculados['Densidade Polpa - EB06'][dia]
+            parametros_calculados['% Sólidos - EB06'][dia] = cenario['mina']['SOL'][dia] - 0.012
+            parametros_calculados['Densidade Polpa - EB06'][dia] = 1/((cenario['mina']['SOL_EB06'][dia]/4.75)+(1- cenario['mina']['SOL_EB06'][dia]))
+            parametros_calculados['Relação: tms - EB06'][dia] = 5395* cenario['mina']['SOL_EB06'][dia]* cenario['mina']['densidade'][dia]/100
+            parametros_calculados['Densidade Polpa - EB07'][dia] =  cenario['mina']['densidade'][dia]
+        
+        perc_solidos = cenario['mina']['SOL']
+        densidade = cenario['mina']['densidade']
+        DF = cenario['mina']['DF']
+        UD = cenario['mina']['UD']
+        umidade = cenario['mina']['umidade']
+        RP = cenario['mina']['RP']
+        dif_balanco = cenario['mina']['dif_balanco']
 
-        parametros_calculados['H20'] = {}
-        for dia in dias:
-            parametros_calculados['H20'][dia] = 3.296 + (0.002986*parametros_ubu['SE'][dia]) + (0.615*parametros_ubu['PPC'][dia])
 
-        parametros_calculados['Bombeamento Acumulado Polpa final semana anterior'] = 0
-        for idx_hora in range(len(horas_Dm3)-1,-1,-1):
-            if parametros_mineroduto_md3['Bombeamento Polpa -D3'][idx_hora] == 'H20':
-                break;
-            else:
-                parametros_calculados['Bombeamento Acumulado Polpa final semana anterior'] += 1;
-
-        parametros_calculados['Bombeamento Acumulado Agua final semana anterior'] = 0
-        for idx_hora in range(len(horas_Dm3)-1,-1,-1):
-            if parametros_mineroduto_md3['Bombeamento Polpa -D3'][idx_hora] == 'H20':
-                parametros_calculados['Bombeamento Acumulado Agua final semana anterior'] += 1;
-            else:
-                break;
+        navios_ate_d14 = []
+        # min_producao_produtos_ubu = cenario['porto']['min_producao_produtos_ubu']
+        capacidade_patio_porto_min = cenario['porto']['capacidade_patio_porto_min']
+        AguaLi = cenario['mineroduto']['janela_min_bombeamento_agua']
+        AguaLs = cenario['mineroduto']['janela_max_bombeamento_agua']
+        PolpaLi = cenario['mineroduto']['janela_min_bombeamento_polpa']
+        PolpaLs = cenario['mineroduto']['janela_max_bombeamento_polpa']
+        bomb_polpa_acum_semana_anterior = cenario['mineroduto']['bombeamento_polpa_acum_semana_anterior']
+        bomb_agua_acum_semana_anterior = cenario['mineroduto']['bombeamento_agua_acum_semana_anterior']        
+        carga_navios = cenario['porto']['carga_navios']
+        taxa_carreg_navios = cenario['porto']['taxa_carreg_navios']
+        estoque_produto_patio = cenario['porto']['estoque_produto_patio']
+        capacidade_carreg_porto_por_dia = cenario['porto']['capacidade_carreg_porto_por_dia']
+        capacidade_patio_porto_min = cenario['porto']['capacidade_patio_porto_min']
+        capacidade_patio_porto_max = cenario['porto']['capacidade_patio_porto_max']
+        data_chegada_navio = cenario['porto']['data_chegada_navio']
+        max_capacidade_eb06 = cenario['mineroduto']['max_capacidade_eb06']
+        tempo_germano_matipo = cenario['mineroduto']['tempo_germano_matipo']
+        tempo_germano_ubu = cenario['mineroduto']['tempo_germano_matipo']
+        prod_bomb_hora_anterior = cenario['mineroduto']['prod_polpa_hora_anterior']
+        fator_conv = cenario['usina']['fator_conv']
+        prod_polpa_hora_anterior = cenario['mineroduto']['prod_polpa_hora_anterior']
 
         data = {'horas_D14': horas_D14, 'produtos_conc': produtos_conc, 'horas_Dm3_D14': horas_Dm3_D14, 'de_para_produtos_mina_conc': de_para_produtos_mina_conc,
                 'min_estoque_pulmao_concentrador': min_estoque_pulmao_concentrador, 'max_estoque_pulmao_concentrador': max_estoque_pulmao_concentrador,
@@ -516,9 +535,16 @@ class Load_data:
                 'max_estoque_polpa_ubu': max_estoque_polpa_ubu, 'max_taxa_envio_patio': max_taxa_envio_patio, 'max_taxa_retorno_patio_usina': max_taxa_retorno_patio_usina,
                 'min_estoque_patio_usina': min_estoque_patio_usina, 'max_estoque_patio_usina': max_estoque_patio_usina, 'estoque_polpa_ubu': estoque_ubu_inicial,
                 'estoque_inicial_patio_usina': estoque_inicial_patio_usina, 'fator_limite_excesso_patio': fator_limite_excesso_patio,
-                'parametros_navios': parametros_navios, 'capacidade_carreg_porto_por_dia': capacidade_carreg_porto_por_dia, 'navios_ate_d14': navios_ate_d14,
-                'produtos_de_cada_navio': produtos_de_cada_navio, 'estoque_produto_patio_d0': estoque_produto_patio_d0, 'parametros_mineroduto_md3': parametros_mineroduto_md3,
-                'horas_Dm3': horas_Dm3, 'navios': navios, 'vazao_bombas': vazao_bombas,
+                'capacidade_carreg__por_dia': capacidade_carreg_porto_por_dia, 'navios_ate_d14': navios_ate_d14,
+                'horas_Dm3': horas_Dm3, 'navios': navios, 'vazao_bombas': vazao_bombas, 'lim_min_campanha':lim_min_campanha,
+                'lim_max_campanha': lim_max_campanha, 'lim_acum_campanha': lim_acum_campanha, 'lim_min_janela': lim_min_janela, 'lim_max_janela':lim_max_janela,
+                'lim_acum_janela':lim_acum_janela, 'AguaLi': AguaLi, 'AguaLs': AguaLs, 'PolpaLi': PolpaLi, 'PolpaLs': PolpaLs, 'carga_navios': carga_navios, 
+                'taxa_carreg_navios': taxa_carreg_navios, 'estoque_produto_patio': estoque_produto_patio, 'capacidade_carreg_porto_por_dia': capacidade_carreg_porto_por_dia,
+                'produtos_navio': produtos_de_cada_navio, 'capacidade_patio_porto_min': capacidade_patio_porto_min, 'capacidade_patio_porto_max': capacidade_patio_porto_max,
+                'data_chegada_navio': data_chegada_navio, 'perc_solidos': perc_solidos, 'densidade': densidade, 'DF': DF, 'UD': UD, 'umidade': umidade, 'RP': RP,
+                'dif_balanco': dif_balanco, 'bomb_polpa_acum_semana_anterior': bomb_polpa_acum_semana_anterior, 'bomb_agua_acum_semana_anterior': bomb_agua_acum_semana_anterior,
+                'max_capacidade_eb06': max_capacidade_eb06, 'tempo_germano_matipo': tempo_germano_matipo, 'tempo_germano_ubu': tempo_germano_ubu, 'prod_bomb_hora_anterior':prod_bomb_hora_anterior,
+                'fator_conv': fator_conv, 'prod_polpa_hora_anterior': prod_polpa_hora_anterior
                 }
 
         return cenario, solver, data

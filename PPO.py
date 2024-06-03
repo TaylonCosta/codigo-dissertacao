@@ -184,13 +184,13 @@ class CustomizedEnv(gymnasium.Env):
 
         #fixa o batch no tamanho minimo para apenas um produto:
         if self.nBatchsP == 0 and action != 0:
-            if self.passo+self.PolpaLi <= 23 and self.nBatchsP+self.PolpaLi <= self.PolpaLs:
+            if self.passo+self.PolpaLi <= SIZE_BOMBEAMENTO-1 and self.nBatchsP+self.PolpaLi <= self.PolpaLs:
                 for i in range(self.passo, (self.passo+self.PolpaLi)):
                   self.BombeamentoPolpa[i] = action
                   self.passo += 1
                   self.nBatchsP += 1
-            elif not self.passo+self.PolpaLi <= 23 and self.nBatchsP+self.PolpaLi <= self.PolpaLs:
-                for i in range(self.passo, 23):
+            elif not self.passo+self.PolpaLi <= SIZE_BOMBEAMENTO-1 and self.nBatchsP+self.PolpaLi <= self.PolpaLs:
+                for i in range(self.passo, SIZE_BOMBEAMENTO-1):
                   self.BombeamentoPolpa[i] = action
                   self.passo += 1
                   self.nBatchsP += 1
@@ -200,13 +200,13 @@ class CustomizedEnv(gymnasium.Env):
             self.nBatchsA = 0
 
         elif self.nBatchsA == 0 and action == 0:
-          if self.passo+self.AguaLi <= 23 and self.nBatchsA+self.AguaLi <= self.AguaLs:
+          if self.passo+self.AguaLi <= SIZE_BOMBEAMENTO-1 and self.nBatchsA+self.AguaLi <= self.AguaLs:
             for i in range(self.passo, (self.passo+self.AguaLi)):
               self.BombeamentoPolpa[i] = action
               self.passo += 1
               self.nBatchsA += 1
-          elif not self.passo+self.AguaLi <= 23 and self.nBatchsA+self.AguaLi <= self.AguaLs:
-            for i in range(self.passo, 23):
+          elif not self.passo+self.AguaLi <= SIZE_BOMBEAMENTO-1 and self.nBatchsA+self.AguaLi <= self.AguaLs:
+            for i in range(self.passo, SIZE_BOMBEAMENTO-1):
               self.BombeamentoPolpa[i] = action
               self.passo += 1
               self.nBatchsA += 1

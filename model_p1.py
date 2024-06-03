@@ -106,7 +106,6 @@ class Model_p1():
                 )
 
         # Restrição para tratar o de-para de produtos da mina e do concentrador
-        #DA PRA TIRAR
         for produto_mina in produtos_mina:
             for produto_conc in produtos_conc:
                 for hora in horas_D14:
@@ -122,7 +121,6 @@ class Model_p1():
                         )
 
         # Restrição para garantir que o concentrador produz um produto por vez
-        #DA PRA TIRAR
         for hora in horas_D14:
             modelo += (
                 lpSum([varProdutoConcentrador[produto_mina][produto_conc][hora] for produto_mina in produtos_mina for produto_conc in produtos_conc]) <= 1,
@@ -130,7 +128,6 @@ class Model_p1():
             )
 
         # Restrição para amarrar a taxa de alimentação do concentrador ao único produto produzido por vez
-        #DA PRA TIRAR
         for produto_mina in produtos_mina:
             for produto_conc in produtos_conc:
                 for hora in horas_D14:

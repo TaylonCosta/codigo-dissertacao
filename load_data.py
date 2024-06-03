@@ -426,40 +426,8 @@ class Load_data:
 
         # -----------------------------------------------------------------------------
 
-        # Lendo dados da aba TAXA
-
-        # Usa Pandas porque é mais fácil para fazer agrupamento e cálculo de média de taxa de carregamento
-        excel_data_df = pandas.read_excel(cenario['geral']['planilha'], sheet_name='TAXA')
-        # taxa_carreg_por_navio = excel_data_df.groupby('CUSTOMER')['Taxa de Carreg.'].mean()
-
         # Guarda os índices dos navios
         navios = cenario['porto']['navios']
-
-        # taxa_carregamento = cenario['porto']['taxa_carregamento']
-        # Esse trecho guarda as taxas de carregamento por navio e, além disso, altera os nomes dos navios
-        # pois eles podem se repetir, então é necessário adicionar um sufixo para diferenciá-los
-        # parametros_navios['Taxa de Carreg.'] = {}
-        # for idx in range(len(parametros_navios['NAVIOS'])):
-        #     navio = parametros_navios['NAVIOS'][idx] + '-L' + str(idx+2)
-        #     navios.append(navio)
-        #     parametros_navios['Taxa de Carreg.'][navio] = taxa_carreg_por_navio[parametros_navios['NAVIOS'][idx]]
-        #     for parametro in conf_parametros_navios:
-        #         parametros_navios[parametro][navio] = parametros_navios[parametro][idx]
-        #         del parametros_navios[parametro][idx]
-
-        # Guarda os índices dos navios com data-real até D14 (ou seja não inclui os navios D+14)
-        # navios_ate_d14 = []
-        # for parametro in ['DATA-PLANEJADA','DATA-REAL']:
-        #     for navio in navios:
-        #         if parametros_navios[parametro][navio] != 'D+14':
-        #             # Usa o mesmo formato dos índices encontrados em `dias`
-        #             parametros_navios[parametro][navio] = f'd{int(parametros_navios[parametro][navio][1:]):02d}'
-        #             if parametro == 'DATA-PLANEJADA':
-        #                 navios_ate_d14.append(navio)
-        #         else:
-        #             parametros_navios[parametro][navio] = 'd15' # Para facilitar D+14 é tratado como d15
-
-        # -----------------------------------------------------------------------------
 
         # PORTO
 

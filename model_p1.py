@@ -58,6 +58,7 @@ class Model_p1():
         max_taxa_retorno_patio_usina = data['max_taxa_retorno_patio_usina']
         min_estoque_patio_usina = data['min_estoque_patio_usina']
         max_estoque_patio_usina = data['max_estoque_patio_usina']
+        max_capacidade_eb06 = data['max_capacidade_eb06']
         estoque_polpa_ubu = data['estoque_polpa_ubu']
         estoque_inicial_patio_usina = data['estoque_inicial_patio_usina']
         fator_limite_excesso_patio = data['fator_limite_excesso_patio']
@@ -69,6 +70,7 @@ class Model_p1():
         dif_balanco = data['dif_balanco']
         perc_solidos = data['perc_solidos']
         densidade = data['densidade']
+        prod_minima_usina = data['min_producao_produtos_ubu']
 
         BIG_M = 10e6
         modelo = LpProblem("Plano Semanal", LpMaximize)
@@ -233,7 +235,6 @@ class Model_p1():
 
         # Indica o estoque EB06, por hora
         varEstoqueEB06 = LpVariable.dicts("Estoque EB06", (produtos_conc, horas_D14), 0, None, LpContinuous)
-        #varEstoqueEB04 = LpVariable.dicts("Estoque EB04", (produtos_conc, horas_D14), 0, None, LpContinuous)
 
         # Indica se há bombeamento de polpa em cada hora
         varBombeamentoPolpa = LpVariable.dicts("Bombeamento Polpa", (produtos_conc, horas_D14), 0, 1, LpInteger)
@@ -242,7 +243,7 @@ class Model_p1():
         for hora in horas_D14:
             modelo += (
                 lpSum(varEstoqueEB06[produto][hora] for produto in produtos_conc)
-                    <= parametros_mineroduto_ubu['Capacidade EB06'][hora],
+                    <= max_capacidade_eb06,
                 f"rest_capacidade_EstoqueEB06_{hora}",
             )
 
@@ -277,7 +278,7 @@ class Model_p1():
 
         #garante fixação
         for produto in produtos_conc:
-            for horas in horas_D14[0:24]:
+            for horas in horas_D14[0:168]:
                 if varBombeamentoPolpaPPO[produto][horas] == 0 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
                     modelo += (varBombeamentoPolpa[produto][horas] <=0, f"rest_fixado2_{produto}_{horas}")
                 if varBombeamentoPolpaPPO[produto][horas] == 1 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
@@ -332,7 +333,7 @@ class Model_p1():
                 for hora in horas_D14:
                     if de_para_produtos_conc_usina[produto_c][produto_u] == 1:
                         modelo += (
-                            varProducaoUbu[produto_c][produto_u][hora] == varProducaoSemIncorporacao[produto_u][hora],
+                            varProducaoUbu[produto_c][produto_u][hora] == varProducaoSemIncorporacao[produto_u][hora]*0.065,
                             f"rest_define_ProducaoUbu_{produto_c}_{produto_u}_{hora}",
                         )
                     else:
@@ -471,6 +472,11 @@ class Model_p1():
                         for produto in produtos_conc)
                 <= BIG_M * (1-varLiberaVolumePatio[horas_D14[i]]),
                 f"rest_define_tranferencia_para_patio_{horas_D14[i]}",
+            )
+
+        for produto_u in produtos_usina:
+            modelo += (
+                lpSum(varProducaoSemIncorporacao[produto_u][hora] for hora in horas_D14) >= prod_minima_usina[produto_u]
             )
 
         for fo in cenario['geral']['funcao_objetivo']:

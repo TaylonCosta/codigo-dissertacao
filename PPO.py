@@ -231,13 +231,6 @@ class CustomizedEnv(gymnasium.Env):
             self.nBatchsA += 1
             self.nBatchsP = 0
 
-        # if self.nBatchsP >= self.PolpaLs or (self.nBatchsA < self.AguaLi and self.nBatchsA > 0):
-        #     self.Polpa = [0]*len(self.prdt_conc)
-        #     self.Agua = 1
-        # if self.nBatchsA >= self.AguaLs or (self.nBatchsP < self.PolpaLi and self.nBatchsP > 0):
-        #     self.Agua = 0
-        #     self.Polpa = [1]*len(self.prdt_conc)
-
         terminou_episodio = bool(self.passo == FIM)
 
         self.FO_anterior = self.fo_value
@@ -293,7 +286,7 @@ class CustomizedEnv(gymnasium.Env):
         # self.mask= np.array([0, 0, 1, 0])
         self.mask = np.array([self.Agua])
         for i in range(0,len(self.Polpa)):
-            self.mask = np.append(self.mask, self.Polpa[i])
+          self.mask = np.append(self.mask, self.Polpa[i])
         return self.mask
 
 class RandomAgent():

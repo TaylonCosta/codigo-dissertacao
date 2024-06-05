@@ -73,28 +73,28 @@ def plot_prod_ubu(resultados):
 
     # Plot for group 1
     axs[0].plot(hours, prod_ubu_c1_u1, label='prod_c1_u1')
-    axs[0].plot(hours, prod_ubu_c2_u1, label='prod_c1_u2')
-    axs[0].plot(hours, prod_ubu_c3_u1, label='prod_c1_u3')
-    axs[0].set_title('Group 1')
+    axs[0].plot(hours, prod_ubu_c2_u1, label='prod_c2_u1')
+    axs[0].plot(hours, prod_ubu_c3_u1, label='prod_c3_u1')
+    axs[0].set_title('produto 1')
     axs[0].legend()
 
     # Plot for group 2
-    axs[1].plot(hours, prod_ubu_c1_u2, label='prod_c2_u1')
+    axs[1].plot(hours, prod_ubu_c1_u2, label='prod_c1_u2')
     axs[1].plot(hours, prod_ubu_c2_u2, label='prod_c2_u2')
-    axs[1].plot(hours, prod_ubu_c3_u2, label='prod_c2_u3')
-    axs[1].set_title('Group 2')
+    axs[1].plot(hours, prod_ubu_c3_u2, label='prod_c3_u2')
+    axs[1].set_title('produto 2')
     axs[1].legend()
 
     # Plot for group 3
-    axs[2].plot(hours, prod_ubu_c1_u3, label='prod_c3_u1')
-    axs[2].plot(hours, prod_ubu_c2_u3, label='prod_c3_u2')
+    axs[2].plot(hours, prod_ubu_c1_u3, label='prod_c1_u3')
+    axs[2].plot(hours, prod_ubu_c2_u3, label='prod_c2_u3')
     axs[2].plot(hours, prod_ubu_c3_u3, label='prod_c3_u3')
-    axs[2].set_title('Group 3')
+    axs[2].set_title('produto 3')
 
-    axs[3].plot(hours, prod_ubu_c1_u4, label='prod_c3_u1')
-    axs[3].plot(hours, prod_ubu_c2_u4, label='prod_c3_u2')
-    axs[3].plot(hours, prod_ubu_c3_u4, label='prod_c3_u3')
-    axs[3].set_title('Group 3')
+    axs[3].plot(hours, prod_ubu_c1_u4, label='prod_c1_u4')
+    axs[3].plot(hours, prod_ubu_c2_u4, label='prod_c2_u4')
+    axs[3].plot(hours, prod_ubu_c3_u4, label='prod_c3_u4')
+    axs[3].set_title('produto 4')
     axs[3].legend()
 
     # Adjust layout

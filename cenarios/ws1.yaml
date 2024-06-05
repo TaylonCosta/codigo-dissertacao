@@ -3,7 +3,7 @@ geral:
   planilha: instancias/P_Semanal.xlsx
   janela_planejamento: 7
   # funcao_objetivo: [max_conc, max_usina, min_atr_nav, min_est_patio]
-  funcao_objetivo: [max_usina]
+  funcao_objetivo: [max_conc, max_usina]
   mipgap: 0.3
   timeLimit: 30
 
@@ -58,7 +58,7 @@ usina:
   min_estoque_patio_usina: 0
   max_estoque_patio_usina: 300000
   fator_conv: {'d01': 0.065, 'd02': 0.065, 'd03': 0.065, 'd04': 0.065, 'd05': 0.065, 'd06': 0.065, 'd07': 0.065}
-  prod_minima_usina: {'PRDT_U1':0, 'PRDT_U2':0, 'PRDT_U3':0, 'PRDT_U4':10000}
+  prod_minima_usina: {'PRDT_U1':0, 'PRDT_U2':0, 'PRDT_U3':0, 'PRDT_U4':0}
 
 mineroduto:
   # bombeamento_polpa: {"PRDT_C" :{"d01_h01": 0, "d01_h02": 0, "d01_h03": 0, "d01_h04": 0, "d01_h05": 0, "d01_h06": 1, "d01_h07": 1, "d01_h08": 1, "d01_h09": 1,
@@ -93,7 +93,7 @@ mineroduto:
   fator_limite_excesso_patio: 0.8
 
   estoque_inicial_eb07: [["PRDT_C", 0]]
-  estoque_inicial_eb06: [["PRDT_C1", 0], ["PRDT_C2", 0], ["PRDT_C3", 0]]
+  estoque_inicial_eb06: [["PRDT_C1", 1500], ["PRDT_C2", 2000], ["PRDT_C3", 2000]]
   min_capacidade_eb07: 0.2
   max_capacidade_eb06: 10250
   max_capacidade_eb07: 30000
@@ -111,7 +111,7 @@ porto:
   capacidade_carreg_porto_por_dia:  1
   capacidade_patio_porto_min: 0
   capacidade_patio_porto_max: 2000000 
-  estoque_produto_patio: {'PRDT_U1': 2000000, 'PRDT_U2': 2000000, 'PRDT_U3': 2000000, 'PRDT_U4': 2000000}
+  estoque_produto_patio: {'PRDT_U1': 0, 'PRDT_U2': 0, 'PRDT_U3': 0, 'PRDT_U4': 0}
   navios: ['EZDK-L2', 'ACINDAR-L3', 'NUCOR-L5']
   produtos_de_cada_navio: [['EZDK-L2', 'PRDT_U1'],
                            ['ACINDAR-L3', 'PRDT_U3'],

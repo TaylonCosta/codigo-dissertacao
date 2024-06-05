@@ -15,7 +15,7 @@ class Load_data:
 
     def load(self):
         parser = argparse.ArgumentParser(description='Otimizador Plano Semanal')
-        parser.add_argument('-c', '--cenario', default='cenarios/ws0.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
+        parser.add_argument('-c', '--cenario', default='cenarios/ws1.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
         parser.add_argument('-s', '--solver', default='GUROBI', type=str, help='Nome do otimizador a ser usado')
         parser.add_argument('-o', '--pasta-saida', default='experimentos', type=str, help='Pasta onde serão salvos os arquivos de resultados')
         parser.add_argument('--relax-and-fix', action='store_true', help='Habilita a heurística Relax And Fix das variáveis do mineroduto')
@@ -52,7 +52,7 @@ class Load_data:
         produtos_conc = cenario['concentrador']['produtos_conc']
         produtos_usina = cenario['usina']['produtos_usina']
 
-        de_para_produtos_mina_conc = {'PRDT1': {'PRDT_C1': 1, 'PRDT_C2': 1, 'PRDT_C3': 0},
+        de_para_produtos_mina_conc = {'PRDT1': {'PRDT_C1': 1, 'PRDT_C2': 1, 'PRDT_C3': 1},
                                       'PRDT2': {'PRDT_C1': 0, 'PRDT_C2': 0, 'PRDT_C3': 1}}
         de_para_produtos_conc_usina = {'PRDT_C1': {'PRDT_U1': 0, 'PRDT_U2':0, 'PRDT_U3':0, 'PRDT_U4':1},
                                     'PRDT_C2': {'PRDT_U1': 0, 'PRDT_U2':1, 'PRDT_U3':1, 'PRDT_U4':0},
@@ -469,7 +469,7 @@ class Load_data:
 
 
         navios_ate_d14 = []
-        # min_producao_produtos_ubu = cenario['porto']['min_producao_produtos_ubu']
+        min_producao_produtos_ubu = cenario['usina']['prod_minima_usina']
         capacidade_patio_porto_min = cenario['porto']['capacidade_patio_porto_min']
         AguaLi = cenario['mineroduto']['janela_min_bombeamento_agua']
         AguaLs = cenario['mineroduto']['janela_max_bombeamento_agua']
@@ -512,14 +512,14 @@ class Load_data:
                 'data_chegada_navio': data_chegada_navio, 'perc_solidos': perc_solidos, 'densidade': densidade, 'DF': DF, 'UD': UD, 'umidade': umidade, 'RP': RP,
                 'dif_balanco': dif_balanco, 'bomb_polpa_acum_semana_anterior': bomb_polpa_acum_semana_anterior, 'bomb_agua_acum_semana_anterior': bomb_agua_acum_semana_anterior,
                 'max_capacidade_eb06': max_capacidade_eb06, 'tempo_germano_matipo': tempo_germano_matipo, 'tempo_germano_ubu': tempo_germano_ubu, 'prod_bomb_hora_anterior':prod_bomb_hora_anterior,
-                'fator_conv': fator_conv, 'prod_polpa_hora_anterior': prod_polpa_hora_anterior
+                'fator_conv': fator_conv, 'prod_polpa_hora_anterior': prod_polpa_hora_anterior, 'min_producao_produtos_ubu': min_producao_produtos_ubu
                 }
 
         return cenario, solver, data
 
     def load_simplified_data_ppo(self):
         parser = argparse.ArgumentParser(description='Otimizador Plano Semanal')
-        parser.add_argument('-c', '--cenario', default='cenarios/ws0.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
+        parser.add_argument('-c', '--cenario', default='cenarios/ws1.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
         parser.add_argument('-s', '--solver', default='GUROBI_CMD', type=str, help='Nome do otimizador a ser usado')
 
         args = parser.parse_args()

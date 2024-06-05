@@ -66,10 +66,12 @@ class Model_p1():
         args = data['args']
         DF = data['DF']
         UD = data['UD']
+        RP = data['RP']
         umidade = data['umidade']
         dif_balanco = data['dif_balanco']
         perc_solidos = data['perc_solidos']
         densidade = data['densidade']
+        fator_conversao = data['fator_conv']
         prod_minima_usina = data['min_producao_produtos_ubu']
 
         BIG_M = 10e6
@@ -200,8 +202,8 @@ class Model_p1():
                     varProducao[produto][hora]
                         == varTaxaAlim[produto][hora] *
                             (1-umidade[self.extrair_dia(hora)])  *
-                            parametros_calculados['RP (Recuperação Mássica) - C3'][self.extrair_dia(hora)] /
-                            100 * DF[self.extrair_dia(hora)] *
+                            RP[self.extrair_dia(hora)]/100 * 
+                            DF[self.extrair_dia(hora)] *
                             (1 - dif_balanco[self.extrair_dia(hora)]),
                     f"rest_define_Producao_{produto}_{hora}",
                 )
@@ -212,8 +214,8 @@ class Model_p1():
             for hora in horas_D14:
                 modelo += (
                     varProducaoVolume[produto][hora]
-                        == varProducao[produto][hora] * (1/parametros_calculados['% Sólidos - EB06'][self.extrair_dia(hora)])
-                                                    * (1/parametros_calculados['Densidade Polpa - EB06'][self.extrair_dia(hora)]),
+                        == varProducao[produto][hora] * (1/perc_solidos[self.extrair_dia(hora)])
+                                                    * (1/densidade[self.extrair_dia(hora)]),
                     f"rest_define_ProducaoVolume_{produto}_{hora}",
                 )
 
@@ -333,10 +335,19 @@ class Model_p1():
                 for hora in horas_D14:
                     if de_para_produtos_conc_usina[produto_c][produto_u] == 1:
                         modelo += (
-                            varProducaoUbu[produto_c][produto_u][hora] == varProducaoSemIncorporacao[produto_u][hora]*0.065,
+                            varProdutoPelot[produto_c][produto_u][hora] <= 1,
+                            f"rest_ProdutoPelot_{produto_c}_{produto_u}_{hora}"
+                        )
+                        modelo += (
+                            varProducaoUbu[produto_c][produto_u][hora] == varProducaoSemIncorporacao[produto_u][hora]*(1+fator_conversao[self.extrair_dia(hora)]),
                             f"rest_define_ProducaoUbu_{produto_c}_{produto_u}_{hora}",
                         )
                     else:
+
+                        modelo += (
+                            varProdutoPelot[produto_c][produto_u][hora] == 0,
+                            f"rest_ProdutoPelot_{produto_c}_{produto_u}_{hora}"
+                        )
                         modelo += (
                             varProducaoUbu[produto_c][produto_u][hora] == 0,
                             f"rest_zera_ProducaoUbu_{produto_c}_{produto_u}_{hora}",
@@ -479,9 +490,9 @@ class Model_p1():
                 lpSum(varProducaoSemIncorporacao[produto_u][hora] for hora in horas_D14) >= prod_minima_usina[produto_u]
             )
 
-        for fo in cenario['geral']['funcao_objetivo']:
-            if not fo in ['max_brit', 'min_atr_nav', 'max_conc', 'max_usina', 'max_est_polpa', 'max_pf', 'min_est_patio']:
-                raise Exception(f"Função objetivo {fo} não implementada!")
+        # for fo in cenario['geral']['funcao_objetivo']:
+        #     if not fo in ['max_brit', 'min_atr_nav', 'max_conc', 'max_usina', 'max_est_polpa', 'max_pf', 'min_est_patio']:
+        #         raise Exception(f"Função objetivo {fo} não implementada!")
 
         # Definindo a função objetivo
         fo = 0

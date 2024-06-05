@@ -19,12 +19,12 @@ from datetime import datetime
 UNIQUE_INSTANCE = True
 UNIQUE_INSTANCE_SEED = 51
 TRAINING_STEPS = 2
-USAR_LOG_TENSORBOARD = False # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
+USAR_LOG_TENSORBOARD = True # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
 SEMENTE = 5
 RANDOM = False
 SIZE = 1
 SIZE_BOMBEAMENTO = 168
-SAVE = False
+SAVE = True
 LOAD = False
 
 
@@ -300,7 +300,7 @@ class RandomAgent():
 def mask_fn(env: gymnasium.Env) -> np.ndarray:
     return env.valid_action_mask()
 
-def evaluate_results(model, env, seeds, render=True):
+def evaluate_results(model, env, seeds, render=False):
     results = []
     FO_bests = []
 

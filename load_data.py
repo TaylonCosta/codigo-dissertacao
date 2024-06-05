@@ -52,7 +52,7 @@ class Load_data:
         produtos_conc = cenario['concentrador']['produtos_conc']
         produtos_usina = cenario['usina']['produtos_usina']
 
-        de_para_produtos_mina_conc = {'PRDT1': {'PRDT_C1': 1, 'PRDT_C2': 1, 'PRDT_C3': 1},
+        de_para_produtos_mina_conc = {'PRDT1': {'PRDT_C1': 1, 'PRDT_C2': 1, 'PRDT_C3': 0},
                                       'PRDT2': {'PRDT_C1': 0, 'PRDT_C2': 0, 'PRDT_C3': 1}}
         de_para_produtos_conc_usina = {'PRDT_C1': {'PRDT_U1': 0, 'PRDT_U2':0, 'PRDT_U3':0, 'PRDT_U4':1},
                                     'PRDT_C2': {'PRDT_U1': 0, 'PRDT_U2':1, 'PRDT_U3':1, 'PRDT_U4':0},
@@ -520,7 +520,7 @@ class Load_data:
     def load_simplified_data_ppo(self):
         parser = argparse.ArgumentParser(description='Otimizador Plano Semanal')
         parser.add_argument('-c', '--cenario', default='cenarios/ws1.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
-        parser.add_argument('-s', '--solver', default='GUROBI_CMD', type=str, help='Nome do otimizador a ser usado')
+        parser.add_argument('-s', '--solver', default='PULP_CBC_CMD', type=str, help='Nome do otimizador a ser usado')
 
         args = parser.parse_args()
 

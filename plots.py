@@ -50,6 +50,27 @@ def plot_prod_c3(resultados):
     plt.legend()
     plt.show()
 
+
+def plot_prod_sem_incorp_ubu(resultados):
+    prod_ubu_u1_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Producao_sem_incorporacao_PRDT_U1")]
+    prod_ubu_u2_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Producao_sem_incorporacao_PRDT_U2")]
+    prod_ubu_u3_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Producao_sem_incorporacao_PRDT_U3")]
+    prod_ubu_u4_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Producao_sem_incorporacao_PRDT_U4")]
+
+
+    hours = range(0, 168)
+
+    plt.plot(hours, prod_ubu_u1_values, label='Producao_sem_incorporacao_PRDT_U1')
+    plt.plot(hours, prod_ubu_u2_values, label='Producao_sem_incorporacao_PRDT_U2')
+    plt.plot(hours, prod_ubu_u3_values, label='Producao_sem_incorporacao_PRDT_U3')
+    plt.plot(hours, prod_ubu_u4_values, label='Producao_sem_incorporacao_PRDT_U4')
+
+    plt.xlabel('Hour')
+    plt.ylabel('Value')
+    plt.legend()
+    plt.show()
+
+
 def plot_prod_ubu(resultados):
     prod_ubu_c1_u1 = [value for key, value in resultados["variaveis"].items() if key.startswith("Producao_Ubu_PRDT_C1_PRDT_U1")]
     prod_ubu_c2_u1 = [value for key, value in resultados["variaveis"].items() if key.startswith("Producao_Ubu_PRDT_C2_PRDT_U1")]

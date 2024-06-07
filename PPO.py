@@ -18,7 +18,7 @@ from datetime import datetime
 
 UNIQUE_INSTANCE = True
 UNIQUE_INSTANCE_SEED = 51
-TRAINING_STEPS = 2
+TRAINING_STEPS = 250000
 USAR_LOG_TENSORBOARD = (
     True  # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
 )
@@ -175,6 +175,8 @@ class CustomizedEnv(gymnasium.Env):
         self.seed(seed)
         self.passo = 0
         self.iter = 0
+        self.cont_fo = 0
+        self.cont_reward = 0
         self.ultima_acao = None
         self.ultima_recompensa = None
         self.Agua = 1
@@ -219,6 +221,8 @@ class CustomizedEnv(gymnasium.Env):
         self.passo = 0
         self.nBatchsP = 0
         self.nBatchsA = 0
+        self.cont_fo = 0
+        self.cont_reward = 0
         self.Agua = 0
         self.Polpa = [0] * len(self.prdt_conc)
         self.status = -1
@@ -250,7 +254,6 @@ class CustomizedEnv(gymnasium.Env):
         self.Agua = 1
         self.Polpa = [1] * len(self.prdt_conc)
         self.actual_state = []
-
         # fixa o batch no tamanho minimo para apenas um produto:
         if self.nBatchsP == 0 and action != 0:
             if (
@@ -341,8 +344,18 @@ class CustomizedEnv(gymnasium.Env):
 
         recompensa = float(self.FO - self.FO_anterior)
 
+        if self.FO == self.FO_anterior or self.ultima_recompensa == recompensa:
+            self.cont_fo += 1
+            self.cont_reward += 1
+
+        if self.cont_fo == 30 or self.cont_reward == 30:
+            terminou_episodio = bool(self.passo == FIM)
+            self.reset()
+
         self.ultima_acao = action
         self.ultima_recompensa = recompensa
+
+
 
         truncated = False
 
@@ -499,13 +512,13 @@ def run_ppo():
     # OLHAR COMO FIXAR SEED NO AMBIENTE
     EVALUATION_SEEDS = FIXED_EVALUATION_SEEDS[:qtde_avaliacoes]
 
-    PPO_avg_FO_bests, PPO_results = evaluate_results(
-        model, env, EVALUATION_SEEDS, render=False
-    )
+    # PPO_avg_FO_bests, PPO_results = evaluate_results(
+    #     model, env, EVALUATION_SEEDS, render=False
+    # )
     # random_avg_FO_bests, random_results = evaluate_results(RandomAgent(env), env, SEMENTES_AVALIACAO, render=False)
     myfile = open("resultados.txt", "w")
-    myfile.write(str(PPO_avg_FO_bests) + "\n")
-    myfile.write(str(PPO_results))
+    myfile.write(str(env.PPO_avg_FO_bests) + "\n")
+    myfile.write(str(env.PPO_results))
     myfile.close()
     print(datetime.now())
     print(f"Done! Resultado: {env.FO_Best} (inicial: {env.FO_Inicial})")

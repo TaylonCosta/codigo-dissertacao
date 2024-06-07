@@ -54,18 +54,18 @@ usina:
   min_estoque_polpa_ubu: 0
   max_estoque_polpa_ubu: 40000
   estoque_inicial_patio_usina: {"PRDT_C1":0, "PRDT_C2":0, "PRDT_C3":0}
-  estoque_inicial_polpa_ubu: [["PRDT_C1", 0], ["PRDT_C2", 0], ["PRDT_C3", 10000]]
+  estoque_inicial_polpa_ubu: [["PRDT_C1", 0], ["PRDT_C2", 0], ["PRDT_C3", 0]]
   min_estoque_patio_usina: 0
   max_estoque_patio_usina: 300000
   fator_conv: {'d01': 0.065, 'd02': 0.065, 'd03': 0.065, 'd04': 0.065, 'd05': 0.065, 'd06': 0.065, 'd07': 0.065}
-  prod_minima_usina: {'PRDT_U1':9000, 'PRDT_U2':0, 'PRDT_U3':0, 'PRDT_U4':0}
+  prod_minima_usina: {'PRDT_U1':0, 'PRDT_U2':0, 'PRDT_U3':0, 'PRDT_U4':0}
 
 mineroduto:
   # bombeamento_polpa: {"PRDT_C" :{"d01_h01": 0, "d01_h02": 0, "d01_h03": 0, "d01_h04": 0, "d01_h05": 0, "d01_h06": 1, "d01_h07": 1, "d01_h08": 1, "d01_h09": 1,
   # "d01_h10": 1, "d01_h11": 0, "d01_h12": 0, "d01_h13": 0, "d01_h14": 0, "d01_h15": 0, "d01_h16": 0, "d01_h17": 1, "d01_h18": 1, "d01_h19": 1,
   # "d01_h20": 1, "d01_h21": 1, "d01_h22": 0, "d01_h23": 0, "d01_h24": 0}}
   bombeamento_matipo: {'d01': 1270, 'd02': 1270, 'd03': 1270, 'd04': 1270, 'd05': 1270, 'd06': 1270, 'd07': 1270, 'd08': 1270, 'd09': 1270, 'd10': 1270, 'd11': 1270, 'd12': 1270, 'd13': 1270, 'd14': 1270}
-  janela_min_bombeamento_polpa: 7
+  janela_min_bombeamento_polpa: 9
   janela_max_bombeamento_polpa: 11
   fixar_janela_bombeamento: livre
   janela_fixa_bombeamento_polpa: 13
@@ -73,8 +73,8 @@ mineroduto:
   bombeamento_restante_janela_anterior_agua: 0
   considerar_janela_final: False
 
-  janela_min_bombeamento_agua: 4
-  janela_max_bombeamento_agua: 7
+  janela_min_bombeamento_agua: 5
+  janela_max_bombeamento_agua: 12
   fixar_janela_bombeamento_agua: livre
   janela_fixa_bombeamento_agua: 6
   janela_para_fixar_bombeamento_agua: 168
@@ -93,7 +93,7 @@ mineroduto:
   fator_limite_excesso_patio: 0.8
 
   estoque_inicial_eb07: [["PRDT_C", 0]]
-  estoque_inicial_eb06: [["PRDT_C1", 0], ["PRDT_C2", 0], ["PRDT_C3", 0]]
+  estoque_inicial_eb06: [["PRDT_C1", 1500], ["PRDT_C2", 1500], ["PRDT_C3", 1500]]
   min_capacidade_eb07: 0.2
   max_capacidade_eb06: 10250
   max_capacidade_eb07: 30000
@@ -132,7 +132,7 @@ porto:
 
 
 # {'dm-3_h01': 0, 'dm-3_h02': 0, 'dm-3_h03': 0, 'dm-3_h04': 0, 'dm-3_h05': 0, 'dm-3_h06': 0, 'dm-3_h07': 0,
-#   'dm-3_h08': 0, 'dm-3_h09': 1, 'dm-3_h10': 1, 'dm-3_h11': 1, 'dm-3_h12': 1, 'dm-3_h13': 1, 'dm-3_h14': 1, 'dm-3_h15': 1, 'dm-3_h16': 1,
+#   'dm-3_h08': 0, 'dm-3_h09': 1, 'dm-3_h10': 1, 'dm-3_h11': 1, 'dm-3_h12': 1, 'dm-3_h13':1270 1, 'dm-3_h14': 1, 'dm-3_h15': 1, 'dm-3_h16': 1,
 #   'dm-3_h17': 1, 'dm-3_h18': 1, 'dm-3_h19': 1, 'dm-3_h20': 1, 'dm-3_h21': 1, 'dm-3_h22': 1, 'dm-3_h23': 1, 'dm-3_h24': 0, 'dm-2_h01': 0,
 #   'dm-2_h02': 0, 'dm-2_h03': 0, 'dm-2_h04': 0, 'dm-2_h05': 0, 'dm-2_h06': 0, 'dm-2_h07': 0, 'dm-2_h08': 1, 'dm-2_h09': 1, 'dm-2_h10': 1,
 #   'dm-2_h11': 1, 'dm-2_h12': 1, 'dm-2_h13': 1, 'dm-2_h14': 1, 'dm-2_h15': 1, 'dm-2_h16': 1, 'dm-2_h17': 1, 'dm-2_h18': 1, 'dm-2_h19': 1,

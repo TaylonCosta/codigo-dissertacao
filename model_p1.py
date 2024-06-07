@@ -28,9 +28,12 @@ class Model_p1():
         return f"{nome_base_arquivo}_{contador}.json"
 
 
-    def modelo(self, cenario, solver, data, varBombeamentoPolpaPPO):
+    def modelo(self, cenario, solver, data, varBombeamentoPolpaPPO, horizon):
         # variaveis utilizadas no modelo
-        horas_D14 = data['horas_D14']
+        if horizon != 0:
+            horas_D14 = data['horas_D14'][:horizon]
+        else:
+            horas_D14 = data['horas_D14']
         produtos_conc = data['produtos_conc']
         de_para_produtos_mina_conc = data['de_para_produtos_mina_conc']
         min_estoque_pulmao_concentrador = data['min_estoque_pulmao_concentrador']
@@ -280,7 +283,7 @@ class Model_p1():
 
         #garante fixação
         for produto in produtos_conc:
-            for horas in horas_D14[0:168]:
+            for horas in horas_D14[0:len(horas_D14)]:
                 if varBombeamentoPolpaPPO[produto][horas] == 0 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
                     modelo += (varBombeamentoPolpa[produto][horas] <=0, f"rest_fixado2_{produto}_{horas}")
                 if varBombeamentoPolpaPPO[produto][horas] == 1 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
@@ -497,9 +500,9 @@ class Model_p1():
         # Definindo a função objetivo
         fo = 0
         # if 'max_conc' in cenario['geral']['funcao_objetivo']:
-        #     fo += lpSum([varTaxaAlim[produto_conc][hora] for produto_conc in produtos_conc for hora in horas_D14])
-        if 'max_usina' in cenario['geral']['funcao_objetivo']:
-            fo += lpSum([varProducaoSemIncorporacao[produto_usina][hora] for produto_usina in produtos_usina for hora in horas_D14])
+        fo += lpSum([varTaxaAlim[produto_conc][hora] for produto_conc in produtos_conc for hora in horas_D14])
+        # if 'max_usina' in cenario['geral']['funcao_objetivo']:
+        fo += lpSum([varProducaoSemIncorporacao[produto_usina][hora] for produto_usina in produtos_usina for hora in horas_D14])
         # if 'max_brit' in cenario['geral']['funcao_objetivo']:
         #     fo += (lpSum([varTaxaBritagem[produto_mina][hora] for produto_mina in produtos_mina for hora in horas_D14]))
 

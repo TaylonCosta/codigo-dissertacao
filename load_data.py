@@ -31,7 +31,7 @@ class Load_data:
         # -----------------------------------------------------------------------------
         # Solver
         print(f'[OK]\nInstanciando solver {args.solver}...   ', end='')
-        solver = getSolver(args.solver, msg=True)
+        solver = getSolver(args.solver, msg=True, timeLimit=120, gapRel=0.01)
         # solver.options.remove(("SolutionLimit", value))
         #------------------------------------------------------------------------------
 
@@ -536,8 +536,12 @@ class Load_data:
         for produto, estoque in cenario['usina']['estoque_inicial_polpa_ubu']:
             estoque_ubu_inicial[produto] = estoque
 
-        disp_conc_inicial = [10000]*24
-        disp_usina_inicial = [10000]*24
+        disp_conc_inicial = (cenario['concentrador']['max_taxa_alimentacao']*
+                            (1-cenario['mina']['umidade']['d01']) *
+                            (cenario['mina']['RP']['d01']/100)* 
+                            cenario['mina']['DF']['d01']*
+                            (1 - cenario['mina']['dif_balanco']['d01']))*(1/cenario['mina']['SOL']['d01'])*(1/cenario['mina']['densidade']['d01'])
+        disp_usina_inicial = cenario['usina']['max_producao_sem_incorporacao']
 
         MaxE06 = cenario['mineroduto']['max_capacidade_eb06']
         MaxEUBU = cenario['usina']['max_estoque_polpa_ubu']

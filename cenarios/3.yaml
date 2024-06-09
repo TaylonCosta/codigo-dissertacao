@@ -58,7 +58,7 @@ usina:
   min_estoque_patio_usina: 0
   max_estoque_patio_usina: 300000
   fator_conv: {'d01': 0.065, 'd02': 0.065, 'd03': 0.065, 'd04': 0.065, 'd05': 0.065, 'd06': 0.065, 'd07': 0.065}
-  prod_minima_usina: {'PRDT_U1':0, 'PRDT_U2':0, 'PRDT_U3':0, 'PRDT_U4':0}
+  prod_minima_usina: {'PRDT_U1':0, 'PRDT_U2':0, 'PRDT_U3':0, 'PRDT_U4':100000}
 
 mineroduto:
   # bombeamento_polpa: {"PRDT_C" :{"d01_h01": 0, "d01_h02": 0, "d01_h03": 0, "d01_h04": 0, "d01_h05": 0, "d01_h06": 1, "d01_h07": 1, "d01_h08": 1, "d01_h09": 1,

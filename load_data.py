@@ -3,6 +3,8 @@ import pandas
 import argparse
 from pulp import *
 from openpyxl import load_workbook
+import random
+
 
 
 class Load_data:
@@ -13,9 +15,13 @@ class Load_data:
         return cenario
 
 
-    def load(self):
+    def load(self, rand):
         parser = argparse.ArgumentParser(description='Otimizador Plano Semanal')
-        parser.add_argument('-c', '--cenario', default='cenarios/ws1.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
+        if rand:
+            instance = random.randint(1, 40)
+            parser.add_argument('-c', '--cenario', default=f'cenarios/{instance}.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
+        else:
+            parser.add_argument('-c', '--cenario', default='cenarios/1.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
         parser.add_argument('-s', '--solver', default='GUROBI', type=str, help='Nome do otimizador a ser usado')
         parser.add_argument('-o', '--pasta-saida', default='experimentos', type=str, help='Pasta onde serão salvos os arquivos de resultados')
         parser.add_argument('--relax-and-fix', action='store_true', help='Habilita a heurística Relax And Fix das variáveis do mineroduto')

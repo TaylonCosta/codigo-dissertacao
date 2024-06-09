@@ -159,7 +159,7 @@ class CustomizedEnv(gymnasium.Env):
         # self.observation_space = spaces.Box(len(self.Lista0)*[tam]+len(self.Lista0)*[self.Dmax])
         load_data = Load_data()
         self.inital_data_ppo = load_data.load_simplified_data_ppo()
-        self.data = load_data.load()
+        self.data = load_data.load(True)
         self.unique_instance = unique_instance
         if self.unique_instance:
             self.create_instance()

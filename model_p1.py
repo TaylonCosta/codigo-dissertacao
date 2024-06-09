@@ -76,6 +76,11 @@ class Model_p1():
         densidade = data['densidade']
         fator_conversao = data['fator_conv']
         prod_minima_usina = data['min_producao_produtos_ubu']
+        PolpaLi = data['PolpaLi']
+        PolpaLs = data['PolpaLs']
+        AguaLi = data['AguaLi']
+        AguaLs = data['AguaLs']
+
 
         BIG_M = 10e6
         modelo = LpProblem("Plano Semanal", LpMaximize)
@@ -281,15 +286,102 @@ class Model_p1():
                 f"rest_bombeamento_unico_produto_{hora}",
             )
 
-        #garante fixação
-        for produto in produtos_conc:
-            for horas in horas_D14[0:len(horas_D14)]:
-                if varBombeamentoPolpaPPO[produto][horas] == 0 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
-                    modelo += (varBombeamentoPolpa[produto][horas] <=0, f"rest_fixado2_{produto}_{horas}")
-                if varBombeamentoPolpaPPO[produto][horas] == 1 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
-                    modelo += (varBombeamentoPolpa[produto][horas] >=1, f"rest_fixado2_{produto}_{horas}")
+        if varBombeamentoPolpaPPO:
+            #garante fixação
+            for produto in produtos_conc:
+                for horas in horas_D14[0:len(horas_D14)]:
+                    if varBombeamentoPolpaPPO[produto][horas] == 0 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
+                        modelo += (varBombeamentoPolpa[produto][horas] <=0, f"rest_fixado2_{produto}_{horas}")
+                    if varBombeamentoPolpaPPO[produto][horas] == 1 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
+                        modelo += (varBombeamentoPolpa[produto][horas] >=1, f"rest_fixado2_{produto}_{horas}")
+        else:
+            # Restrição para garantir que apenas um produto é bombeado por vez
+            for hora in horas_D14:
+                modelo += (
+                    lpSum(varBombeamentoPolpa[produto][hora] for produto in produtos_conc) <= 1,
+                    f"rest_bombeamento_unico_produto_{hora}",
+                )
+                def bombeamento_hora_anterior(produto, idx_hora):
+                    return varBombeamentoPolpa[produto][horas_D14[idx_hora-1]]
+
+            # Define o bombeamento de polpa para as horas de d01 a d14, respeitando as janelas mínimas de polpa e de água respectivamente
+            for produto in produtos_conc:
+                for i, hora in enumerate(horas_D14[0:-PolpaLi+1]):
+                    if i == 0:
+                        modelo += (
+                            varBombeamentoPolpa[produto][horas_D14[i]] + 
+                                lpSum([varBombeamentoPolpa[produto][horas_D14[j]] for j in range(i+1, i+PolpaLi)]) >=
+                                    PolpaLi - PolpaLi*(1 - varBombeamentoPolpa[produto][horas_D14[i]]),
+                            f"rest_janela_bombeamento_polpa_{produto}_0",
+                    )
+                    else:
+                        modelo += (
+                            varBombeamentoPolpa[produto][horas_D14[i]] + 
+                                lpSum([varBombeamentoPolpa[produto][horas_D14[j]] for j in range(i+1, i+PolpaLi)]) >= PolpaLi
+                                    - PolpaLi*(1 - varBombeamentoPolpa[produto][horas_D14[i]] + bombeamento_hora_anterior(produto, i)),
+                            f"rest_janela_bombeamento_polpa_{produto}_0",
+                    )
+                        
+            for i, hora in enumerate(horas_D14[0:-AguaLi+1]):
+                if i == 0:
+                    modelo += (
+                        lpSum(varBombeamentoPolpa[produto][horas_D14[i]] for produto in produtos_conc)+ 
+                        lpSum([varBombeamentoPolpa[produto][horas_D14[j]] 
+                                for produto in produtos_conc for j in range(i+1, i+AguaLi)]) <=
+                            BIG_M*(1 + lpSum(varBombeamentoPolpa[produto][horas_D14[i]] for produto in produtos_conc)),
+                        f"rest_janela_bombeamento_agua_{produto}_{hora}",
+                    )
+                else:
+                    modelo += (
+                        lpSum(varBombeamentoPolpa[produto][horas_D14[i]] for produto in produtos_conc)+ 
+                        lpSum([varBombeamentoPolpa[produto][horas_D14[j]] 
+                                for produto in produtos_conc for j in range(i+1, i+AguaLi)]) <=
+                            BIG_M*(1 + lpSum(varBombeamentoPolpa[produto][horas_D14[i]] for produto in produtos_conc) 
+                                    - lpSum(bombeamento_hora_anterior(produto, i) for produto in produtos_conc)),
+                        f"rest_janela_bombeamento_agua_{produto}_{hora}",
+                    )
+            # Contabiliza o bombeamento acumulado de polpa - Xac
+            varBombeamentoPolpaAcumulado = LpVariable.dicts("Mineroduto_Bombeamento_Polpa_Acumulado", (horas_D14), 0, len(horas_D14), LpInteger)
+
+            # Indica o bombeamento final de polpa
+            varBombeamentoPolpaFinal = LpVariable.dicts("Mineroduto_Bombeamento_Polpa_Final", (horas_D14), 0, len(horas_D14), LpInteger)
+
+            def bombeamento_acumulado_polpa_hora_anterior(idx_hora):
+                return varBombeamentoPolpaAcumulado[horas_D14[idx_hora-1]]
+
+            # subject to Producao1a{t in 2..H}: #maximo de 1s
+            #    Xac[t] <= Xac[t-1] + 1 + (1- X[t])*M;
+
+            for idx_hora in range(len(horas_D14)):
+                modelo += (
+                    varBombeamentoPolpaAcumulado[horas_D14[idx_hora]] <= 
+                        bombeamento_acumulado_polpa_hora_anterior(idx_hora) + 1 + 
+                        (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc))*BIG_M,
+                    f"seq_bomb_1a_{horas_D14[idx_hora]}",
+                )
+
+            # subject to Producao1b{t in 2..H}: #maximo de 1s
+            #    Xac[t] >= Xac[t-1] + 1 - (1- X[t])*M;
+
+            for idx_hora in range(len(horas_D14)):
+                modelo += (
+                    varBombeamentoPolpaAcumulado[horas_D14[idx_hora]] >=
+                        bombeamento_acumulado_polpa_hora_anterior(idx_hora) + 1 - 
+                        (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc))*BIG_M,
+                    f"seq_bomb_1b_{horas_D14[idx_hora]}",
+                )
+
+            # subject to Producao1c{t in 2..H}: #maximo de 1s
+            #    Xac[t] <= X[t]*M;
+
+            for idx_hora in range(len(horas_D14)):
+                modelo += (
+                    varBombeamentoPolpaAcumulado[horas_D14[idx_hora]] <= lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc)*BIG_M,
+                    f"seq_bomb_1c_{horas_D14[idx_hora]}",
+                )
 
 
+                    
         varBombeado = LpVariable.dicts("Bombeado", (produtos_conc, horas_D14), 0, None, LpContinuous)
         for idx_hora in (horas_D14):
             for produto in produtos_conc:
@@ -488,9 +580,13 @@ class Model_p1():
                 f"rest_define_tranferencia_para_patio_{horas_D14[i]}",
             )
 
+        slack = pulp.LpVariable.dicts("Slack", produtos_usina, lowBound=0)
+        
+        modelo += pulp.lpSum(slack[produto_u] for produto_u in produtos_usina)
+
         for produto_u in produtos_usina:
             modelo += (
-                lpSum(varProducaoSemIncorporacao[produto_u][hora] for hora in horas_D14) >= prod_minima_usina[produto_u]
+                lpSum(varProducaoSemIncorporacao[produto_u][hora] for hora in horas_D14) + slack[produto_u] >= prod_minima_usina[produto_u]
             )
 
         # for fo in cenario['geral']['funcao_objetivo']:

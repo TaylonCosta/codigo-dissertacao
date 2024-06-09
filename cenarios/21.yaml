@@ -93,7 +93,7 @@ mineroduto:
   fator_limite_excesso_patio: 0.8
 
   estoque_inicial_eb07: [["PRDT_C", 0]]
-  estoque_inicial_eb06: [["PRDT_C1", 0], ["PRDT_C2", 10000], ["PRDT_C3", 250]]
+  estoque_inicial_eb06: [["PRDT_C1", 0], ["PRDT_C2", 1000], ["PRDT_C3", 250]]
   min_capacidade_eb07: 0.2
   max_capacidade_eb06: 10250
   max_capacidade_eb07: 30000

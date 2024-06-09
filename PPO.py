@@ -18,7 +18,7 @@ from datetime import datetime
 
 UNIQUE_INSTANCE = True
 UNIQUE_INSTANCE_SEED = 51
-TRAINING_STEPS = 250000
+TRAINING_STEPS = 200000
 USAR_LOG_TENSORBOARD = (
     True  # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
 )
@@ -158,8 +158,9 @@ class CustomizedEnv(gymnasium.Env):
         n_actions = 1
         # self.observation_space = spaces.Box(len(self.Lista0)*[tam]+len(self.Lista0)*[self.Dmax])
         load_data = Load_data()
-        self.inital_data_ppo = load_data.load_simplified_data_ppo()
-        self.data = load_data.load(True)
+        rand_instance = random.randint(1, 40)
+        self.inital_data_ppo = load_data.load_simplified_data_ppo(rand_instance)
+        self.data = load_data.load(rand_instance)
         self.unique_instance = unique_instance
         if self.unique_instance:
             self.create_instance()

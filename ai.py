@@ -39,17 +39,16 @@ class Learning():
 
         fo_value = 0
         if resultados_modelo['solver']['status'] == 'Infeasible':
-        # Set all variables to 0 if the status is 'Infeasible'
+            # Set all variables to 0 if the status is 'Infeasible'
             for produto in produtos_conc:
-                estoque_eb06[produto].update({0: sheet_data['estoque_eb06_d0'][produto]})
-                estoque_ubu[produto].update({0: sheet_data['estoque_polpa_ubu'][produto]})
-                for dia in range(1, 8):
-                    for v in range(1, 25):
-                        estoque_eb06[produto].update({(dia - 1) * 24 + v: 0})
-                        estoque_ubu[produto].update({(dia - 1) * 24 + v: 0})
-                        prod_concentrador[produto].update({(dia - 1) * 24 + (v - 1): 0})
-                for aux in range(24 * 7):
-                    prod_ubu[produto][aux] = 0
+                    estoque_eb06[produto] = {0: 0}
+                    estoque_ubu[produto] = {0: 0}
+                    for i in range(len(sheet_data['horas_D14'])):
+                        estoque_eb06[produto].update({i + 1: 0})
+                        estoque_ubu[produto].update({i + 1: 0})
+                        prod_concentrador[produto].update({i: 0})
+                    for aux in range(len(sheet_data['horas_D14'])):
+                        prod_ubu[produto][aux] = 0
             fo_value = -999999
         else:
             # Normal execution if status is not 'Infeasible'

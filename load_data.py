@@ -492,6 +492,13 @@ class Load_data:
         prod_bomb_hora_anterior = cenario['mineroduto']['prod_polpa_hora_anterior']
         fator_conv = cenario['usina']['fator_conv']
         prod_polpa_hora_anterior = cenario['mineroduto']['prod_polpa_hora_anterior']
+        prod_para_estoque = cenario['porto']['prod_para_estoque']
+        janelas_campanhas_min = cenario['mineroduto']['janelas_campanhas_min']
+        janelas_campanhas_max = cenario['mineroduto']['janelas_campanhas_min']
+        janelas_campanha_acum = cenario['mineroduto']['janelas_campanha_acum']
+        limites_campanhas_min = cenario['mina']['limites_campanhas_min']
+        limites_campanhas_max = cenario['mina']['limites_campanhas_max']
+        limites_campanhas_acum = cenario['mina']['limites_campanhas_acum']
 
         data = {'horas_D14': horas_D14, 'produtos_conc': produtos_conc, 'horas_Dm3_D14': horas_Dm3_D14, 'de_para_produtos_mina_conc': de_para_produtos_mina_conc,
                 'min_estoque_pulmao_concentrador': min_estoque_pulmao_concentrador, 'max_estoque_pulmao_concentrador': max_estoque_pulmao_concentrador,
@@ -514,7 +521,9 @@ class Load_data:
                 'data_chegada_navio': data_chegada_navio, 'perc_solidos': perc_solidos, 'densidade': densidade, 'DF': DF, 'UD': UD, 'umidade': umidade, 'RP': RP,
                 'dif_balanco': dif_balanco, 'bomb_polpa_acum_semana_anterior': bomb_polpa_acum_semana_anterior, 'bomb_agua_acum_semana_anterior': bomb_agua_acum_semana_anterior,
                 'max_capacidade_eb06': max_capacidade_eb06, 'tempo_germano_matipo': tempo_germano_matipo, 'tempo_germano_ubu': tempo_germano_ubu, 'prod_bomb_hora_anterior':prod_bomb_hora_anterior,
-                'fator_conv': fator_conv, 'prod_polpa_hora_anterior': prod_polpa_hora_anterior, 'min_producao_produtos_ubu': min_producao_produtos_ubu
+                'fator_conv': fator_conv, 'prod_polpa_hora_anterior': prod_polpa_hora_anterior, 'min_producao_produtos_ubu': min_producao_produtos_ubu, 'prod_para_estoque': prod_para_estoque,
+                'janelas_campanhas_min': janelas_campanhas_min, 'janelas_campanhas_max': janelas_campanhas_max, 'janelas_campanha_acum': janelas_campanha_acum, 'limites_campanhas_min': limites_campanhas_min,
+                'limites_campanhas_max': limites_campanhas_max, 'limites_campanhas_acum': limites_campanhas_acum
                 }
 
         return cenario, solver, data

@@ -26,7 +26,9 @@ mina:
   densidade: {'d01': 2.14, 'd02': 2.14, 'd03': 2.14, 'd04': 2.14, 'd05': 2.14, 'd06': 2.14, 'd07': 2.14}
   umidade: {'d01': 0.07, 'd02': 0.07, 'd03': 0.07, 'd04': 0.07, 'd05': 0.07, 'd06': 0.07, 'd07': 0.07}
   dif_balanco: {'d01': 0.005, 'd02': 0.005, 'd03': 0.005, 'd04': 0.005, 'd05': 0.005, 'd06': 0.005, 'd07': 0.005}
-
+  limites_campanhas_min : {}
+  limites_campanhas_max : {}
+  limites_campanhas_acum : {}
 
 concentrador:
   produtos_conc: ['PRDT_C1', 'PRDT_C2', 'PRDT_C3']
@@ -81,6 +83,9 @@ mineroduto:
   nro_janelas_livres_agua: 3
   janela_livre_min_bombeamento_agua: 10
   janela_livre_max_bombeamento_agua: 1
+  janelas_campanhas_min : {"PRDT_C1": 0, "PRDT_C2": 0, "PRDT_C3": 0}
+  janelas_campanhas_max : {"PRDT_C1": 10000, "PRDT_C2": 10000, "PRDT_C3": 10000}
+  janelas_campanha_acum : {"PRDT_C1": 0, "PRDT_C2": 0, "PRDT_C3": 0}
 
   utilizacao_minima_mineroduto: 0
   janela_da_utilizacao_minima_mineroduto_horas: 168
@@ -128,8 +133,8 @@ porto:
   data_chegada_navio: {'EZDK-L2': 'd01_h01',
                       'ACINDAR-L3': 'd01_h01',
                       'NUCOR-L5': 'd01_h01'}
-  
 
+  prod_para_estoque: {'PRDT_U1': 0, 'PRDT_U2': 0, 'PRDT_U3': 0, 'PRDT_U4': 0}
 
 # {'dm-3_h01': 0, 'dm-3_h02': 0, 'dm-3_h03': 0, 'dm-3_h04': 0, 'dm-3_h05': 0, 'dm-3_h06': 0, 'dm-3_h07': 0,
 #   'dm-3_h08': 0, 'dm-3_h09': 1, 'dm-3_h10': 1, 'dm-3_h11': 1, 'dm-3_h12': 1, 'dm-3_h13':1270 1, 'dm-3_h14': 1, 'dm-3_h15': 1, 'dm-3_h16': 1,

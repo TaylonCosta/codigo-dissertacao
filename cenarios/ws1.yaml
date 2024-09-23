@@ -118,6 +118,9 @@ porto:
   capacidade_patio_porto_max: 2000000 
   estoque_produto_patio: {'PRDT_U1': 0, 'PRDT_U2': 0, 'PRDT_U3': 0, 'PRDT_U4': 0}
   navios: ['EZDK-L2', 'ACINDAR-L3', 'NUCOR-L5']
+
+  navios_horizonte: ['EZDK-L2', 'ACINDAR-L3', 'NUCOR-L5']
+
   produtos_de_cada_navio: [['EZDK-L2', 'PRDT_U1'],
                            ['ACINDAR-L3', 'PRDT_U3'],
                            ['NUCOR-L5', 'PRDT_U4']]

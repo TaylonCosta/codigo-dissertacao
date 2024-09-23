@@ -89,9 +89,15 @@ class Model_p1():
         janelas_campanhas_min = data['janelas_campanhas_min']
         janelas_campanhas_max = data['janelas_campanhas_max']
         janelas_campanha_acum = data['janelas_campanha_acum']
+        limites_campanhas_min = data['limites_campanhas_min']
+        limites_campanhas_max = data['limites_campanhas_max']
+        limites_campanhas_acum = data['limites_campanhas_acum']
         bomb_polpa_acum_semana_anterior = data['bomb_polpa_acum_semana_anterior']
         bomb_agua_acum_semana_anterior = data['bomb_agua_acum_semana_anterior']
         data_chegada_navio = data['data_chegada_navio']
+        navios = data['navios']
+        navios_horizonte = data['navios_horizonte']
+        produtos_navio = data['produtos_navio']
 
 
         BIG_M = 10e6
@@ -106,6 +112,23 @@ class Model_p1():
 
         # Variável que indica o produto que está sendo entregue pelo concentrador, por hora
         varProdutoConcentrador = LpVariable.dicts("Produto Concentrador", (produtos_mina, produtos_conc, horas_D14),  0, 1, LpInteger)
+
+
+        varFimCampanhaConcentrador = LpVariable.dicts("Concentrador_FimCampanha", (produtos_conc, horas_D14),  0, 1, LpInteger)
+
+        varTaxaAlimProdMinaConc = LpVariable.dicts("Concentrador_Taxa_Alimentacao_ConversaoProdutos", (produtos_mina, produtos_conc, horas_D14),
+                                        0, max_taxa_alimentacao,
+                                        LpContinuous)
+
+        varTaxaAlimAcumulada = LpVariable.dicts("Concentrador_Taxa_Alimentacao_Acumulada",
+                                        (produtos_conc, horas_D14),
+                                        0, None,
+                                        LpContinuous)
+        
+        varJanelaAlimAcumulada = LpVariable.dicts("Concentrador_Janela_Alimentacao_Acumulada",
+                                            (produtos_conc, horas_D14),
+                                            0, None,
+                                            LpInteger)
 
         # Variável para definir o nível da taxa de alimentação, por produto mina, epor produto do concentrador, por hora
         varNivelTaxaAlim = LpVariable.dicts("Nivel Taxa Alimentacao - C3", (produtos_mina, produtos_conc, horas_D14), 0, numero_faixas_producao, LpInteger)
@@ -525,7 +548,7 @@ class Model_p1():
             varBombeamentoPolpaFinal = LpVariable.dicts("Mineroduto_Bombeamento_Polpa_Final", (horas_D14), 0, len(horas_D14), LpInteger)
 
             def bombeamento_acumulado_polpa_hora_anterior(idx_hora):
-                                if idx_hora == 0:
+                if idx_hora == 0:
                     # subject to Producao2f{t in 1..H}: #maximo de 1s
                     #    Xac[1] = 0;
                     return bomb_polpa_acum_semana_anterior
@@ -1098,6 +1121,7 @@ class Model_p1():
                 f"rest_define_tranferencia_para_patio_{horas_D14[i]}",
             )
 
+        varCarregamentoNavio = LpVariable.dicts("Porto_Carregamento_Navio", (navios, horas_D14), 0, None, LpContinuous)
 
         # Indica, para cada navio, se é a hora que inicia o carregamento
         varInicioCarregNavio = LpVariable.dicts("Porto_Inicio_Carregamento", (navios, horas_D14), 0, 1, LpInteger)
@@ -1127,7 +1151,7 @@ class Model_p1():
                 )
 
         # Restrições para garantir que cada navio até D14 começa o carregamento no máximo uma vez
-        for navio in navios_ate_d14:
+        for navio in navios_horizonte:
             modelo += (
                 lpSum([varInicioCarregNavio[navio][hora] for hora in horas_D14]) <= 1,
                 f"rest_define_InicioCarregNavio_{navio}",
@@ -1135,7 +1159,7 @@ class Model_p1():
 
         # Restrições para garantir que os navios depois do D14 não começam a carregar na programação
         for navio in navios:
-            if not navio in navios_ate_d14:
+            if not navio in navios_horizonte:
                 modelo += (
                     lpSum([varInicioCarregNavio[navio][hora] for hora in horas_D14]) == 0,
                     f"rest_define_InicioCarregNavio_{navio}",
@@ -1207,7 +1231,7 @@ class Model_p1():
             )
 
         # Restrições para garantir que se o carregamento ocorrer, ele só começa após navio chegar
-        for navio in navios_ate_d14:
+        for navio in navios_horizonte:
             modelo += (
                 lpSum([idx_hora*varInicioCarregNavio[navio][horas_D14[idx_hora]] for idx_hora in range(len(horas_D14))]) 
                     >= data_chegada_navio[navio] - BIG_M*(1 - lpSum([varInicioCarregNavio[navio][horas_D14[idx_hora]] for idx_hora in range(len(horas_D14))])),
@@ -1221,7 +1245,7 @@ class Model_p1():
                     varEstoqueProdutoPatio[produto][horas_D14[idx_hora]] 
                         == varEstoqueProdutoPatio[produto][horas_D14[idx_hora-1]] + 
                             varProducaoSemIncorporacao[produto][horas_D14[idx_hora]] -
-                            lpSum(varCarregamentoNavio[navio][horas_D14[idx_hora]] * produtos_de_cada_navio[navio][produto]
+                            lpSum(varCarregamentoNavio[navio][horas_D14[idx_hora]] * produtos_navio[navio][produto]
                                 for navio in navios),
                     f"rest_define_EstoqueProdutoPatio_{produto}_{horas_D14[idx_hora]}",
                 )
@@ -1230,7 +1254,7 @@ class Model_p1():
                 varEstoqueProdutoPatio[produto][horas_D14[0]] 
                     == estoque_produto_patio[produto] +
                     varProducaoSemIncorporacao[produto][horas_D14[0]] -
-                    lpSum(varCarregamentoNavio[navio][horas_D14[0]] * produtos_de_cada_navio[navio][produto]                               
+                    lpSum(varCarregamentoNavio[navio][horas_D14[0]] * produtos_navio[navio][produto]                               
                         for navio in navios),
                 f"rest_define_EstoqueProdutoPatio_{produto}_{horas_D14[0]}",
             )
@@ -1238,19 +1262,21 @@ class Model_p1():
         # Define o limite mínimo do pátio do porto ao final do horizonte de planejamento
         for produto in produtos_usina:
             modelo += (
-                varEstoqueProdutoPatio[produto][horas_D14[-1]] >= prod_para_estoque[produto],
+                varEstoqueProdutoPatio[produto][horas_D14[-1]] >= produtos_navio[produto],
                 f"rest_define_limite_minimo_final_EstoquePatio_{produto}",
             )
 
-        varVolumeAtrasadoNavio = LpVariable.dicts("Porto_Volume_Atrasado_Navios", (navios_ate_d14), 0, None, LpContinuous)
+        varVolumeAtrasadoNavio = LpVariable.dicts("Porto_Volume_Atrasado_Navios", (navios_horizonte), 0, None, LpContinuous)
 
-        for navio in navios_ate_d14:
+        for navio in navios_horizonte:
             modelo += (
                 varVolumeAtrasadoNavio[navio] == 
                     (varDataInicioCarregNavio[navio] - data_chegada_navio[navio]) *
                     taxa_carreg_navios[navio],
                 f"rest_define_VolumeAtrasadoNavio_{navio}",
             )
+
+        menor_taxa_carregamento = min([taxa_carreg_navios for navio in navios_horizonte])
 
         # slack = pulp.LpVariable.dicts("Slack", produtos_usina, lowBound=0)
         
@@ -1269,7 +1295,7 @@ class Model_p1():
 
         # Definindo a função objetivo
         fo = 0
-        fo += - (lpSum([varVolumeAtrasadoNavio[navio]*(1/menor_taxa_carregamento) for navio in navios_ate_d14]))
+        fo += - (lpSum([varVolumeAtrasadoNavio[navio]*(1/menor_taxa_carregamento) for navio in navios_horizonte]))
         # if 'max_conc' in cenario['geral']['funcao_objetivo']:
         # fo += lpSum([varTaxaAlim[produto_conc][hora] for produto_conc in produtos_conc for hora in horas_D14])
         # if 'max_usina' in cenario['geral']['funcao_objetivo']:

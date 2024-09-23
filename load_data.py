@@ -470,7 +470,7 @@ class Load_data:
         dif_balanco = cenario['mina']['dif_balanco']
 
 
-        navios_ate_d14 = []
+        navios_horizonte = cenario['porto']['navios_horizonte']
         min_producao_produtos_ubu = cenario['usina']['prod_minima_usina']
         capacidade_patio_porto_min = cenario['porto']['capacidade_patio_porto_min']
         AguaLi = cenario['mineroduto']['janela_min_bombeamento_agua']
@@ -512,7 +512,7 @@ class Load_data:
                 'max_estoque_polpa_ubu': max_estoque_polpa_ubu, 'max_taxa_envio_patio': max_taxa_envio_patio, 'max_taxa_retorno_patio_usina': max_taxa_retorno_patio_usina,
                 'min_estoque_patio_usina': min_estoque_patio_usina, 'max_estoque_patio_usina': max_estoque_patio_usina, 'estoque_polpa_ubu': estoque_ubu_inicial,
                 'estoque_inicial_patio_usina': estoque_inicial_patio_usina, 'fator_limite_excesso_patio': fator_limite_excesso_patio,
-                'capacidade_carreg__por_dia': capacidade_carreg_porto_por_dia, 'navios_ate_d14': navios_ate_d14,
+                'capacidade_carreg__por_dia': capacidade_carreg_porto_por_dia, 'navios_horizonte': navios_horizonte,
                 'horas_Dm3': horas_Dm3, 'navios': navios, 'vazao_bombas': vazao_bombas, 'lim_min_campanha':lim_min_campanha,
                 'lim_max_campanha': lim_max_campanha, 'lim_acum_campanha': lim_acum_campanha, 'lim_min_janela': lim_min_janela, 'lim_max_janela':lim_max_janela,
                 'lim_acum_janela':lim_acum_janela, 'AguaLi': AguaLi, 'AguaLs': AguaLs, 'PolpaLi': PolpaLi, 'PolpaLs': PolpaLs, 'carga_navios': carga_navios, 

@@ -500,7 +500,7 @@ class Model_p1():
             for hora in horas_D14:
                 modelo += (
                     lpSum(varBombeamentoPolpa[produto][hora] for produto in produtos_conc) <= 1,
-                    f"rest_bombeamento_unico_produto_{hora}",
+                    f"rest_bombeamento_unico_produto_{produto}_{hora}",
                 )
                 def bombeamento_hora_anterior(produto, idx_hora):
                     return varBombeamentoPolpa[produto][horas_D14[idx_hora-1]]
@@ -519,8 +519,8 @@ class Model_p1():
                         modelo += (
                             varBombeamentoPolpa[produto][horas_D14[i]] + 
                                 lpSum([varBombeamentoPolpa[produto][horas_D14[j]] for j in range(i+1, i+PolpaLi)]) >= PolpaLi
-                                    - PolpaLi*(1 - varBombeamentoPolpa[produto][horas_D14[i]] + bombeamento_hora_anterior(produto, i)),
-                            f"rest_janela_bombeamento_polpa_{produto}_0",
+                                 - PolpaLi*(1 - varBombeamentoPolpa[produto][horas_D14[i]] + bombeamento_hora_anterior(produto, i)),
+                            f"rest_janela_bombeamento_polpa_{produto}_{hora}",
                     )
                         
             for i, hora in enumerate(horas_D14[0:-AguaLi+1]):
@@ -1165,6 +1165,8 @@ class Model_p1():
                     f"rest_define_InicioCarregNavio_{navio}",
                 )
         
+        print(horas_D14[idx_hora])
+
         # Para cada navio
         for navio in navios:
             # Calcula quantas horas são necessárias para carregar o navio, incluindo a última hora que pode carregar

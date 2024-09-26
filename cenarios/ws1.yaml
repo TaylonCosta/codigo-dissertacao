@@ -26,9 +26,9 @@ mina:
   densidade: {'d01': 2.14, 'd02': 2.14, 'd03': 2.14, 'd04': 2.14, 'd05': 2.14, 'd06': 2.14, 'd07': 2.14}
   umidade: {'d01': 0.07, 'd02': 0.07, 'd03': 0.07, 'd04': 0.07, 'd05': 0.07, 'd06': 0.07, 'd07': 0.07}
   dif_balanco: {'d01': 0.005, 'd02': 0.005, 'd03': 0.005, 'd04': 0.005, 'd05': 0.005, 'd06': 0.005, 'd07': 0.005}
-  limites_campanhas_min : {}
-  limites_campanhas_max : {}
-  limites_campanhas_acum : {}
+  limites_campanhas_min : {"PRDT_C1": 27000, "PRDT_C2": 27000, "PRDT_C3": 54000, "PRDT_U1": 40000, "PRDT_U2": 5000, "PRDT_U3": 40000, "PRDT_U4": 40000}
+  limites_campanhas_max : {"PRDT_C1": 840000, "PRDT_C2": 840000, "PRDT_C3": 840000, "PRDT_U1": 840000, "PRDT_U2": 840000, "PRDT_U3": 840000, "PRDT_U4": 840000}
+  limites_campanhas_acum : {"PRDT_C1": 0, "PRDT_C2": 0, "PRDT_C3": 0, "PRDT_U1": 0, "PRDT_U2": 0, "PRDT_U3": 0, "PRDT_U4": 0}
 
 concentrador:
   produtos_conc: ['PRDT_C1', 'PRDT_C2', 'PRDT_C3']
@@ -83,9 +83,9 @@ mineroduto:
   nro_janelas_livres_agua: 3
   janela_livre_min_bombeamento_agua: 10
   janela_livre_max_bombeamento_agua: 1
-  janelas_campanhas_min : {"PRDT_C1": 0, "PRDT_C2": 0, "PRDT_C3": 0}
-  janelas_campanhas_max : {"PRDT_C1": 10000, "PRDT_C2": 10000, "PRDT_C3": 10000}
-  janelas_campanha_acum : {"PRDT_C1": 0, "PRDT_C2": 0, "PRDT_C3": 0}
+  janelas_campanhas_min : {"PRDT_C1": 0, "PRDT_C2": 0, "PRDT_C3": 0, "PRDT_U1": 0, "PRDT_U2": 0, "PRDT_U3": 0, "PRDT_U4": 0}
+  janelas_campanhas_max : {"PRDT_C1": 400, "PRDT_C2": 400, "PRDT_C3": 400, "PRDT_U1": 400, "PRDT_U2": 400, "PRDT_U3": 400, "PRDT_U4": 400}
+  janelas_campanha_acum : {"PRDT_C1": 0, "PRDT_C2": 0, "PRDT_C3": 0, "PRDT_U1": 0, "PRDT_U2": 0, "PRDT_U3": 0, "PRDT_U4": 0}
 
   utilizacao_minima_mineroduto: 0
   janela_da_utilizacao_minima_mineroduto_horas: 168

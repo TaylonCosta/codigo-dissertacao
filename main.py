@@ -18,7 +18,7 @@ def gerar_nome_arquivo_saida(nome_base_arquivo):
 
 def main():
     load_data = Load_data()
-    data = load_data.load('ws1')
+    data = load_data.load('teste_rapido')
     
     # bomb = {'PRDT_C1': {'d01_h01': 1, 'd01_h02': 1, 'd01_h03': 1, 'd01_h04': 1, 'd01_h05': 1, 'd01_h06': 0, 'd01_h07': 0, 'd01_h08': 0, 'd01_h09': 0, 'd01_h10': 0, 'd01_h11': 0, 'd01_h12': 0, 'd01_h13': 0, 'd01_h14': 0, 'd01_h15': 0, 'd01_h16': 0, 'd01_h17': 0, 'd01_h18': 0, 'd01_h19': 0, 'd01_h20': 0, 'd01_h21': 0, 'd01_h22': 0, 'd01_h23': 0, 'd01_h24': 0,
     #                     'd02_h01': 0, 'd02_h02': 0, 'd02_h03': 0, 'd02_h04': 0, 'd02_h05': 0, 'd02_h06': 0, 'd02_h07': 0, 'd02_h08': 0, 'd02_h09': 0, 'd02_h10': 0, 'd02_h11': 0, 'd02_h12': 0, 'd02_h13': 0, 'd02_h14': 0, 'd02_h15': 0, 'd02_h16': 0, 'd02_h17': 0, 'd02_h18': 0, 'd02_h19': 0, 'd02_h20': 0, 'd02_h21': 0, 'd02_h22': 0, 'd02_h23': 0, 'd02_h24': 0,
@@ -46,14 +46,14 @@ def main():
     resultados = L.solve_model()
 
     plot_estoque_eb06(resultados)
-    # plot_prod_c3(resultados)
-    # plot_estoque_polpa_ubu(resultados)
-    # plot_prod_ubu(resultados)
-    # plot_prod_sem_incorp_ubu(resultados)
+    plot_prod_c3(resultados)
+    plot_estoque_polpa_ubu(resultados)
+    plot_prod_ubu(resultados)
+    plot_prod_sem_incorp_ubu(resultados)
 
     print(resultados['solver']['valor_fo'])
 
-    run_ppo()
+    # run_ppo()
 
     print("\n Finished!")
 

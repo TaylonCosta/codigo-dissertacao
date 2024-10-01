@@ -20,8 +20,8 @@ class Learning():
 
         modelo = Model()
         status_modelo, resultados_modelo = modelo.modelo(cenario, solver, sheet_data, self.varBombeamentoPolpa, self.horizon)
-        return self.format_results(resultados_modelo, sheet_data)
-        # return resultados_modelo
+        # return self.format_results(resultados_modelo, sheet_data)
+        return resultados_modelo
     
 
     def format_results(self, resultados_modelo, sheet_data):

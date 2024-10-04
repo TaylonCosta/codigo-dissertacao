@@ -4,7 +4,7 @@ from pulp import *                 # usado para resolver o problema de otimizaç
 import argparse                    # usado para tratar os argumentos do script
 from PPO import run_ppo
 from ai import *
-from plots import plot_prod_ubu, plot_estoque_eb06, plot_prod_c3, plot_estoque_polpa_ubu, plot_prod_sem_incorp_ubu
+from plots import plot_prod_ubu, plot_estoque_eb06, plot_prod_c3, plot_estoque_polpa_ubu, plot_prod_sem_incorp_ubu, plot_carreg_navio, plot_britagem
 
 def gerar_nome_arquivo_saida(nome_base_arquivo):
     """ Gera o nome padronizado do arquivo de saída """
@@ -45,11 +45,14 @@ def main():
     L = Learning(None, 168, data)
     resultados = L.solve_model()
 
-    plot_estoque_eb06(resultados)
+    plot_britagem(resultados)
+    # plot_estoque_eb06(resultados)
     plot_prod_c3(resultados)
-    plot_estoque_polpa_ubu(resultados)
+    # plot_estoque_polpa_ubu(resultados)
     plot_prod_ubu(resultados)
     plot_prod_sem_incorp_ubu(resultados)
+    # plot_carreg_navio(resultados)
+
 
     print(resultados['solver']['valor_fo'])
 

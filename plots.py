@@ -1,4 +1,20 @@
-import matplotlib.pyplot as plt  
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+def plot_britagem(resultados):
+    britagem_prdt1_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Taxa_Britagem_PRDT1_")]
+    britagem_prdt2_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Taxa_Britagem_PRDT2_")]
+
+    hours = range(0, 168)
+
+    plt.plot(hours, britagem_prdt1_values, label='Taxa_Britagem_PRDT1_')
+    plt.plot(hours, britagem_prdt2_values, label='Taxa_Britagem_PRDT2_')
+
+    plt.xlabel('Hour')
+    plt.ylabel('Value')
+    plt.legend()
+    plt.show()
 
 def plot_estoque_eb06(resultados):
     bombeado_prdt_c1_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Estoque_EB06_PRDT_C1")]
@@ -121,4 +137,90 @@ def plot_prod_ubu(resultados):
     # Adjust layout
     plt.tight_layout()
 
+    plt.show()
+
+def plot_carreg_navio(resultados):
+    
+    start_values_ship1 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NUCOR_L5_")]
+    end_values_ship1 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NUCOR_L5_")]
+
+    labels = resultados["horas_D14"]
+
+    # Calculate duration of loading
+    loading_duration_ship1 = np.array(end_values_ship1) - np.array(start_values_ship1)
+
+    # Create the bar chart
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.bar(labels, loading_duration_ship1, color='blue')
+
+    # Labeling the axes and title
+    ax.set_xlabel('Time Period (d01_h01 to d07_h24)', fontsize=12)
+    ax.set_ylabel('Loading Duration (hours)', fontsize=12)
+    ax.set_title('Loading Duration from Start to End', fontsize=14)
+
+    # Rotate the x-axis labels for better readability
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+
+    # Show the plot
+    plt.show()
+
+    plot2(resultados)
+
+    plot3(resultados)
+    # hours = range(0, 168)
+
+    # plt.plot(hours, prod_c3_prdt_c1_values, label='Producao___C3___Prog_PRDT_C1')
+    # plt.plot(hours, prod_c3_prdt_c2_values, label='Producao___C3___Prog_PRDT_C2')
+    # plt.plot(hours, prod_c3_prdt_c3_values, label='Producao___C3___Prog_PRDT_C3')
+
+    # plt.xlabel('Hour')
+    # plt.ylabel('Value')
+    # plt.legend()
+    # plt.show()
+
+def plot2(resultados):
+    start_values_ship2 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_ACINDAR_L3_")]
+    end_values_ship2 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_ACINDAR_L3_")]
+
+    labels = resultados["horas_D14"]
+
+    loading_duration_ship2 = np.array(end_values_ship2) - np.array(start_values_ship2)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.bar(labels, loading_duration_ship2, color='green')
+
+    ax.set_xlabel('Time Period (d01_h01 to d07_h24)', fontsize=12)
+    ax.set_ylabel('Loading Duration (hours)', fontsize=12)
+    ax.set_title('Loading Duration from Start to End', fontsize=14)
+
+    # Rotate the x-axis labels for better readability
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+
+    # Show the plot
+    plt.show()
+
+def plot3(resultados):
+    start_values_ship3 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NUIRON_L4_")]
+    end_values_ship3 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NUIRON_L4_")]
+
+    labels = resultados["horas_D14"]
+
+    loading_duration_ship3 = np.array(end_values_ship3) - np.array(start_values_ship3)
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.bar(labels, loading_duration_ship3, color='red')
+
+    ax.set_xlabel('Time Period (d01_h01 to d07_h24)', fontsize=12)
+    ax.set_ylabel('Loading Duration (hours)', fontsize=12)
+    ax.set_title('Loading Duration from Start to End', fontsize=14)
+
+    # Rotate the x-axis labels for better readability
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+
+    # Show the plot
     plt.show()

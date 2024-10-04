@@ -16,7 +16,7 @@ class Load_data:
     def load(self, instance):
         parser = argparse.ArgumentParser(description='Otimizador Plano Semanal')
         parser.add_argument('-c', '--cenario', default=f'cenarios/{instance}.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
-        parser.add_argument('-s', '--solver', default='HiGHS', type=str, help='Nome do otimizador a ser usado')
+        parser.add_argument('-s', '--solver', default='GUROBI', type=str, help='Nome do otimizador a ser usado')
         parser.add_argument('-o', '--pasta-saida', default='experimentos', type=str, help='Pasta onde serão salvos os arquivos de resultados')
         parser.add_argument('--relax-and-fix', action='store_true', help='Habilita a heurística Relax And Fix das variáveis do mineroduto')
         parser.add_argument('--opt-partes', action='store_true', help='Habilita a heurística de otimização por partes')
@@ -71,12 +71,6 @@ class Load_data:
         # Obs.: índices dos navios são definidos ao ler os dados da aba NAVIOS
 
         BIG_M = 10e6  # Big M
-
-        opcoes_restricoes = ["fixado_pelo_usuario", "fixado_pelo_modelo", "livre"]
-
-        print(f"[OK]\nObtendo parâmetros do cenário...   ", end="")
-
-        janela_planejamento = cenario["geral"]["janela_planejamento"]
 
         # verificar se não vai mesmo britagem
 
@@ -138,10 +132,6 @@ class Load_data:
         for produto, estoque in cenario["mineroduto"]["estoque_inicial_eb06"]:
             estoque_eb06_d0[produto] = estoque
 
-        estoque_eb07_d0 = {}
-        for produto, estoque in cenario["mineroduto"]["estoque_inicial_eb07"]:
-            estoque_eb07_d0[produto] = estoque
-
         estoque_ubu_inicial = {}
         for produto, estoque in cenario["usina"]["estoque_inicial_polpa_ubu"]:
             estoque_ubu_inicial[produto] = estoque
@@ -167,6 +157,8 @@ class Load_data:
         max_taxa_envio_patio = cenario["mineroduto"]["max_taxa_envio_patio"]
 
         fator_limite_excesso_patio = cenario["mineroduto"]["fator_limite_excesso_patio"]
+        fator_limite_incorporacao_patio = cenario["mineroduto"]["fator_limite_incorporacao_patio"]
+        taxa_max_incorporacao_patio = cenario["mineroduto"]["taxa_max_incorporacao_patio"]
         vazao_bombas = cenario["mineroduto"]["vazao_bombas"]
 
         # Paradas de manutenção
@@ -348,7 +340,6 @@ class Load_data:
         # estoque_eb6_d0 = ws["C5"].value
         # estoque_polpa_ubu = ['estoque_inicial_polpa_ubu']
 
-        estoque_polpa_ubu = cenario["usina"]["estoque_inicial_polpa_ubu"]
         # configuração das linhas onde se encontram os parâmetros da aba MINERODUTO-UBU
         conf_parametros_mineroduto_ubu = {
             "Capacidade EB06": 7,
@@ -432,8 +423,6 @@ class Load_data:
         ws = wb["PÁTIO-PORTO"]
 
         # estoque_produto_patio_d0 = ws["D10"].value
-        estoque_produto_patio_d0 = cenario["porto"]["estoque_produto_patio"]
-
         # -----------------------------------------------------------------------------
 
         # Lendo dados da aba NAVIOS
@@ -472,7 +461,7 @@ class Load_data:
         # PORTO
 
         produtos_de_cada_navio = {
-            navio: {produto_usina: 0 for produto_usina in produtos_usina}
+            navio: {produto: 0 for produto in produtos_usina + produtos_conc}
             for navio in navios
         }
         for navio, produto_usina in cenario["porto"]["produtos_de_cada_navio"]:
@@ -555,7 +544,7 @@ class Load_data:
         prod_polpa_hora_anterior = cenario["mineroduto"]["prod_polpa_hora_anterior"]
         prod_para_estoque = cenario["porto"]["prod_para_estoque"]
         janelas_campanhas_min = cenario["mineroduto"]["janelas_campanhas_min"]
-        janelas_campanhas_max = cenario["mineroduto"]["janelas_campanhas_min"]
+        janelas_campanhas_max = cenario["mineroduto"]["janelas_campanhas_max"]
         janelas_campanha_acum = cenario["mineroduto"]["janelas_campanha_acum"]
         limites_campanhas_min = cenario["mina"]["limites_campanhas_min"]
         limites_campanhas_max = cenario["mina"]["limites_campanhas_max"]
@@ -596,6 +585,8 @@ class Load_data:
             "estoque_polpa_ubu": estoque_ubu_inicial,
             "estoque_inicial_patio_usina": estoque_inicial_patio_usina,
             "fator_limite_excesso_patio": fator_limite_excesso_patio,
+            "fator_limite_incorporacao_patio": fator_limite_incorporacao_patio,
+            "taxa_max_incorporacao_patio": taxa_max_incorporacao_patio,
             "capacidade_carreg__por_dia": capacidade_carreg_porto_por_dia,
             "navios_horizonte": navios_horizonte,
             "horas_Dm3": horas_Dm3,

@@ -3,21 +3,15 @@ geral:
   planilha: instancias/P_Semanal.xlsx
   janela_planejamento: 7
   # funcao_objetivo: [max_conc, max_usina, min_atr_nav, min_est_patio]
-  funcao_objetivo: [max_usina]
+  funcao_objetivo: [max_conc, max_usina]
   mipgap: 0.3
   timeLimit: 30
 
 mina:
-  lim_min_campanha: {"PRDT_C1":27000, "PRDT_C2":27000, "PRDT_C3":27000, "PRDT_U1":40000, "PRDT_U2":40000, "PRDT_U3":40000, "PRDT_U4":40000}
-  lim_max_campanha: {"PRDT_C1":840000, "PRDT_C2":840000, "PRDT_C3":840000, "PRDT_U1":840000, "PRDT_U2":840000, "PRDT_U3":840000, "PRDT_U4":840000}
-  lim_acum_campanha: {"PRDT_C1":0, "PRDT_C2":0, "PRDT_C3":0, "PRDT_U1":0, "PRDT_U2":0, "PRDT_U3":0, "PRDT_U4":0}
-  lim_min_janela: {"PRDT_C1":0, "PRDT_C2":0, "PRDT_C3":0, "PRDT_U1":0, "PRDT_U2":0, "PRDT_U3":0, "PRDT_U4":0}
-  lim_max_janela: {"PRDT_C1":400, "PRDT_C2":400, "PRDT_C3":400, "PRDT_U1":400, "PRDT_U2":400, "PRDT_U3":400, "PRDT_U4":400}
-  lim_acum_janela: {"PRDT_C1":0, "PRDT_C2":0, "PRDT_C3":0, "PRDT_U1":0, "PRDT_U2":0, "PRDT_U3":0, "PRDT_U4":0}
-  campanha: [["PRDT1", "d01_h01"]]
-  taxa_alimentacao_britagem: [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000]
-  disponibilidade_britagem: [85.42, 91.70, 91.70, 91.70, 91.70, 91.70, 50.00, 85.42, 94.00, 94.00, 94.00, 85.42, 94.00, 94.00]
-  utilizacao_britagem: [82.00, 86.00, 86.00, 85.90, 86.00, 86.00, 80.00, 83.20, 86.10, 85.40, 85.00, 82.00, 84.20, 78.00]
+  campanha: [["PRDT1", "d01_h01"], ["PRDT2", "d05_h01"]]
+  taxa_alimentacao_britagem: [3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000, 3000]
+  disponibilidade_britagem: [85.42, 94.30, 94.30, 94.30, 94.30, 94.30, 85.40, 94.30, 94.30, 94.30, 94.30, 33.30, 66.70, 94.30]
+  utilizacao_britagem: [60.00, 71.00, 82.00, 85.00, 85.00, 85.00, 82.00, 86.00, 86.00, 86.00, 86.00, 85.00, 85.00, 86.00]
   RP: {'d01': 54.94, 'd02': 54.94, 'd03': 54.94, 'd04': 54.94, 'd05': 54.94, 'd06': 54.94, 'd07': 54.94}
   UD: {'d01': 0.97, 'd02': 0.97, 'd03': 0.97, 'd04': 0.97, 'd05': 0.97, 'd06': 0.97, 'd07': 0.97}
   DF: {'d01': 0.975 , 'd02': 0.9745, 'd03': 0.975, 'd04': 0.975, 'd05': 0.975, 'd06': 0.975, 'd07': 0.975}
@@ -25,12 +19,14 @@ mina:
   SOL_EB06: {'d01': 0.669, 'd02': 0.669, 'd03': 0.669, 'd04': 0.669, 'd05': 0.669, 'd06': 0.669, 'd07': 0.669}
   densidade: {'d01': 2.14, 'd02': 2.14, 'd03': 2.14, 'd04': 2.14, 'd05': 2.14, 'd06': 2.14, 'd07': 2.14}
   umidade: {'d01': 0.07, 'd02': 0.07, 'd03': 0.07, 'd04': 0.07, 'd05': 0.07, 'd06': 0.07, 'd07': 0.07}
-  dif_balanco: {'d01': 0.003, 'd02': 0.003, 'd03': 0.003, 'd04': 0.003, 'd05': 0.003, 'd06': 0.003, 'd07': 0.003}
-
+  dif_balanco: {'d01': 0.005, 'd02': 0.005, 'd03': 0.005, 'd04': 0.005, 'd05': 0.005, 'd06': 0.005, 'd07': 0.005}
+  limites_campanhas_min : {"PRDT_C1": 27000, "PRDT_C2": 27000, "PRDT_C3": 54000, "PRDT_U1": 40000, "PRDT_U2": 5000, "PRDT_U3": 40000, "PRDT_U4": 40000}
+  limites_campanhas_max : {"PRDT_C1": 840000, "PRDT_C2": 840000, "PRDT_C3": 840000, "PRDT_U1": 840000, "PRDT_U2": 840000, "PRDT_U3": 840000, "PRDT_U4": 840000}
+  limites_campanhas_acum : {"PRDT_C1": 30000, "PRDT_C2": 0, "PRDT_C3": 0, "PRDT_U1": 0, "PRDT_U2": 0, "PRDT_U3": 0, "PRDT_U4": 0}
 
 concentrador:
   produtos_conc: ['PRDT_C1', 'PRDT_C2', 'PRDT_C3']
-  estoque_pulmao_inicial_concentrador: [["PRDT1", 10000], ["PRDT2", 10000]]
+  estoque_pulmao_inicial_concentrador: [["PRDT1", 0], ["PRDT2", 0]]
   min_estoque_pulmao_concentrador: 0
   max_estoque_pulmao_concentrador: 100000
   faixas_producao_concentrador: 625
@@ -44,12 +40,10 @@ concentrador:
 
 usina:
   produtos_usina: ['PRDT_U1', 'PRDT_U2', 'PRDT_U3', 'PRDT_U4']
-  max_producao_sem_incorporacao: 1062.5
+  max_producao_sem_incorporacao: 1062
   min_producao_sem_incorporacao: 0
   fixar_producao_sem_incorporacao: livre
   producao_sem_incorporacao_fixa: 1062.5
-  inicio_manutencoes_usina: []
-  duracao_manutencoes_usina: []
   max_taxa_retorno_patio_usina: 4000
   min_estoque_polpa_ubu: 0
   max_estoque_polpa_ubu: 40000
@@ -58,14 +52,11 @@ usina:
   min_estoque_patio_usina: 0
   max_estoque_patio_usina: 300000
   fator_conv: {'d01': 0.065, 'd02': 0.065, 'd03': 0.065, 'd04': 0.065, 'd05': 0.065, 'd06': 0.065, 'd07': 0.065}
-  prod_minima_usina: {'PRDT_U1':0, 'PRDT_U2':0, 'PRDT_U3':0, 'PRDT_U4':10000}
+  prod_minima_usina: {'PRDT_U1':0, 'PRDT_U2':0, 'PRDT_U3':0, 'PRDT_U4':0}
 
 mineroduto:
-  # bombeamento_polpa: {"PRDT_C" :{"d01_h01": 0, "d01_h02": 0, "d01_h03": 0, "d01_h04": 0, "d01_h05": 0, "d01_h06": 1, "d01_h07": 1, "d01_h08": 1, "d01_h09": 1,
-  # "d01_h10": 1, "d01_h11": 0, "d01_h12": 0, "d01_h13": 0, "d01_h14": 0, "d01_h15": 0, "d01_h16": 0, "d01_h17": 1, "d01_h18": 1, "d01_h19": 1,
-  # "d01_h20": 1, "d01_h21": 1, "d01_h22": 0, "d01_h23": 0, "d01_h24": 0}}
   bombeamento_matipo: {'d01': 1270, 'd02': 1270, 'd03': 1270, 'd04': 1270, 'd05': 1270, 'd06': 1270, 'd07': 1270, 'd08': 1270, 'd09': 1270, 'd10': 1270, 'd11': 1270, 'd12': 1270, 'd13': 1270, 'd14': 1270}
-  janela_min_bombeamento_polpa: 7
+  janela_min_bombeamento_polpa: 9
   janela_max_bombeamento_polpa: 11
   fixar_janela_bombeamento: livre
   janela_fixa_bombeamento_polpa: 13
@@ -73,30 +64,29 @@ mineroduto:
   bombeamento_restante_janela_anterior_agua: 0
   considerar_janela_final: False
 
-  janela_min_bombeamento_agua: 4
-  janela_max_bombeamento_agua: 7
+  janela_min_bombeamento_agua: 5
+  janela_max_bombeamento_agua: 20 
   fixar_janela_bombeamento_agua: livre
   janela_fixa_bombeamento_agua: 6
   janela_para_fixar_bombeamento_agua: 168
   nro_janelas_livres_agua: 3
   janela_livre_min_bombeamento_agua: 10
   janela_livre_max_bombeamento_agua: 1
+  janelas_campanhas_min : {"PRDT_C1": 0, "PRDT_C2": 0, "PRDT_C3": 0, "PRDT_U1": 0, "PRDT_U2": 0, "PRDT_U3": 0, "PRDT_U4": 0}
+  janelas_campanhas_max : {"PRDT_C1": 400, "PRDT_C2": 400, "PRDT_C3": 400, "PRDT_U1": 400, "PRDT_U2": 400, "PRDT_U3": 400, "PRDT_U4": 400}
+  janelas_campanha_acum : {"PRDT_C1": 0, "PRDT_C2": 0, "PRDT_C3": 0, "PRDT_U1": 0, "PRDT_U2": 0, "PRDT_U3": 0, "PRDT_U4": 0}
 
   utilizacao_minima_mineroduto: 0
   janela_da_utilizacao_minima_mineroduto_horas: 168
   tempo_mineroduto:  0
 
-  inicio_manutencoes_mineroduto: []
-  duracao_manutencoes_mineroduto: []
-
-  max_taxa_envio_patio: 600
+  max_taxa_envio_patio: 1200
+  taxa_max_incorporacao_patio: 166.66
   fator_limite_excesso_patio: 0.8
+  fator_limite_incorporacao_patio: 0.2
 
-  estoque_inicial_eb07: [["PRDT_C", 0]]
   estoque_inicial_eb06: [["PRDT_C1", 0], ["PRDT_C2", 0], ["PRDT_C3", 0]]
-  min_capacidade_eb07: 0.2
   max_capacidade_eb06: 10250
-  max_capacidade_eb07: 30000
   vazao_bombas: 1270
 
   bombeamento_polpa_acum_semana_anterior: 0
@@ -110,33 +100,38 @@ mineroduto:
 porto:
   capacidade_carreg_porto_por_dia:  1
   capacidade_patio_porto_min: 0
-  capacidade_patio_porto_max: 2000000 
-  estoque_produto_patio: {'PRDT_U1': 2000000, 'PRDT_U2': 2000000, 'PRDT_U3': 2000000, 'PRDT_U4': 2000000}
-  navios: ['EZDK-L2', 'ACINDAR-L3', 'NUCOR-L5']
-  produtos_de_cada_navio: [['EZDK-L2', 'PRDT_U1'],
-                           ['ACINDAR-L3', 'PRDT_U3'],
-                           ['NUCOR-L5', 'PRDT_U4']]
+  capacidade_patio_porto_max: 1500000
+  estoque_produto_patio: {'PRDT_U1': 0, 'PRDT_U2': 0, 'PRDT_U3': 0, 'PRDT_U4': 0}
+  navios: ['ACINDAR-L3', 'NUCOR-L5', 'NUIRON-L4', 'NAVIO-1', 'NAVIO-2', 'NAVIO-3']
 
-  taxa_carreg_navios: {'EZDK-L2': 3200,
-                      'ACINDAR-L3': 4000,
-                      'NUCOR-L5': 4500}
+  navios_horizonte: ['ACINDAR-L3', 'NUCOR-L5', 'NUIRON-L4']
 
-  carga_navios: {'EZDK-L2': 80000,
-                'ACINDAR-L3': 250000,
-                'NUCOR-L5': 80000}
+  produtos_de_cada_navio: [['ACINDAR-L3', 'PRDT_U3'],
+                           ['NUCOR-L5', 'PRDT_U2'],
+                           ['NUIRON-L4', 'PRDT_U4'],
+                           ['NAVIO-1', 'PRDT_U1'],
+                           ['NAVIO-2', 'PRDT_U1'],
+                           ['NAVIO-3', 'PRDT_U4']]
 
-  data_chegada_navio: {'EZDK-L2': 'd01_h01',
-                      'ACINDAR-L3': 'd01_h01',
-                      'NUCOR-L5': 'd01_h01'}
-  
+  taxa_carreg_navios: {'ACINDAR-L3': 4000,
+                      'NUCOR-L5': 4500,
+                      'NUIRON-L4': 4500,
+                      'NAVIO-1': 4500,
+                      'NAVIO-2': 4000,
+                      'NAVIO-3': 4500}
 
+  carga_navios: {'ACINDAR-L3': 85716,
+                'NUCOR-L5': 64706,
+                'NUIRON-L4': 80882,
+                'NAVIO-1': 70654,
+                'NAVIO-2': 37561,
+                'NAVIO-3': 93514}
 
-# {'dm-3_h01': 0, 'dm-3_h02': 0, 'dm-3_h03': 0, 'dm-3_h04': 0, 'dm-3_h05': 0, 'dm-3_h06': 0, 'dm-3_h07': 0,
-#   'dm-3_h08': 0, 'dm-3_h09': 1, 'dm-3_h10': 1, 'dm-3_h11': 1, 'dm-3_h12': 1, 'dm-3_h13': 1, 'dm-3_h14': 1, 'dm-3_h15': 1, 'dm-3_h16': 1,
-#   'dm-3_h17': 1, 'dm-3_h18': 1, 'dm-3_h19': 1, 'dm-3_h20': 1, 'dm-3_h21': 1, 'dm-3_h22': 1, 'dm-3_h23': 1, 'dm-3_h24': 0, 'dm-2_h01': 0,
-#   'dm-2_h02': 0, 'dm-2_h03': 0, 'dm-2_h04': 0, 'dm-2_h05': 0, 'dm-2_h06': 0, 'dm-2_h07': 0, 'dm-2_h08': 1, 'dm-2_h09': 1, 'dm-2_h10': 1,
-#   'dm-2_h11': 1, 'dm-2_h12': 1, 'dm-2_h13': 1, 'dm-2_h14': 1, 'dm-2_h15': 1, 'dm-2_h16': 1, 'dm-2_h17': 1, 'dm-2_h18': 1, 'dm-2_h19': 1,
-#   'dm-2_h20': 1, 'dm-2_h21': 0, 'dm-2_h22': 0, 'dm-2_h23': 0, 'dm-2_h24': 0,'dm-1_h01':0, 'dm-1_h02': 0, 'dm-1_h03': 0, 'dm-1_h04': 1,
-#   'dm-1_h05': 1, 'dm-1_h06': 1, 'dm-1_h07': 1, 'dm-1_h08': 1, 'dm-1_h09': 1, 'dm-1_h10': 1, 'dm-1_h11': 1, 'dm-1_h12': 1, 'dm-1_h13': 1,
-#   'dm-1_h14': 1, 'dm-1_h15': 1, 'dm-1_h16': 1, 'dm-1_h17': 0, 'dm-1_h18': 0,  'dm-1_h19':  0, 'dm-1_h20': 0, 'dm-1_h21': 0, 'dm-1_h22': 0,
-#   'dm-1_h23': 0, 'dm-1_h24': 1,
+  data_chegada_navio: {'ACINDAR-L3': 1,
+                      'NUCOR-L5': 72,
+                      'NUIRON-L4': 120,
+                      'NAVIO-1': 40,
+                      'NAVIO-2': 80,
+                      'NAVIO-3': 91}
+
+  prod_para_estoque: {"PRDT_C1": 50000, "PRDT_C2": 10000, "PRDT_C3": 0, "PRDT_U1": 0, "PRDT_U2": 10000, "PRDT_U3": 0, "PRDT_U4": 10000}

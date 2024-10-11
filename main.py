@@ -45,12 +45,12 @@ def main():
     L = Learning(None, 168, data)
     resultados = L.solve_model()
 
-    plot_britagem(resultados)
+    # plot_britagem(resultados)
     # plot_estoque_eb06(resultados)
-    plot_prod_c3(resultados)
+    # plot_prod_c3(resultados)
     # plot_estoque_polpa_ubu(resultados)
-    plot_prod_ubu(resultados)
-    plot_prod_sem_incorp_ubu(resultados)
+    # plot_prod_ubu(resultados)
+    # plot_prod_sem_incorp_ubu(resultados)
     # plot_carreg_navio(resultados)
 
 

@@ -140,9 +140,9 @@ class Model_p1():
         for produto_mina in produtos_mina:
             for produto_conc in produtos_conc:
                 for hora in horas_D14:
-                    if de_para_produtos_mina_conc[produto_mina][produto_conc] <= 1:
+                    if de_para_produtos_mina_conc[produto_mina][produto_conc] == 1:
                         modelo += (
-                            varProdutoConcentrador[produto_mina][produto_conc][hora] == 1,
+                            varProdutoConcentrador[produto_mina][produto_conc][hora] <= 1,
                             f"rest_ProdutoConcentrador_{produto_mina}_{produto_conc}_{hora}"
                         )
                     else:
@@ -332,21 +332,6 @@ class Model_p1():
                         f"rest_amarra_taxaAlimProdMinaConc_varProdConc_{produto_mina}_{produto_conc}_{hora}",
                     )
 
-        # # Amarra taxa de alimentação com as faixas de produção do concentrador
-        # for produto_mina in produtos_mina:
-        #     for produto_conc in produtos_conc:
-        #         for hora in horas_D14:
-        #             modelo += (
-        #                 varTaxaAlimProdMinaConc[produto_mina][produto_conc][hora]
-        #                     == faixas_producao_concentrador*varNivelTaxaAlim[produto_mina][produto_conc][hora],
-        #                 f"rest_FaixasProducaoConcentrador_{produto_mina}_{produto_conc}_{hora}",
-        #             )
-        #             modelo += (
-        #                 varNivelTaxaAlim[produto_mina][produto_conc][hora]
-        #                     <= BIG_M*lpSum(varProdutoConcentrador[produto_mina][produto_conc][hora] for produto_mina in produtos_mina),
-        #                 f"rest_TaxaAlimPorProduto_{produto_mina}_{produto_conc}_{hora}",
-        #             )
-
         # Define o estoque pulmão do concentrador
         for produto_mina in produtos_mina:
             for i in range(1, len(horas_D14)):
@@ -440,7 +425,6 @@ class Model_p1():
                     <= max_capacidade_eb06,
                 f"rest_capacidade_EstoqueEB06_{hora}",
             )
-
 
         #Define o valor de estoque de EB06, por produto, da segunda hora em diante
         for produto in produtos_conc:

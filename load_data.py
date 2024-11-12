@@ -13,19 +13,10 @@ class Load_data:
             cenario = yaml.safe_load(arquivo)
         return cenario
 
-    def load(self, instance):
-        parser = argparse.ArgumentParser(description='Otimizador Plano Semanal')
-        parser.add_argument('-c', '--cenario', default=f'cenarios/{instance}.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
-        parser.add_argument('-s', '--solver', default='GUROBI', type=str, help='Nome do otimizador a ser usado')
-        parser.add_argument('-o', '--pasta-saida', default='experimentos', type=str, help='Pasta onde serão salvos os arquivos de resultados')
-        parser.add_argument('--relax-and-fix', action='store_true', help='Habilita a heurística Relax And Fix das variáveis do mineroduto')
-        parser.add_argument('--opt-partes', action='store_true', help='Habilita a heurística de otimização por partes')
-        parser.add_argument('--ppo', action='store_true', help='Resolve o mdoelo pelo ppo')
-
-        args = parser.parse_args()
-
+    def load(self, args):
         print(f"[OK]\nLendo arquivo {args.cenario}...   ", end="")
         # Abre o arquivo YAML com dados do cenário (parâmetros do problema)
+        print(args.cenario)
         cenario = self.ler_cenario(args.cenario)
 
         # -----------------------------------------------------------------------------

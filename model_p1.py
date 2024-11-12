@@ -1236,6 +1236,19 @@ class Model_p1():
                 f"rest_define_EstoqueProdutoPatio_{produto}_{horas_D14[0]}",
             )
 
+        for hora in horas_D14:
+            modelo += (
+                lpSum(varEstoqueProdutoPatio[produto][hora] for produto in produtos_usina)
+                >= capacidade_patio_porto_min,
+                f"rest_define_limite_min_estoque_patio_{produto}_{hora}",
+            )
+            modelo += (
+                lpSum(varEstoqueProdutoPatio[produto][hora] for produto in produtos_usina)
+                <= capacidade_patio_porto_max,
+                f"rest_define_limite_max_estoque_patio_{produto}_{hora}",
+            )
+
+
         varVolumeAtrasadoNavio = LpVariable.dicts("Porto_Volume_Atrasado_Navios", (navios_horizonte), 0, None, LpContinuous)
 
         for navio in navios_horizonte:
@@ -1295,7 +1308,7 @@ class Model_p1():
             os.makedirs(args.pasta_saida)
 
         # Salvando os dados em arquivo binário usando pickels
-        nome_arquivo_saida = self.gerar_nome_arquivo_saida(f"{cenario['geral']['nome']}_teste_rapido")
+        nome_arquivo_saida = self.gerar_nome_arquivo_saida(f"{cenario['geral']['nome']}")
         with open(f'{args.pasta_saida}/{nome_arquivo_saida}', "w", encoding="utf8") as f:
             json.dump(resultados, f)
 

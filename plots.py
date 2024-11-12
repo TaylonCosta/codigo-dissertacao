@@ -139,88 +139,89 @@ def plot_prod_ubu(resultados):
 
     plt.show()
 
-def plot_carreg_navio(resultados):
+def plot_produto_patio(resultados):
+    estoque_patio_u1_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Estoque_Produto_Patio_PRDT_U1")]
+    estoque_patio_u2_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Estoque_Produto_Patio_PRDT_U2")]
+    estoque_patio_u3_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Estoque_Produto_Patio_PRDT_U3")]
+    estoque_patio_u4_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Estoque_Produto_Patio_PRDT_U4")]
+
+    hours = range(0, 168)
+
+    plt.plot(hours, estoque_patio_u1_values, label='Estoque_Patio_PRDT_U1')
+    plt.plot(hours, estoque_patio_u2_values, label='Estoque_Patio_PRDT_U2')
+    plt.plot(hours, estoque_patio_u3_values, label='Estoque_Patio_PRDT_U3')
+    plt.plot(hours, estoque_patio_u4_values, label='Estoque_Patio_PRDT_U4')
+
+
+    plt.xlabel('Hour')
+    plt.ylabel('Value')
+    plt.legend()
+    plt.show()
+
+
+
+def format_carreg_array(arr):
+    indices_of_ones = np.where(arr == 1)[0]
+
+    if len(indices_of_ones) >= 2:
+        start, end = indices_of_ones[0], indices_of_ones[1]
+        arr[start:end+1] = 1
     
+    return arr
+
+def plot_carreg_navio(resultados):
+    # Extract start and end values for each ship
     start_values_ship1 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NUCOR_L5_")]
     end_values_ship1 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NUCOR_L5_")]
 
-    labels = resultados["horas_D14"]
-
-    # Calculate duration of loading
-    loading_duration_ship1 = np.array(end_values_ship1) - np.array(start_values_ship1)
-
-    # Create the bar chart
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.bar(labels, loading_duration_ship1, color='blue')
-
-    # Labeling the axes and title
-    ax.set_xlabel('Time Period (d01_h01 to d07_h24)', fontsize=12)
-    ax.set_ylabel('Loading Duration (hours)', fontsize=12)
-    ax.set_title('Loading Duration from Start to End', fontsize=14)
-
-    # Rotate the x-axis labels for better readability
-    plt.xticks(rotation=90)
-    plt.tight_layout()
-
-    # Show the plot
-    plt.show()
-
-    plot2(resultados)
-
-    plot3(resultados)
-    # hours = range(0, 168)
-
-    # plt.plot(hours, prod_c3_prdt_c1_values, label='Producao___C3___Prog_PRDT_C1')
-    # plt.plot(hours, prod_c3_prdt_c2_values, label='Producao___C3___Prog_PRDT_C2')
-    # plt.plot(hours, prod_c3_prdt_c3_values, label='Producao___C3___Prog_PRDT_C3')
-
-    # plt.xlabel('Hour')
-    # plt.ylabel('Value')
-    # plt.legend()
-    # plt.show()
-
-def plot2(resultados):
     start_values_ship2 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_ACINDAR_L3_")]
     end_values_ship2 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_ACINDAR_L3_")]
-
-    labels = resultados["horas_D14"]
-
-    loading_duration_ship2 = np.array(end_values_ship2) - np.array(start_values_ship2)
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-
-    ax.bar(labels, loading_duration_ship2, color='green')
-
-    ax.set_xlabel('Time Period (d01_h01 to d07_h24)', fontsize=12)
-    ax.set_ylabel('Loading Duration (hours)', fontsize=12)
-    ax.set_title('Loading Duration from Start to End', fontsize=14)
-
-    # Rotate the x-axis labels for better readability
-    plt.xticks(rotation=90)
-    plt.tight_layout()
-
-    # Show the plot
-    plt.show()
-
-def plot3(resultados):
+    
     start_values_ship3 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NUIRON_L4_")]
     end_values_ship3 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NUIRON_L4_")]
+    
+    start_values_ship4 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NAVIO_1_")]
+    end_values_ship4 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NAVIO_1_")]
 
+
+    # Get the labels (time periods) and convert them to indices for plotting
     labels = resultados["horas_D14"]
+    time_indices = np.arange(len(labels))  # Create numeric indices for each time period
+    
+    loading_duration_ship1 = np.array(end_values_ship1) + np.array(start_values_ship1)
+    loading_duration_ship2 = np.array(end_values_ship2) + np.array(start_values_ship2)
+    loading_duration_ship3 = np.array(end_values_ship3) + np.array(start_values_ship3)
+    loading_duration_ship4 = np.array(end_values_ship4) + np.array(start_values_ship4)
 
-    loading_duration_ship3 = np.array(end_values_ship3) - np.array(start_values_ship3)
 
+    loading_duration_arr_ship1 = format_carreg_array(loading_duration_ship1)
+    loading_duration_arr_ship2 = format_carreg_array(loading_duration_ship2)
+    loading_duration_arr_ship3 = format_carreg_array(loading_duration_ship3)
+    loading_duration_arr_ship4 = format_carreg_array(loading_duration_ship4)
+    
+    # Create a single plot
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    ax.bar(labels, loading_duration_ship3, color='red')
+    # Plot each ship's loading duration on the same bar chart
+    bar_width = 0.5  # Reduced bar width to fit an extra bar
+    x = np.arange(len(labels))
+    
+    # Plot each ship with an offset for each bar
+    ax.bar(x + 1.5 * bar_width, loading_duration_arr_ship1, color='blue', width=bar_width, label='Ship 1')
+    ax.bar(x - 1.5 * bar_width, loading_duration_arr_ship2, color='green', width=bar_width, label='Ship 2')
+    ax.bar(x - 0.5 * bar_width, loading_duration_arr_ship3, color='red', width=bar_width, label='Ship 3')
+    ax.bar(x + 0.5 * bar_width, loading_duration_arr_ship4, color='black', width=bar_width, label='Ship 4')
 
+
+    # Labels and title
     ax.set_xlabel('Time Period (d01_h01 to d07_h24)', fontsize=12)
     ax.set_ylabel('Loading Duration (hours)', fontsize=12)
-    ax.set_title('Loading Duration from Start to End', fontsize=14)
+    ax.set_title('Loading Duration from Start to End for All Ships', fontsize=14)
 
-    # Rotate the x-axis labels for better readability
-    plt.xticks(rotation=90)
+    # Rotate x-axis labels and add legend
+    plt.xticks(x, labels, rotation=90)
+    ax.legend()
+
+    # Adjust layout and show plot
     plt.tight_layout()
-
-    # Show the plot
     plt.show()

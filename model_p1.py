@@ -1,8 +1,5 @@
 from pulp import LpProblem, LpMaximize, LpContinuous, LpInteger, LpVariable, lpSum, LpStatus
 import json
-import csv
-import pandas as pd
-import matplotlib.pyplot as plt
 import math
 import os
 
@@ -1114,7 +1111,6 @@ class Model_p1():
                 varEstoqueProdutoPatio[produto][horas_D14[-1]] >= prod_para_estoque[produto],
                 f"rest_define_limite_minimo_final_estoque_praca_{produto}",
             )
-
         # Restrições para garantir que a capacidade do porto é respeitada
         for navio in navios:
             for idx_hora in range(len(horas_D14)):
@@ -1147,7 +1143,6 @@ class Model_p1():
             # Calcula quantas horas são necessárias para carregar o navio, incluindo a última hora que pode carregar
             # uma quantidade menor que a taxa de carregamento (o resto que sobrou)
             horas_carregamento = math.ceil(carga_navios[navio]/taxa_carreg_navios[navio])
-
             # Nas primeiras horas (antes do tempo necessário para carregar o navio), o carregamento não pode ter terminado
             for idx_hora in range(0, horas_carregamento-1):
                 modelo += (

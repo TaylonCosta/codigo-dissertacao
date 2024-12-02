@@ -22,7 +22,7 @@ class Load_data:
         # -----------------------------------------------------------------------------
         # Solver
         print(f"[OK]\nInstanciando solver {args.solver}...   ", end="")
-        solver = getSolver(args.solver, msg=True, timeLimit=1800, gapRel=0.01)
+        solver = getSolver(args.solver, msg=True, timeLimit=18400, gapRel=0)
         # solver.options.remove(("SolutionLimit", value))
         # ------------------------------------------------------------------------------
 
@@ -59,6 +59,15 @@ class Load_data:
             "PRDT_C3": {"PRDT_U1": 1, "PRDT_U2": 0, "PRDT_U3": 0, "PRDT_U4": 0},
         }
 
+        # de_para_produtos_mina_conc = {
+        #     "RNS": {"CHS": 1, "CNS": 1, "CLS": 0},
+        #     "RLS": {"CHS": 0, "CNS": 0, "CLS": 1},
+        # }
+        # de_para_produtos_conc_usina = {
+        #     "CHS": {"PDR_MX": 0, "PDR_STD": 0, "PBF_HB": 0, "PBF_STD": 1},
+        #     "CNS": {"PDR_MX": 0, "PDR_STD": 1, "PBF_HB": 1, "PBF_STD": 0},
+        #     "CLS": {"PDR_MX": 1, "PDR_STD": 0, "PBF_HB": 0, "PBF_STD": 0},
+        # }
         # Obs.: índices dos navios são definidos ao ler os dados da aba NAVIOS
 
         BIG_M = 10e6  # Big M

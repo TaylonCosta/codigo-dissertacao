@@ -5,7 +5,7 @@ import argparse                    # usado para tratar os argumentos do script
 import json
 from PPO import run_ppo
 from ai import *
-from plots import plot_prod_ubu, plot_estoque_eb06, plot_prod_c3, plot_estoque_polpa_ubu, plot_prod_sem_incorp_ubu, plot_carreg_navio, plot_britagem, plot_produto_patio
+from plots import plot_prod_ubu, plot_estoque_eb06, plot_prod_c3, plot_estoque_polpa_ubu, plot_prod_sem_incorp_ubu, plot_carreg_navio, plot_britagem, plot_produto_patio, plot_bombeado
 
 def gerar_nome_arquivo_saida(nome_base_arquivo):
     """ Gera o nome padronizado do arquivo de saída """
@@ -18,16 +18,17 @@ def gerar_nome_arquivo_saida(nome_base_arquivo):
     return f"{nome_base_arquivo}_{contador}.json"
 
 def run_plots():
-    with open('experimentos/ws1.json', 'r') as file:
+    with open('experimentos/HSLD1.json', 'r') as file:
         resultados = json.load(file)
 
     # plot_britagem(resultados)
     # plot_estoque_eb06(resultados)
     # plot_prod_c3(resultados)
-    # plot_estoque_polpa_ubu(resultados)
-    # plot_prod_ubu(resultados)
-    plot_prod_sem_incorp_ubu(resultados)
+    plot_estoque_polpa_ubu(resultados)
+    plot_prod_ubu(resultados)
+    # plot_prod_sem_incorp_ubu(resultados)
     plot_produto_patio(resultados)
+    # plot_bombeado(resultados)
     plot_carreg_navio(resultados)
 
 
@@ -52,9 +53,11 @@ def main():
     parser.add_argument('--relax-and-fix', action='store_true', help='Habilita a heurística Relax And Fix das variáveis do mineroduto')
     parser.add_argument('--opt-partes', action='store_true', help='Habilita a heurística de otimização por partes')
     parser.add_argument('--ppo', action='store_true', help='Resolve o mdoelo pelo ppo')
+    
     args = parser.parse_args()
     run_model(args)
-    run_plots()
+    # run_ppo(args)
+    # run_plots()
 
 
 if __name__ == "__main__":

@@ -32,6 +32,22 @@ def plot_estoque_eb06(resultados):
     plt.legend()
     plt.show()
 
+def plot_bombeado(resultados):
+    bombeado_prdt_c1_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Bombeado_PRDT_C1")]
+    bombeado_prdt_c2_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Bombeado_PRDT_C2")]
+    bombeado_prdt_c3_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Bombeado_PRDT_C3")]
+
+    hours = range(0, 168)
+
+    plt.plot(hours, bombeado_prdt_c1_values, label='Bombeado_PRDT_C1')
+    plt.plot(hours, bombeado_prdt_c2_values, label='Bombeado_PRDT_C2')
+    plt.plot(hours, bombeado_prdt_c3_values, label='Bombeado_PRDT_C3')
+
+    plt.xlabel('Hour')
+    plt.ylabel('Value')
+    plt.legend()
+    plt.show()
+
 def plot_estoque_polpa_ubu(resultados):
     estoque_polpa_ubu_prdt_c1_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Estoque_Polpa_Ubu_PRDT_C1")]
     estoque_polpa_ubu_prdt_c2_values = [value for key, value in resultados["variaveis"].items() if key.startswith("Estoque_Polpa_Ubu_PRDT_C2")]
@@ -180,8 +196,8 @@ def plot_carreg_navio(resultados):
     start_values_ship3 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NUIRON_L4_")]
     end_values_ship3 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NUIRON_L4_")]
     
-    start_values_ship4 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NAVIO_1_")]
-    end_values_ship4 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NAVIO_1_")]
+    # start_values_ship4 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NAVIO_1_")]
+    # end_values_ship4 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NAVIO_1_")]
 
 
     # Get the labels (time periods) and convert them to indices for plotting
@@ -191,13 +207,13 @@ def plot_carreg_navio(resultados):
     loading_duration_ship1 = np.array(end_values_ship1) + np.array(start_values_ship1)
     loading_duration_ship2 = np.array(end_values_ship2) + np.array(start_values_ship2)
     loading_duration_ship3 = np.array(end_values_ship3) + np.array(start_values_ship3)
-    loading_duration_ship4 = np.array(end_values_ship4) + np.array(start_values_ship4)
+    # loading_duration_ship4 = np.array(end_values_ship4) + np.array(start_values_ship4)
 
 
     loading_duration_arr_ship1 = format_carreg_array(loading_duration_ship1)
     loading_duration_arr_ship2 = format_carreg_array(loading_duration_ship2)
     loading_duration_arr_ship3 = format_carreg_array(loading_duration_ship3)
-    loading_duration_arr_ship4 = format_carreg_array(loading_duration_ship4)
+    # loading_duration_arr_ship4 = format_carreg_array(loading_duration_ship4)
     
     # Create a single plot
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -207,10 +223,10 @@ def plot_carreg_navio(resultados):
     x = np.arange(len(labels))
     
     # Plot each ship with an offset for each bar
-    ax.bar(x + 1.5 * bar_width, loading_duration_arr_ship1, color='blue', width=bar_width, label='Ship 1')
-    ax.bar(x - 1.5 * bar_width, loading_duration_arr_ship2, color='green', width=bar_width, label='Ship 2')
-    ax.bar(x - 0.5 * bar_width, loading_duration_arr_ship3, color='red', width=bar_width, label='Ship 3')
-    ax.bar(x + 0.5 * bar_width, loading_duration_arr_ship4, color='black', width=bar_width, label='Ship 4')
+    ax.bar(x + 1.5 * bar_width, loading_duration_arr_ship1, color='blue', width=bar_width, label='NUCOR_L5')
+    ax.bar(x - 1.5 * bar_width, loading_duration_arr_ship2, color='green', width=bar_width, label='ACINDAR_L3')
+    ax.bar(x - 0.5 * bar_width, loading_duration_arr_ship3, color='red', width=bar_width, label='SNUIRON_L4')
+    # ax.bar(x + 0.5 * bar_width, loading_duration_arr_ship4, color='black', width=bar_width, label='Ship 4')
 
 
     # Labels and title

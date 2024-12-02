@@ -457,10 +457,11 @@ def evaluate_results(model, env, seeds, render=False):
     return np.average(FO_bests), results
 
 
-def run_ppo():
+def run_ppo(args):
 
     print("===== CHECANDO AMBIENTE =====")
-
+    
+    print(args)
     env = CustomizedEnv(unique_instance=UNIQUE_INSTANCE, seed=UNIQUE_INSTANCE_SEED)
     # If the environment don't follow the interface, an error will be thrown
     # check_env(env, warn=True)

@@ -24,10 +24,10 @@ def run_plots():
     # plot_britagem(resultados)
     # plot_estoque_eb06(resultados)
     # plot_prod_c3(resultados)
-    plot_estoque_polpa_ubu(resultados)
-    plot_prod_ubu(resultados)
+    # plot_estoque_polpa_ubu(resultados)
+    # plot_prod_ubu(resultados)
     # plot_prod_sem_incorp_ubu(resultados)
-    plot_produto_patio(resultados)
+    # plot_produto_patio(resultados)
     # plot_bombeado(resultados)
     plot_carreg_navio(resultados)
 
@@ -57,7 +57,7 @@ def main():
     args = parser.parse_args()
     run_model(args)
     # run_ppo(args)
-    # run_plots()
+    run_plots()
 
 
 if __name__ == "__main__":

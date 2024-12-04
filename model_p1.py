@@ -35,7 +35,7 @@ class Model_p1():
         produtos_britagem = data['produtos_britagem']
         produtos_mina = data['produtos_mina']
         estoque_pulmao_inicial_concentrador = data['estoque_pulmao_inicial_concentrador']
-        fatorGeracaoLama = data['fatorGeracaoLama']
+        fatorGeracaoLama = data['fator_geracao_lama']
         estoque_eb06_d0 = data['estoque_eb06_d0']
         vazao_bombas = data['vazao_bombas']
         produtos_conc = data['produtos_conc']

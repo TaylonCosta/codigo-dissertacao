@@ -187,14 +187,14 @@ def format_carreg_array(arr):
 
 def plot_carreg_navio(resultados):
     # Extract start and end values for each ship
-    start_values_ship1 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NUCOR_L5_")]
-    end_values_ship1 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NUCOR_L5_")]
+    start_values_ship1 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NAVIO_1")]
+    end_values_ship1 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NAVIO_1")]
 
-    start_values_ship2 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_ACINDAR_L3_")]
-    end_values_ship2 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_ACINDAR_L3_")]
+    # start_values_ship2 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_ACINDAR_L3_")]
+    # end_values_ship2 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_ACINDAR_L3_")]
     
-    start_values_ship3 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NUIRON_L4_")]
-    end_values_ship3 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NUIRON_L4_")]
+    # start_values_ship3 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NUIRON_L4_")]
+    # end_values_ship3 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NUIRON_L4_")]
     
     # start_values_ship4 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NAVIO_1_")]
     # end_values_ship4 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NAVIO_1_")]
@@ -205,14 +205,15 @@ def plot_carreg_navio(resultados):
     time_indices = np.arange(len(labels))  # Create numeric indices for each time period
     
     loading_duration_ship1 = np.array(end_values_ship1) + np.array(start_values_ship1)
-    loading_duration_ship2 = np.array(end_values_ship2) + np.array(start_values_ship2)
-    loading_duration_ship3 = np.array(end_values_ship3) + np.array(start_values_ship3)
+    # loading_duration_ship2 = np.array(end_values_ship2) + np.array(start_values_ship2)
+    # loading_duration_ship3 = np.array(end_values_ship3) + np.array(start_values_ship3)
     # loading_duration_ship4 = np.array(end_values_ship4) + np.array(start_values_ship4)
 
+    print()
 
     loading_duration_arr_ship1 = format_carreg_array(loading_duration_ship1)
-    loading_duration_arr_ship2 = format_carreg_array(loading_duration_ship2)
-    loading_duration_arr_ship3 = format_carreg_array(loading_duration_ship3)
+    # loading_duration_arr_ship2 = format_carreg_array(loading_duration_ship2)
+    # loading_duration_arr_ship3 = format_carreg_array(loading_duration_ship3)
     # loading_duration_arr_ship4 = format_carreg_array(loading_duration_ship4)
     
     # Create a single plot
@@ -221,11 +222,11 @@ def plot_carreg_navio(resultados):
     # Plot each ship's loading duration on the same bar chart
     bar_width = 0.5  # Reduced bar width to fit an extra bar
     x = np.arange(len(labels))
-    
+
     # Plot each ship with an offset for each bar
-    ax.bar(x + 1.5 * bar_width, loading_duration_arr_ship1, color='blue', width=bar_width, label='NUCOR_L5')
-    ax.bar(x - 1.5 * bar_width, loading_duration_arr_ship2, color='green', width=bar_width, label='ACINDAR_L3')
-    ax.bar(x - 0.5 * bar_width, loading_duration_arr_ship3, color='red', width=bar_width, label='SNUIRON_L4')
+    ax.bar(x, loading_duration_arr_ship1, width=bar_width, color='blue', label='NUCOR_L5')
+    # ax.bar(x - 1.5 * bar_width, loading_duration_arr_ship2, color='green', width=bar_width, label='ACINDAR_L3')
+    # ax.bar(x - 0.5 * bar_width, loading_duration_arr_ship3, color='red', width=bar_width, label='SNUIRON_L4')
     # ax.bar(x + 0.5 * bar_width, loading_duration_arr_ship4, color='black', width=bar_width, label='Ship 4')
 
 

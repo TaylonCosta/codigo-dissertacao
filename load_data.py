@@ -22,14 +22,14 @@ class Load_data:
         # -----------------------------------------------------------------------------
         # Solver
         print(f"[OK]\nInstanciando solver {args.solver}...   ", end="")
-        solver = getSolver(args.solver, msg=True, timeLimit=18400, gapRel=0)
+        solver = getSolver(args.solver, msg=True, timeLimit=7200, gapRel=0)
         # solver.options.remove(("SolutionLimit", value))
         # ------------------------------------------------------------------------------
 
-        print(f'[OK]\nAbrindo planilha {cenario["geral"]["planilha"]}...   ', end="")
-        # Abre a planilha e força o cálculo das fórmulas
-        wb = load_workbook(cenario["geral"]["planilha"], data_only=True)
-        wb.calculation.calcMode = "auto"
+        # print(f'[OK]\nAbrindo planilha {cenario["geral"]["planilha"]}...   ', end="")
+        # # Abre a planilha e força o cálculo das fórmulas
+        # wb = load_workbook(cenario["geral"]["planilha"], data_only=True)
+        # wb.calculation.calcMode = "auto"
 
         # -----------------------------------------------------------------------------
         # Índices usados pelas variáveis e parâmetros
@@ -155,7 +155,7 @@ class Load_data:
         tempo_mineroduto = cenario["mineroduto"]["tempo_mineroduto"]
 
         max_taxa_envio_patio = cenario["mineroduto"]["max_taxa_envio_patio"]
-
+        print(max_taxa_envio_patio)
         fator_limite_excesso_patio = cenario["mineroduto"]["fator_limite_excesso_patio"]
         fator_limite_incorporacao_patio = cenario["mineroduto"]["fator_limite_incorporacao_patio"]
         taxa_max_incorporacao_patio = cenario["mineroduto"]["taxa_max_incorporacao_patio"]
@@ -190,7 +190,7 @@ class Load_data:
         print(f"[OK]\nObtendo parâmetros da planilha...   ", end="")
 
         # Lê os dados da aba MINA
-        ws = wb["MINA"]
+        # ws = wb["MINA"]
 
         # configuração das linhas onde se encontram os parâmetros
         conf_parametros_mina = {
@@ -230,33 +230,33 @@ class Load_data:
         max_parametros_mina = {}
 
         # Lê a aba mina guardando os valores dos parâmetros e os valores mínimos e máximos
-        for parametro in conf_parametros_mina:
-            linha = conf_parametros_mina[parametro]
-            parametros_mina[parametro] = {}
-            for idx, cell in enumerate(
-                ws[
-                    coluna_dia_inicial
-                    + str(linha)
-                    + ":"
-                    + coluna_dia_final
-                    + str(linha)
-                ][0]
-            ):
-                parametros_mina[parametro][dias[idx]] = cell.value
-                break
-            min_parametros_mina[parametro] = (
-                ws[coluna_min + str(linha)].value
-                if ws[coluna_min + str(linha)].value is not None
-                else 0
-            )
-            max_parametros_mina[parametro] = (
-                ws[coluna_max + str(linha)].value
-                if ws[coluna_max + str(linha)].value is not None
-                else BIG_M
-            )
+        # for parametro in conf_parametros_mina:
+        #     linha = conf_parametros_mina[parametro]
+        #     parametros_mina[parametro] = {}
+        #     for idx, cell in enumerate(
+        #         ws[
+        #             coluna_dia_inicial
+        #             + str(linha)
+        #             + ":"
+        #             + coluna_dia_final
+        #             + str(linha)
+        #         ][0]
+        #     ):
+        #         parametros_mina[parametro][dias[idx]] = cell.value
+        #         break
+        #     min_parametros_mina[parametro] = (
+        #         ws[coluna_min + str(linha)].value
+        #         if ws[coluna_min + str(linha)].value is not None
+        #         else 0
+        #     )
+        #     max_parametros_mina[parametro] = (
+        #         ws[coluna_max + str(linha)].value
+        #         if ws[coluna_max + str(linha)].value is not None
+        #         else BIG_M
+        #     )
 
         # Lê o parâmetro de geração de lama
-        fatorGeracaoLama = ws["D26"].value
+        # fatorGeracaoLama = ws["D26"].value
 
         # print('\n CONFERINDO parâmetros da MINA')
         # print(f'{parametros_mina=}')
@@ -291,7 +291,7 @@ class Load_data:
 
         # Lendo dados da aba MINERODUTO(-D3)
 
-        ws = wb["MINERODUTO(-D3)"]
+        # ws = wb["MINERODUTO(-D3)"]
 
         # configuração das linhas onde se encontram os parâmetros
         conf_parametros_mineroduto_md3 = {
@@ -314,15 +314,15 @@ class Load_data:
         parametros_mineroduto_md3 = {}
 
         # Lendo os parâmetros da planilha
-        for parametro in conf_parametros_mineroduto_md3:
-            linha = conf_parametros_mineroduto_md3[parametro]
-            parametros_mineroduto_md3[parametro] = {}
-            for idx, cell in enumerate(
-                ws[
-                    f"{get_column_name(coluna_hora_inicial_mD3)}{linha}:{get_column_name(coluna_hora_final_mD3)}{linha}"
-                ][0]
-            ):
-                parametros_mineroduto_md3[parametro][horas_Dm3[idx]] = cell.value
+        # for parametro in conf_parametros_mineroduto_md3:
+        #     linha = conf_parametros_mineroduto_md3[parametro]
+        #     parametros_mineroduto_md3[parametro] = {}
+        #     for idx, cell in enumerate(
+        #         ws[
+        #             f"{get_column_name(coluna_hora_inicial_mD3)}{linha}:{get_column_name(coluna_hora_final_mD3)}{linha}"
+        #         ][0]
+        #     ):
+        #         parametros_mineroduto_md3[parametro][horas_Dm3[idx]] = cell.value
 
         # Sobrescreve o bombeamento polpa -D3 com a informação do cenário, porque agora é multiproduto
         # parametros_mineroduto_md3['Bombeamento Polpa -D3'] = cenario['mineroduto']['bombeamento_polpa_dm3']
@@ -334,7 +334,7 @@ class Load_data:
 
         # Lendo dados da aba MINERODUTO-UBU
 
-        ws = wb["MINERODUTO-UBU"]
+        # ws = wb["MINERODUTO-UBU"]
 
         # Lendo parâmetros de uma única célula
         # estoque_eb6_d0 = ws["C5"].value
@@ -354,15 +354,15 @@ class Load_data:
         parametros_mineroduto_ubu = {}
 
         # Lendo os parâmetros da planilha
-        for parametro in conf_parametros_mineroduto_ubu:
-            linha = conf_parametros_mineroduto_ubu[parametro]
-            parametros_mineroduto_ubu[parametro] = {}
-            for idx, cell in enumerate(
-                ws[
-                    f"{get_column_name(coluna_hora_inicial_d14)}{linha}:{get_column_name(coluna_hora_final_d14)}{linha}"
-                ][0]
-            ):
-                parametros_mineroduto_ubu[parametro][horas_D14[idx]] = cell.value
+        # for parametro in conf_parametros_mineroduto_ubu:
+        #     linha = conf_parametros_mineroduto_ubu[parametro]
+        #     parametros_mineroduto_ubu[parametro] = {}
+        #     for idx, cell in enumerate(
+        #         ws[
+        #             f"{get_column_name(coluna_hora_inicial_d14)}{linha}:{get_column_name(coluna_hora_final_d14)}{linha}"
+        #         ][0]
+        #     ):
+        #         parametros_mineroduto_ubu[parametro][horas_D14[idx]] = cell.value
 
         # print('\n CONFERINDO parâmetros da MINERODUTO-UBU')
         # print(f'{estoque_eb6_d0=}')
@@ -373,7 +373,7 @@ class Load_data:
 
         # Lendo dados da aba UBU
 
-        ws = wb["UBU"]
+        # ws = wb["UBU"]
 
         # configuração das linhas onde se encontram os parâmetros da aba UBU
         conf_parametros_mineroduto_ubu = {
@@ -398,20 +398,20 @@ class Load_data:
         parametros_ubu = {}
 
         # Lendo os parâmetros da planilha
-        for parametro in conf_parametros_mineroduto_ubu:
-            linha = conf_parametros_mineroduto_ubu[parametro]
-            parametros_ubu[parametro] = {}
-            for idx, cell in enumerate(
-                ws[
-                    coluna_dia_inicial
-                    + str(linha)
-                    + ":"
-                    + coluna_dia_final
-                    + str(linha)
-                ][0]
-            ):
-                parametros_ubu[parametro][dias[idx]] = cell.value
-                break
+        # for parametro in conf_parametros_mineroduto_ubu:
+        #     linha = conf_parametros_mineroduto_ubu[parametro]
+        #     parametros_ubu[parametro] = {}
+        #     for idx, cell in enumerate(
+        #         ws[
+        #             coluna_dia_inicial
+        #             + str(linha)
+        #             + ":"
+        #             + coluna_dia_final
+        #             + str(linha)
+        #         ][0]
+        #     ):
+        #         parametros_ubu[parametro][dias[idx]] = cell.value
+        #         break
 
         # print('\n CONFERINDO parâmetros da aba UBU')
         # print(f'{parametros_ubu}')
@@ -420,14 +420,14 @@ class Load_data:
 
         # Lendo dados da aba PÁTIO-PORTO
 
-        ws = wb["PÁTIO-PORTO"]
+        # ws = wb["PÁTIO-PORTO"]
 
         # estoque_produto_patio_d0 = ws["D10"].value
         # -----------------------------------------------------------------------------
 
         # Lendo dados da aba NAVIOS
 
-        ws = wb["NAVIOS"]
+        # ws = wb["NAVIOS"]
 
         # configuração das linhas onde se encontram os parâmetros da aba NAVIOS
         conf_parametros_navios = {
@@ -443,15 +443,15 @@ class Load_data:
         # Lendo os parâmetros da planilha
         # Obs.: aqui os navios são indexados por índice, mas isso será alterado mais adiante
         #       porque o mesmo nome de navio pode aparecer mais de uma vez
-        for parametro in conf_parametros_navios:
-            coluna = conf_parametros_navios[parametro]
-            parametros_navios[parametro] = {}
-            linha = 2
-            cell = ws[coluna + str(linha)]
-            while cell.value is not None:
-                parametros_navios[parametro][linha - 2] = cell.value
-                linha += 1
-                cell = ws[coluna + str(linha)]
+        # for parametro in conf_parametros_navios:
+        #     coluna = conf_parametros_navios[parametro]
+        #     parametros_navios[parametro] = {}
+        #     linha = 2
+        #     cell = ws[coluna + str(linha)]
+        #     while cell.value is not None:
+        #         parametros_navios[parametro][linha - 2] = cell.value
+        #         linha += 1
+        #         cell = ws[coluna + str(linha)]
 
         # -----------------------------------------------------------------------------
 
@@ -483,6 +483,8 @@ class Load_data:
             parametros_calculados["Rendimento Operacional - C3"][dia] = (
                 cenario["mina"]["UD"][dia] * cenario["mina"]["DF"][dia]
             )
+
+        fator_geracao_lama = cenario["mina"]["fator_geracao_lama"]
 
         parametros_calculados["% Sólidos - EB06"] = {}
         parametros_calculados["Densidade Polpa - EB06"] = {}
@@ -566,7 +568,7 @@ class Load_data:
             "faixas_producao_concentrador": faixas_producao_concentrador,
             "estoque_pulmao_inicial_concentrador": estoque_pulmao_inicial_concentrador,
             "parametros_calculados": parametros_calculados,
-            "fatorGeracaoLama": fatorGeracaoLama,
+            "fator_geracao_lama": fator_geracao_lama,
             "parametros_mineroduto_ubu": parametros_mineroduto_ubu,
             "estoque_eb06_d0": estoque_eb06_d0,
             "dias": dias,

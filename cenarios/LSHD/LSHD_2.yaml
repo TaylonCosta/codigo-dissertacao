@@ -1,5 +1,5 @@
 geral:
-  nome: ws0
+  nome: LSHD2
   planilha: instancias/P_Semanal.xlsx
   janela_planejamento: 7
   # funcao_objetivo: [max_conc, max_usina, min_atr_nav, min_est_patio]
@@ -23,6 +23,7 @@ mina:
   limites_campanhas_min : {"PRDT_C1": 27000, "PRDT_C2": 27000, "PRDT_C3": 54000, "PRDT_U1": 40000, "PRDT_U2": 5000, "PRDT_U3": 40000, "PRDT_U4": 40000}
   limites_campanhas_max : {"PRDT_C1": 840000, "PRDT_C2": 840000, "PRDT_C3": 840000, "PRDT_U1": 840000, "PRDT_U2": 840000, "PRDT_U3": 840000, "PRDT_U4": 840000}
   limites_campanhas_acum : {"PRDT_C1": 30000, "PRDT_C2": 0, "PRDT_C3": 0, "PRDT_U1": 0, "PRDT_U2": 0, "PRDT_U3": 0, "PRDT_U4": 0}
+  fator_geracao_lama: 0.905
 
 concentrador:
   produtos_conc: ['PRDT_C1', 'PRDT_C2', 'PRDT_C3']
@@ -101,32 +102,40 @@ porto:
   capacidade_patio_porto_min: 0
   capacidade_patio_porto_max: 1500000
   estoque_produto_patio: {'PRDT_U1': 0, 'PRDT_U2': 0, 'PRDT_U3': 0, 'PRDT_U4': 0}
-  navios: ['ACINDAR-L3', 'NUCOR-L5', 'NUIRON-L4', 'NAVIO-1', 'NAVIO-2', 'NAVIO-3']
+  navios: ['ACINDAR-L3', 'NUCOR-L5', 'NUIRON-L4', 'NAVIO-1', 'NAVIO-2', 'NAVIO-4']
 
-  navios_horizonte: ['ACINDAR-L3', 'NUCOR-L5', 'NUIRON-L4']
+  navios_horizonte: ['ACINDAR-L3', 'NUCOR-L5', 'NUIRON-L4', 'NAVIO-1', 'NAVIO-2', 'NAVIO-4']
 
   taxa_carreg_navios: {'ACINDAR-L3': 4000,
                       'NUCOR-L5': 4500,
                       'NUIRON-L4': 4500,
                       'NAVIO-1': 4500,
                       'NAVIO-2': 4000,
-                      'NAVIO-3': 4500}
+                      'NAVIO-4': 4500
+                      }
 
   produtos_de_cada_navio: [
-        ['NAVIO-1', 'PRDT_C1'],
-        ['NAVIO-2', 'PRDT_C3'],
-        ['NAVIO-3', 'PRDT_U4']]
+          ['ACINDAR-L3', 'PRDT_U1'],
+          ['NUCOR-L5', 'PRDT_U2'],
+          ['NUIRON-L4', 'PRDT_U3'],
+          ['NAVIO-1', 'PRDT_U1'],
+          ['NAVIO-2', 'PRDT_U4'],
+          ['NAVIO-4', 'PRDT_U3']]
 
   carga_navios: {
-        'NAVIO-1': 80000,
-        'NAVIO-2': 50000,
-        'NAVIO-3': 70000
-    }
+          'ACINDAR-L3': 95000,
+          'NUCOR-L5': 80000,
+          'NUIRON-L4': 87000,
+          'NAVIO-1': 70000,
+          'NAVIO-2': 90000,
+          'NAVIO-4': 100000}
 
   data_chegada_navio: {
-        'NAVIO-1': 20,
-        'NAVIO-2': 50,
-        'NAVIO-3': 100
-    }
-  
-  prod_para_estoque: {"PRDT_C1": 45000, "PRDT_C2": 0, "PRDT_C3": 15000, "PRDT_U1": 0, "PRDT_U2": 0, "PRDT_U3": 0, "PRDT_U4": 25000}
+          'ACINDAR-L3': 5,
+          'NUCOR-L5': 20,
+          'NUIRON-L4': 30,
+          'NAVIO-1': 40,
+          'NAVIO-2': 50,
+          'NAVIO-4': 60}
+
+  prod_para_estoque: {"PRDT_C1": 0, "PRDT_C2": 0, "PRDT_C3": 10000, "PRDT_U1": 0, "PRDT_U2": 15000, "PRDT_U3": 10000, "PRDT_U4": 25000}

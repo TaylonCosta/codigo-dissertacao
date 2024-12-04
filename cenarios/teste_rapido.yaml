@@ -23,6 +23,7 @@ mina:
   limites_campanhas_min : {"CHS": 40500, "CNS": 40500, "CLS": 40500, "PDR_MX": 12500, "PDR_STD": 12500, "PBF_HB": 12500, "PBF_STD": 12500}
   limites_campanhas_max : {"CHS": 840000, "CNS": 840000, "CLS": 840000, "PDR_MX": 840000, "PDR_STD": 840000, "PBF_HB": 840000, "PBF_STD": 840000}
   limites_campanhas_acum : {"CHS": 0, "CNS": 0, "CLS": 0, "PDR_MX": 0, "PDR_STD": 0, "PBF_HB": 0, "PBF_STD": 0}
+  fator_geracao_lama: 
 
 concentrador:
   produtos_conc: ['CHS', 'CNS', 'CLS']

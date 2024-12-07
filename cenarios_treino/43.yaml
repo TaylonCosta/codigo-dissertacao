@@ -1,0 +1,298 @@
+concentrador:
+  duracao_manutencoes_concentrador: []
+  estoque_pulmao_inicial_concentrador:
+  - - PRDT1
+    - 13883
+  - - PRDT2
+    - 18367
+  faixas_producao_concentrador: 625
+  fixar_taxa_alimentacao: livre
+  inicio_manutencoes_concentrador: []
+  max_estoque_pulmao_concentrador: 100000
+  max_taxa_alimentacao: 2500
+  min_estoque_pulmao_concentrador: 0
+  min_taxa_alimentacao: 0
+  numero_faixas_producao: 4
+  produtos_conc:
+  - PRDT_C1
+  - PRDT_C2
+  - PRDT_C3
+  taxa_alimentacao_fixa: 2500
+geral:
+  funcao_objetivo:
+  - max_conc
+  - max_usina
+  janela_planejamento: 7
+  mipgap: 0.3
+  nome: ASAD1
+  planilha: instancias/P_Semanal.xlsx
+  timeLimit: 30
+mina:
+  DF:
+    d01: 0.975
+    d02: 0.9745
+    d03: 0.975
+    d04: 0.975
+    d05: 0.975
+    d06: 0.975
+    d07: 0.975
+  RP:
+    d01: 54.94
+    d02: 54.94
+    d03: 54.94
+    d04: 54.94
+    d05: 54.94
+    d06: 54.94
+    d07: 54.94
+  SOL:
+    d01: 0.66
+    d02: 0.66
+    d03: 0.66
+    d04: 0.66
+    d05: 0.66
+    d06: 0.66
+    d07: 0.66
+  SOL_EB06:
+    d01: 0.669
+    d02: 0.669
+    d03: 0.669
+    d04: 0.669
+    d05: 0.669
+    d06: 0.669
+    d07: 0.669
+  UD:
+    d01: 0.97
+    d02: 0.97
+    d03: 0.97
+    d04: 0.97
+    d05: 0.97
+    d06: 0.97
+    d07: 0.97
+  campanha:
+  - - PRDT1
+    - d01_h01
+  - - PRDT2
+    - d05_h01
+  densidade:
+    d01: 2.14
+    d02: 2.14
+    d03: 2.14
+    d04: 2.14
+    d05: 2.14
+    d06: 2.14
+    d07: 2.14
+  dif_balanco:
+    d01: 0.005
+    d02: 0.005
+    d03: 0.005
+    d04: 0.005
+    d05: 0.005
+    d06: 0.005
+    d07: 0.005
+  disponibilidade_britagem:
+  - 85.42
+  - 94.3
+  - 94.3
+  - 94.3
+  - 94.3
+  - 94.3
+  - 85.4
+  - 94.3
+  - 94.3
+  - 94.3
+  - 94.3
+  - 33.3
+  - 66.7
+  - 94.3
+  fator_geracao_lama: 0.905
+  limites_campanhas_acum:
+    PRDT_C1: 30000
+    PRDT_C2: 0
+    PRDT_C3: 0
+    PRDT_U1: 0
+    PRDT_U2: 0
+    PRDT_U3: 0
+    PRDT_U4: 0
+  limites_campanhas_max:
+    PRDT_C1: 840000
+    PRDT_C2: 840000
+    PRDT_C3: 840000
+    PRDT_U1: 840000
+    PRDT_U2: 840000
+    PRDT_U3: 840000
+    PRDT_U4: 840000
+  limites_campanhas_min:
+    PRDT_C1: 27000
+    PRDT_C2: 27000
+    PRDT_C3: 54000
+    PRDT_U1: 40000
+    PRDT_U2: 5000
+    PRDT_U3: 40000
+    PRDT_U4: 40000
+  taxa_alimentacao_britagem:
+  - 3000
+  - 3000
+  - 3000
+  - 3000
+  - 3000
+  - 3000
+  - 3000
+  - 3000
+  - 3000
+  - 3000
+  - 3000
+  - 3000
+  - 3000
+  - 3000
+  umidade:
+    d01: 0.07
+    d02: 0.07
+    d03: 0.07
+    d04: 0.07
+    d05: 0.07
+    d06: 0.07
+    d07: 0.07
+  utilizacao_britagem:
+  - 60.0
+  - 71.0
+  - 82.0
+  - 85.0
+  - 85.0
+  - 85.0
+  - 82.0
+  - 86.0
+  - 86.0
+  - 86.0
+  - 86.0
+  - 85.0
+  - 85.0
+  - 86.0
+mineroduto:
+  bombeamento_agua_acum_semana_anterior: 0
+  bombeamento_polpa_acum_semana_anterior: 0
+  bombeamento_restante_janela_anterior_agua: 0
+  bombeamento_restante_janela_anterior_polpa: 1
+  considerar_janela_final: false
+  estoque_inicial_eb06:
+  - - PRDT_C1
+    - 703
+  - - PRDT_C2
+    - 985
+  - - PRDT_C3
+    - 3488
+  fator_limite_excesso_patio: 0.8
+  fator_limite_incorporacao_patio: 0.2
+  fixar_janela_bombeamento: livre
+  fixar_janela_bombeamento_agua: livre
+  janela_da_utilizacao_minima_mineroduto_horas: 168
+  janela_fixa_bombeamento_agua: 6
+  janela_fixa_bombeamento_polpa: 13
+  janela_livre_max_bombeamento_agua: 1
+  janela_livre_min_bombeamento_agua: 10
+  janela_max_bombeamento_agua: 20
+  janela_max_bombeamento_polpa: 11
+  janela_min_bombeamento_agua: 5
+  janela_min_bombeamento_polpa: 9
+  janela_para_fixar_bombeamento_agua: 168
+  janelas_campanha_acum:
+    PRDT_C1: 0
+    PRDT_C2: 0
+    PRDT_C3: 0
+    PRDT_U1: 0
+    PRDT_U2: 0
+    PRDT_U3: 0
+    PRDT_U4: 0
+  janelas_campanhas_max:
+    PRDT_C1: 400
+    PRDT_C2: 400
+    PRDT_C3: 400
+    PRDT_U1: 400
+    PRDT_U2: 400
+    PRDT_U3: 400
+    PRDT_U4: 400
+  janelas_campanhas_min:
+    PRDT_C1: 0
+    PRDT_C2: 0
+    PRDT_C3: 0
+    PRDT_U1: 0
+    PRDT_U2: 0
+    PRDT_U3: 0
+    PRDT_U4: 0
+  max_capacidade_eb06: 10250
+  max_taxa_envio_patio: 1200
+  nro_janelas_livres_agua: 3
+  prod_polpa_hora_anterior: ''
+  taxa_max_incorporacao_patio: 166.66
+  tempo_germano_matipo: 10
+  tempo_germano_ubu: 25
+  tempo_mineroduto: 0
+  utilizacao_minima_mineroduto: 0
+  vazao_bombas: 1270
+porto:
+  capacidade_carreg_porto_por_dia: 1
+  capacidade_patio_porto_max: 1500000
+  capacidade_patio_porto_min: 0
+  carga_navios:
+    NAVIO-1: 20307
+  data_chegada_navio:
+    NAVIO-1: 32
+  estoque_produto_patio:
+    PRDT_U1: 10805
+    PRDT_U2: 15449
+    PRDT_U3: 44760
+    PRDT_U4: 38964
+  navios: &id001
+  - NAVIO-1
+  navios_horizonte: *id001
+  prod_para_estoque:
+    PRDT_C1: 24680
+    PRDT_C2: 2608
+    PRDT_C3: 5170
+    PRDT_U1: 20224
+    PRDT_U2: 17608
+    PRDT_U3: 11376
+    PRDT_U4: 18329
+  produtos_de_cada_navio:
+  - - NAVIO-1
+    - PRDT_U4
+  taxa_carreg_navios:
+    NAVIO-1: 4635
+usina:
+  estoque_inicial_patio_usina:
+    PRDT_C1: 9374
+    PRDT_C2: 8252
+    PRDT_C3: 5424
+  estoque_inicial_polpa_ubu:
+  - - PRDT_C1
+    - 19843
+  - - PRDT_C2
+    - 7073
+  - - PRDT_C3
+    - 16985
+  fator_conv:
+    d01: 0.065
+    d02: 0.065
+    d03: 0.065
+    d04: 0.065
+    d05: 0.065
+    d06: 0.065
+    d07: 0.065
+  fixar_producao_sem_incorporacao: livre
+  max_estoque_patio_usina: 300000
+  max_estoque_polpa_ubu: 40000
+  max_producao_sem_incorporacao: 1062
+  max_taxa_retorno_patio_usina: 4000
+  min_estoque_patio_usina: 0
+  min_estoque_polpa_ubu: 0
+  min_producao_sem_incorporacao: 0
+  prod_minima_usina:
+    PRDT_U1: 0
+    PRDT_U2: 0
+    PRDT_U3: 0
+    PRDT_U4: 0
+  producao_sem_incorporacao_fixa: 1062.5
+  produtos_usina:
+  - PRDT_U1
+  - PRDT_U2
+  - PRDT_U3
+  - PRDT_U4

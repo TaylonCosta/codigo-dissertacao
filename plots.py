@@ -190,8 +190,8 @@ def plot_carreg_navio(resultados):
     start_values_ship1 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NAVIO_1")]
     end_values_ship1 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NAVIO_1")]
 
-    # start_values_ship2 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_ACINDAR_L3_")]
-    # end_values_ship2 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_ACINDAR_L3_")]
+    start_values_ship2 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NAVIO_2")]
+    end_values_ship2 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NAVIO_2")]
     
     # start_values_ship3 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Inicio_Carregamento_NUIRON_L4_")]
     # end_values_ship3 = [value for key, value in resultados["variaveis"].items() if key.startswith("Porto_Fim_Carregamento_NUIRON_L4_")]
@@ -205,14 +205,14 @@ def plot_carreg_navio(resultados):
     time_indices = np.arange(len(labels))  # Create numeric indices for each time period
     
     loading_duration_ship1 = np.array(end_values_ship1) + np.array(start_values_ship1)
-    # loading_duration_ship2 = np.array(end_values_ship2) + np.array(start_values_ship2)
+    loading_duration_ship2 = np.array(end_values_ship2) + np.array(start_values_ship2)
     # loading_duration_ship3 = np.array(end_values_ship3) + np.array(start_values_ship3)
     # loading_duration_ship4 = np.array(end_values_ship4) + np.array(start_values_ship4)
 
     print()
 
     loading_duration_arr_ship1 = format_carreg_array(loading_duration_ship1)
-    # loading_duration_arr_ship2 = format_carreg_array(loading_duration_ship2)
+    loading_duration_arr_ship2 = format_carreg_array(loading_duration_ship2)
     # loading_duration_arr_ship3 = format_carreg_array(loading_duration_ship3)
     # loading_duration_arr_ship4 = format_carreg_array(loading_duration_ship4)
     
@@ -220,12 +220,12 @@ def plot_carreg_navio(resultados):
     fig, ax = plt.subplots(figsize=(10, 6))
 
     # Plot each ship's loading duration on the same bar chart
-    bar_width = 0.5  # Reduced bar width to fit an extra bar
+    bar_width = 1  # Reduced bar width to fit an extra bar
     x = np.arange(len(labels))
 
     # Plot each ship with an offset for each bar
-    ax.bar(x, loading_duration_arr_ship1, width=bar_width, color='blue', label='NUCOR_L5')
-    # ax.bar(x - 1.5 * bar_width, loading_duration_arr_ship2, color='green', width=bar_width, label='ACINDAR_L3')
+    ax.bar(x + 0.5 * bar_width, loading_duration_arr_ship1, color='blue', width=bar_width, label='NAVIO-1')
+    ax.bar(x - 0.5 * bar_width, loading_duration_arr_ship2, color='green', width=bar_width, label='NAVIO-2')
     # ax.bar(x - 0.5 * bar_width, loading_duration_arr_ship3, color='red', width=bar_width, label='SNUIRON_L4')
     # ax.bar(x + 0.5 * bar_width, loading_duration_arr_ship4, color='black', width=bar_width, label='Ship 4')
 

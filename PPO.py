@@ -15,6 +15,7 @@ from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.ppo_mask import MaskablePPO
 from sb3_contrib.common.maskable.utils import get_action_masks
 from datetime import datetime
+import argparse  
 
 UNIQUE_INSTANCE = True
 UNIQUE_INSTANCE_SEED = 51
@@ -65,54 +66,14 @@ class CustomizedEnv(gymnasium.Env):
             cont += 1
         return bombeamento
 
-    def initialize(self, rand):
-        if rand:
-            self.estoque_eb06_inicial = random.randint(0, 10000)
-            self.estoque_ubu_inicial = random.randint(0, 10000)
-            self.disp_conc_inicial = [random.randint(0, 10000)] * 24
-            self.disp_usina_inicial = [random.randint(0, 10000)] * 24
-            self.MaxE06 = random.randint(0, 10000)
-            self.MaxEUBU = random.randint(0, 10000)
-            self.AguaLi = 4
-            self.AguaLs = 7
-            self.PolpaLi = 10
-            self.PolpaLs = 15
+    def initialize(self):
+        self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs, self.vazao_bombas_eb06, self.prdt_conc, self.prdt_usina = self.inital_data_ppo
 
-        else:
-            (
-                self.estoque_eb06_inicial,
-                self.estoque_ubu_inicial,
-                self.disp_conc_inicial,
-                self.disp_usina_inicial,
-                self.MaxE06,
-                self.MaxEUBU,
-                self.AguaLi,
-                self.AguaLs,
-                self.PolpaLi,
-                self.PolpaLs,
-                self.vazao_bombas_eb06,
-                self.prdt_conc,
-                self.prdt_usina,
-            ) = self.inital_data_ppo
+        return self.estoque_eb06_inicial, self.estoque_ubu_inicial, self.disp_conc_inicial, self.disp_usina_inicial, self.MaxE06, self.MaxEUBU, self.AguaLi, self.AguaLs, self.PolpaLi, self.PolpaLs, self.vazao_bombas_eb06, self.prdt_conc, self.prdt_usina
 
-        return (
-            self.estoque_eb06_inicial,
-            self.estoque_ubu_inicial,
-            self.disp_conc_inicial,
-            self.disp_usina_inicial,
-            self.MaxE06,
-            self.MaxEUBU,
-            self.AguaLi,
-            self.AguaLs,
-            self.PolpaLi,
-            self.PolpaLs,
-            self.vazao_bombas_eb06,
-            self.prdt_conc,
-            self.prdt_usina,
-        )
 
     def evaluate(self, BombeamentoPolpa, passo, data):
-        L = Learning(self.convert_bombeamento_list(BombeamentoPolpa), passo, data)
+        L = Learning(self.convert_bombeamento_list(BombeamentoPolpa), 0, data)
         status, estoque_eb06, estoque_ubu, prod_concentrador, prod_usina = (
             L.solve_model()
         )
@@ -137,7 +98,7 @@ class CustomizedEnv(gymnasium.Env):
             self.vazao_bombas_eb06,
             self.prdt_conc,
             self.prdt_usina,
-        ) = self.initialize(RANDOM)
+        ) = self.initialize()
         self.MaxCon = self.disp_conc_inicial
         self.MaxUbu = self.disp_usina_inicial
 
@@ -157,10 +118,18 @@ class CustomizedEnv(gymnasium.Env):
         # Define action and observation space
         n_actions = 1
         # self.observation_space = spaces.Box(len(self.Lista0)*[tam]+len(self.Lista0)*[self.Dmax])
+        
+        rand_instance = random.randint(0, 99)
+        parser = argparse.ArgumentParser(description='Otimizador Plano Semanal')
+        parser.add_argument('-c', '--cenario', default=f'cenarios_treino/{rand_instance}.yaml', type=str, help='Caminho para o arquivo do cenário a ser experimentado')
+        parser.add_argument('-s', '--solver', default='GUROBI', type=str, help='Nome do otimizador a ser usado')
+        parser.add_argument('-o', '--pasta-saida', default='experimentos_treino', type=str, help='Pasta onde serão salvos os arquivos de resultados')
+        args = parser.parse_args()
+
+        print(args.cenario)
         load_data = Load_data()
-        rand_instance = random.randint(1, 40)
-        self.inital_data_ppo = load_data.load_simplified_data_ppo(rand_instance)
-        self.data = load_data.load(rand_instance)
+        self.inital_data_ppo = load_data.load_simplified_data_ppo(args)
+        self.data = load_data.load(args)
         self.unique_instance = unique_instance
         if self.unique_instance:
             self.create_instance()
@@ -367,6 +336,8 @@ class CustomizedEnv(gymnasium.Env):
         )
         print(f"\tbomb: {self.BombeamentoPolpa}")
         print(f"\treward: {self.ultima_recompensa}")
+        print(f"\tbatch agua: {self.nBatchsA}")
+        print(f"\tbatch polpa: {self.nBatchsP}")
         info = {}
 
         return (
@@ -401,6 +372,10 @@ class CustomizedEnv(gymnasium.Env):
         # self.mask= np.array([0, 0, 1, 0])
         cont = 0
         for produto_conc in self.prdt_conc:
+            print(f"produto: {produto_conc}, passo: {self.passo}")
+            print(f"estoque eb6: {self.estoque_eb06[produto_conc][self.passo]}")
+            print(f"polpa {(self.PolpaLi* (self.disp_conc_inicial - self.vazao_bombas_eb06))}")
+
             if (self.estoque_eb06[produto_conc][self.passo] + (self.PolpaLi* 
             (self.disp_conc_inicial - self.vazao_bombas_eb06)) < 0):
                 self.Polpa[cont] = 0
@@ -411,6 +386,7 @@ class CustomizedEnv(gymnasium.Env):
         self.mask = np.array([self.Agua])
         for i in range(0, len(self.Polpa)):
             self.mask = np.append(self.mask, self.Polpa[i])
+        print(f'MASCARA: {self.mask}')
         return self.mask
 
 
@@ -457,11 +433,10 @@ def evaluate_results(model, env, seeds, render=False):
     return np.average(FO_bests), results
 
 
-def run_ppo(args):
+def run_ppo():
 
     print("===== CHECANDO AMBIENTE =====")
     
-    print(args)
     env = CustomizedEnv(unique_instance=UNIQUE_INSTANCE, seed=UNIQUE_INSTANCE_SEED)
     # If the environment don't follow the interface, an error will be thrown
     # check_env(env, warn=True)

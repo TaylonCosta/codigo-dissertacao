@@ -633,25 +633,7 @@ class Load_data:
 
         return cenario, solver, data
 
-    def load_simplified_data_ppo(self, instance):
-        parser = argparse.ArgumentParser(description="Otimizador Plano Semanal")
-        parser.add_argument(
-            "-c",
-            "--cenario",
-            default=f"cenarios/{instance}.yaml",
-            type=str,
-            help="Caminho para o arquivo do cenário a ser experimentado",
-        )
-        parser.add_argument(
-            "-s",
-            "--solver",
-            default="PULP_CBC_CMD",
-            type=str,
-            help="Nome do otimizador a ser usado",
-        )
-
-        args = parser.parse_args()
-
+    def load_simplified_data_ppo(self, args):
         print(f"[OK]\nLendo arquivo {args.cenario}...   ", end="")
         # Abre o arquivo YAML com dados do cenário (parâmetros do problema)
         cenario = self.ler_cenario(args.cenario)
@@ -686,6 +668,9 @@ class Load_data:
         vazao_bombas = cenario["mineroduto"]["vazao_bombas"]
         produtos_conc = cenario["concentrador"]["produtos_conc"]
         produtos_usina = cenario["usina"]["produtos_usina"]
+
+        print(f"AAAAAAAAAAAAAAAAAAAAAAAA{estoque_eb06_inicial}")
+
 
         return (
             estoque_eb06_inicial,

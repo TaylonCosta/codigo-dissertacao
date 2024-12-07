@@ -18,7 +18,7 @@ def gerar_nome_arquivo_saida(nome_base_arquivo):
     return f"{nome_base_arquivo}_{contador}.json"
 
 def run_plots():
-    with open('experimentos/HSLD1.json', 'r') as file:
+    with open('experimentos/ASAD10.json', 'r') as file:
         resultados = json.load(file)
 
     # plot_britagem(resultados)
@@ -55,9 +55,10 @@ def main():
     parser.add_argument('--ppo', action='store_true', help='Resolve o mdoelo pelo ppo')
     
     args = parser.parse_args()
+
     run_model(args)
-    # run_ppo(args)
-    run_plots()
+    # run_ppo()
+    # run_plots()
 
 
 if __name__ == "__main__":

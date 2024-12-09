@@ -2,9 +2,9 @@ concentrador:
   duracao_manutencoes_concentrador: []
   estoque_pulmao_inicial_concentrador:
   - - PRDT1
-    - 2852
+    - 82698
   - - PRDT2
-    - 18382
+    - 9781
   faixas_producao_concentrador: 625
   fixar_taxa_alimentacao: livre
   inicio_manutencoes_concentrador: []
@@ -175,11 +175,11 @@ mineroduto:
   considerar_janela_final: false
   estoque_inicial_eb06:
   - - PRDT_C1
-    - 3864
+    - 2012
   - - PRDT_C2
-    - 1484
+    - 1116
   - - PRDT_C3
-    - 425
+    - 6622
   fator_limite_excesso_patio: 0.8
   fator_limite_incorporacao_patio: 0.2
   fixar_janela_bombeamento: livre
@@ -233,42 +233,63 @@ porto:
   capacidade_patio_porto_max: 1500000
   capacidade_patio_porto_min: 0
   carga_navios:
-    NAVIO-1: 6893
+    NAVIO-1: 24276
   data_chegada_navio:
-    NAVIO-1: 24
+    NAVIO-1: 143
   estoque_produto_patio:
-    PRDT_U1: 26403
-    PRDT_U2: 43359
-    PRDT_U3: 30867
-    PRDT_U4: 39912
+    PRDT_U1: 26245
+    PRDT_U2: 46693
+    PRDT_U3: 28288
+    PRDT_U4: 48774
+    0:
+    - PRDT_U1
+    - 2902
+    1:
+    - PRDT_U2
+    - 1227517
+    2:
+    - PRDT_U3
+    - 186208
+    3:
+    - PRDT_U4
+    - 18176
   navios: &id001
   - NAVIO-1
   navios_horizonte: *id001
   prod_para_estoque:
-    PRDT_C1: 13787
-    PRDT_C2: 3703
-    PRDT_C3: 922
-    PRDT_U1: 15500
-    PRDT_U2: 19745
-    PRDT_U3: 17760
-    PRDT_U4: 28580
+    PRDT_C1: 21400
+    PRDT_C2: 17903
+    PRDT_C3: 13140
+    PRDT_U1: 14612
+    PRDT_U2: 9851
+    PRDT_U3: 1155
+    PRDT_U4: 21936
   produtos_de_cada_navio:
   - - NAVIO-1
-    - PRDT_U2
+    - PRDT_U3
   taxa_carreg_navios:
-    NAVIO-1: 4171
+    NAVIO-1: 4186
 usina:
   estoque_inicial_patio_usina:
-    PRDT_C1: 2077
-    PRDT_C2: 5179
-    PRDT_C3: 5450
+    PRDT_C1: 3857
+    PRDT_C2: 10755
+    PRDT_C3: 15388
+    0:
+    - PRDT_C1
+    - 156546
+    1:
+    - PRDT_C2
+    - 31942
+    2:
+    - PRDT_C3
+    - 92175
   estoque_inicial_polpa_ubu:
   - - PRDT_C1
-    - 10575
+    - 37093
   - - PRDT_C2
-    - 14990
+    - 2533
   - - PRDT_C3
-    - 1205
+    - 369
   fator_conv:
     d01: 0.065
     d02: 0.065

@@ -38,11 +38,9 @@ def run_model(args):
 
     L = Learning(None, 168, data)
     resultados = L.solve_model()
-    print(resultados['solver']['valor_fo'])
+    print(resultados[5])
 
     # run_ppo()
-
-    print("\n Finished!")
 
 
 def main():
@@ -53,12 +51,17 @@ def main():
     parser.add_argument('--relax-and-fix', action='store_true', help='Habilita a heurística Relax And Fix das variáveis do mineroduto')
     parser.add_argument('--opt-partes', action='store_true', help='Habilita a heurística de otimização por partes')
     parser.add_argument('--ppo', action='store_true', help='Resolve o mdoelo pelo ppo')
+    parser.add_argument('--modelo', action='store_true', help='Resolve apenas o mdoelo')
+    parser.add_argument('--plots', action='store_true', help='Plota dos graficos')
     
     args = parser.parse_args()
-
-    run_model(args)
-    # run_ppo()
-    # run_plots()
+    
+    if args.ppo:
+        run_ppo()
+    if args.modelo:
+        run_model(args)
+    if args.plots:
+        run_plots()
 
 
 if __name__ == "__main__":

@@ -7,35 +7,52 @@ def generate_random_data():
         data = yaml.safe_load(file)
 
     # Atualiza as variáveis especificadas com valores aleatórios
-    data["concentrador"]["estoque_pulmao_inicial_concentrador"] = [
-        ["PRDT1", random.randint(1000, 20000)],
-        ["PRDT2", random.randint(1000, 20000)]
-    ]
+    estoque_conc = 100000
+    for i in range (0, 2):
+        rand_conc = random.randint(0, estoque_conc)
+        if estoque_conc < 0:
+            data["concentrador"]["estoque_pulmao_inicial_concentrador"][i] = [f"PRDT{i+1}", 0]
+        else:
+            data["concentrador"]["estoque_pulmao_inicial_concentrador"][i] = [f"PRDT{i+1}", rand_conc]
+        estoque_conc -= rand_conc
 
-    data["usina"]["estoque_inicial_patio_usina"] = {
-        "PRDT_C1": random.randint(1000, 10000),
-        "PRDT_C2": random.randint(1000, 10000),
-        "PRDT_C3": random.randint(1000, 10000),
-    }
+    estoque_patio_usina = 300000
+    for i in range (0, 3):
+        rand_patio = random.randint(0, estoque_patio_usina)
+        if estoque_patio_usina < 0:
+            data["usina"]["estoque_inicial_patio_usina"][i] = [f"PRDT_C{i+1}", 0]
+        else:
+            data["usina"]["estoque_inicial_patio_usina"][i] = [f"PRDT_C{i+1}", rand_patio]
+        estoque_patio_usina -= rand_patio
 
-    data["usina"]["estoque_inicial_polpa_ubu"] = [
-        ["PRDT_C1", random.randint(1000, 20000)],
-        ["PRDT_C2", random.randint(1000, 20000)],
-        ["PRDT_C3", random.randint(1000, 20000)]
-    ]
 
-    data["mineroduto"]["estoque_inicial_eb06"] = [
-        ["PRDT_C1", random.randint(0, 5000)],
-        ["PRDT_C2", random.randint(0, 5000)],
-        ["PRDT_C3", random.randint(0, 5000)]
-    ]
+    estoque_polpa_ubu = 40000
+    for i in range (0, 3):
+        rand_polpa = random.randint(0, estoque_polpa_ubu)
+        if estoque_polpa_ubu < 0:
+            data["usina"]["estoque_inicial_polpa_ubu"][i] = [f"PRDT_C{i+1}", 0]
+        else:
+            data["usina"]["estoque_inicial_polpa_ubu"][i] = [f"PRDT_C{i+1}", rand_polpa]
+        estoque_polpa_ubu -= rand_polpa
 
-    data["porto"]["estoque_produto_patio"] = {
-        "PRDT_U1": random.randint(10000, 50000),
-        "PRDT_U2": random.randint(10000, 50000),
-        "PRDT_U3": random.randint(10000, 50000),
-        "PRDT_U4": random.randint(10000, 50000),
-    }
+
+    estoque_eb6 = 10250
+    for i in range (0, 3):
+        rand_eb6 = random.randint(0, estoque_eb6)
+        if estoque_eb6 < 0:
+            data["mineroduto"]["estoque_inicial_eb06"][i] = [f"PRDT_C{i+1}", 0]
+        else:
+            data["mineroduto"]["estoque_inicial_eb06"][i] = [f"PRDT_C{i+1}", rand_eb6]
+        estoque_eb6 -= rand_eb6
+
+    estoque_porto = 1500000
+    for i in range (0, 4):
+        rand_porto = random.randint(0, estoque_porto)
+        if estoque_porto < 0:
+            data["porto"]["estoque_produto_patio"][i] = [f"PRDT_U{i+1}", 0]
+        else:
+            data["porto"]["estoque_produto_patio"][i] = [f"PRDT_U{i+1}", rand_porto]
+        estoque_porto -= rand_porto
 
     num_navios = random.randint(1, 5)
     navios = [f"NAVIO-{i+1}" for i in range(num_navios)]
@@ -45,7 +62,7 @@ def generate_random_data():
     # Gera dados aleatórios para os navios
     data["porto"]["taxa_carreg_navios"] = {navio: random.randint(4000, 5000) for navio in navios}
     data["porto"]["carga_navios"] = {navio: random.randint(5000, 80000) for navio in navios}
-    data["porto"]["data_chegada_navio"] = {navio: random.randint(1, 100) for navio in navios}
+    data["porto"]["data_chegada_navio"] = {navio: random.randint(1, 160) for navio in navios}
     data["porto"]["produtos_de_cada_navio"] = [[navio, random.choice(["PRDT_U1", "PRDT_U2", "PRDT_U3", "PRDT_U4"])] for navio in navios]
     
 

@@ -22,7 +22,7 @@ class Load_data:
         # -----------------------------------------------------------------------------
         # Solver
         print(f"[OK]\nInstanciando solver {args.solver}...   ", end="")
-        solver = getSolver(args.solver, msg=True, timeLimit=7200, gapRel=0)
+        solver = getSolver(args.solver, msg=True, timeLimit=600, gapRel=0.1)
         # solver.options.remove(("SolutionLimit", value))
         # ------------------------------------------------------------------------------
 
@@ -668,9 +668,6 @@ class Load_data:
         vazao_bombas = cenario["mineroduto"]["vazao_bombas"]
         produtos_conc = cenario["concentrador"]["produtos_conc"]
         produtos_usina = cenario["usina"]["produtos_usina"]
-
-        print(f"AAAAAAAAAAAAAAAAAAAAAAAA{estoque_eb06_inicial}")
-
 
         return (
             estoque_eb06_inicial,

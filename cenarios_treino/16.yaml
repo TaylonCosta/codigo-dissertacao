@@ -2,9 +2,9 @@ concentrador:
   duracao_manutencoes_concentrador: []
   estoque_pulmao_inicial_concentrador:
   - - PRDT1
-    - 2969
+    - 50575
   - - PRDT2
-    - 3599
+    - 44393
   faixas_producao_concentrador: 625
   fixar_taxa_alimentacao: livre
   inicio_manutencoes_concentrador: []
@@ -175,11 +175,11 @@ mineroduto:
   considerar_janela_final: false
   estoque_inicial_eb06:
   - - PRDT_C1
-    - 1073
+    - 5184
   - - PRDT_C2
-    - 2243
+    - 1303
   - - PRDT_C3
-    - 85
+    - 1709
   fator_limite_excesso_patio: 0.8
   fator_limite_incorporacao_patio: 0.2
   fixar_janela_bombeamento: livre
@@ -233,54 +233,75 @@ porto:
   capacidade_patio_porto_max: 1500000
   capacidade_patio_porto_min: 0
   carga_navios:
-    NAVIO-1: 18292
-    NAVIO-2: 15999
-    NAVIO-3: 13864
+    NAVIO-1: 13920
+    NAVIO-2: 18330
+    NAVIO-3: 67804
   data_chegada_navio:
-    NAVIO-1: 91
-    NAVIO-2: 68
-    NAVIO-3: 39
+    NAVIO-1: 145
+    NAVIO-2: 45
+    NAVIO-3: 57
   estoque_produto_patio:
-    PRDT_U1: 23131
-    PRDT_U2: 47850
-    PRDT_U3: 22699
-    PRDT_U4: 38981
+    PRDT_U1: 26245
+    PRDT_U2: 46693
+    PRDT_U3: 28288
+    PRDT_U4: 48774
+    0:
+    - PRDT_U1
+    - 48218
+    1:
+    - PRDT_U2
+    - 327530
+    2:
+    - PRDT_U3
+    - 550051
+    3:
+    - PRDT_U4
+    - 255766
   navios: &id001
   - NAVIO-1
   - NAVIO-2
   - NAVIO-3
   navios_horizonte: *id001
   prod_para_estoque:
-    PRDT_C1: 24705
-    PRDT_C2: 13820
-    PRDT_C3: 22035
-    PRDT_U1: 2990
-    PRDT_U2: 1932
-    PRDT_U3: 18785
-    PRDT_U4: 15729
+    PRDT_C1: 12004
+    PRDT_C2: 11104
+    PRDT_C3: 15898
+    PRDT_U1: 28184
+    PRDT_U2: 22309
+    PRDT_U3: 2993
+    PRDT_U4: 7504
   produtos_de_cada_navio:
   - - NAVIO-1
-    - PRDT_U4
+    - PRDT_U1
   - - NAVIO-2
     - PRDT_U1
   - - NAVIO-3
-    - PRDT_U2
+    - PRDT_U4
   taxa_carreg_navios:
-    NAVIO-1: 4087
-    NAVIO-2: 4617
-    NAVIO-3: 4466
+    NAVIO-1: 4798
+    NAVIO-2: 4519
+    NAVIO-3: 4977
 usina:
   estoque_inicial_patio_usina:
-    PRDT_C1: 3844
-    PRDT_C2: 9126
-    PRDT_C3: 7629
+    PRDT_C1: 3857
+    PRDT_C2: 10755
+    PRDT_C3: 15388
+    0:
+    - PRDT_C1
+    - 141699
+    1:
+    - PRDT_C2
+    - 89350
+    2:
+    - PRDT_C3
+    - 62139
   estoque_inicial_polpa_ubu:
   - - PRDT_C1
-    - 6944
+    - 15116
   - - PRDT_C2
-    - 1907
+    - 4074
   - - PRDT_C3
-    - 16208
+    - 3432
   fator_conv:
     d01: 0.065
     d02: 0.065

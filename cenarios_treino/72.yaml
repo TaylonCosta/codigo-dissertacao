@@ -2,9 +2,9 @@ concentrador:
   duracao_manutencoes_concentrador: []
   estoque_pulmao_inicial_concentrador:
   - - PRDT1
-    - 17056
+    - 56711
   - - PRDT2
-    - 7265
+    - 412
   faixas_producao_concentrador: 625
   fixar_taxa_alimentacao: livre
   inicio_manutencoes_concentrador: []
@@ -175,11 +175,11 @@ mineroduto:
   considerar_janela_final: false
   estoque_inicial_eb06:
   - - PRDT_C1
-    - 2481
+    - 9415
   - - PRDT_C2
-    - 105
+    - 81
   - - PRDT_C3
-    - 223
+    - 696
   fator_limite_excesso_patio: 0.8
   fator_limite_incorporacao_patio: 0.2
   fixar_janela_bombeamento: livre
@@ -233,22 +233,34 @@ porto:
   capacidade_patio_porto_max: 1500000
   capacidade_patio_porto_min: 0
   carga_navios:
-    NAVIO-1: 62267
-    NAVIO-2: 31983
-    NAVIO-3: 20077
-    NAVIO-4: 47478
-    NAVIO-5: 41222
+    NAVIO-1: 36259
+    NAVIO-2: 34999
+    NAVIO-3: 43037
+    NAVIO-4: 38155
+    NAVIO-5: 36971
   data_chegada_navio:
-    NAVIO-1: 78
-    NAVIO-2: 63
-    NAVIO-3: 4
-    NAVIO-4: 70
-    NAVIO-5: 29
+    NAVIO-1: 93
+    NAVIO-2: 92
+    NAVIO-3: 153
+    NAVIO-4: 99
+    NAVIO-5: 83
   estoque_produto_patio:
-    PRDT_U1: 42164
-    PRDT_U2: 22710
-    PRDT_U3: 18443
-    PRDT_U4: 44028
+    PRDT_U1: 26245
+    PRDT_U2: 46693
+    PRDT_U3: 28288
+    PRDT_U4: 48774
+    0:
+    - PRDT_U1
+    - 151474
+    1:
+    - PRDT_U2
+    - 985607
+    2:
+    - PRDT_U3
+    - 279116
+    3:
+    - PRDT_U4
+    - 20732
   navios: &id001
   - NAVIO-1
   - NAVIO-2
@@ -257,42 +269,51 @@ porto:
   - NAVIO-5
   navios_horizonte: *id001
   prod_para_estoque:
-    PRDT_C1: 18296
-    PRDT_C2: 9978
-    PRDT_C3: 13330
-    PRDT_U1: 16153
-    PRDT_U2: 16768
-    PRDT_U3: 3558
-    PRDT_U4: 21913
+    PRDT_C1: 23001
+    PRDT_C2: 14278
+    PRDT_C3: 21751
+    PRDT_U1: 1740
+    PRDT_U2: 25487
+    PRDT_U3: 9666
+    PRDT_U4: 4074
   produtos_de_cada_navio:
   - - NAVIO-1
     - PRDT_U1
   - - NAVIO-2
-    - PRDT_U2
-  - - NAVIO-3
     - PRDT_U3
+  - - NAVIO-3
+    - PRDT_U4
   - - NAVIO-4
     - PRDT_U3
   - - NAVIO-5
-    - PRDT_U4
+    - PRDT_U2
   taxa_carreg_navios:
-    NAVIO-1: 4184
-    NAVIO-2: 4111
-    NAVIO-3: 4713
-    NAVIO-4: 4874
-    NAVIO-5: 4261
+    NAVIO-1: 4346
+    NAVIO-2: 4377
+    NAVIO-3: 4331
+    NAVIO-4: 4660
+    NAVIO-5: 4339
 usina:
   estoque_inicial_patio_usina:
-    PRDT_C1: 1482
-    PRDT_C2: 4663
-    PRDT_C3: 9816
+    PRDT_C1: 3857
+    PRDT_C2: 10755
+    PRDT_C3: 15388
+    0:
+    - PRDT_C1
+    - 226078
+    1:
+    - PRDT_C2
+    - 8554
+    2:
+    - PRDT_C3
+    - 49434
   estoque_inicial_polpa_ubu:
   - - PRDT_C1
-    - 5802
+    - 32538
   - - PRDT_C2
-    - 11500
+    - 2985
   - - PRDT_C3
-    - 16508
+    - 1900
   fator_conv:
     d01: 0.065
     d02: 0.065

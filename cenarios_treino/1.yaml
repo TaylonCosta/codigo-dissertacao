@@ -2,9 +2,9 @@ concentrador:
   duracao_manutencoes_concentrador: []
   estoque_pulmao_inicial_concentrador:
   - - PRDT1
-    - 17787
+    - 979
   - - PRDT2
-    - 7888
+    - 16138
   faixas_producao_concentrador: 625
   fixar_taxa_alimentacao: livre
   inicio_manutencoes_concentrador: []
@@ -175,11 +175,11 @@ mineroduto:
   considerar_janela_final: false
   estoque_inicial_eb06:
   - - PRDT_C1
-    - 3279
+    - 7529
   - - PRDT_C2
-    - 2655
+    - 1492
   - - PRDT_C3
-    - 4705
+    - 1104
   fator_limite_excesso_patio: 0.8
   fator_limite_incorporacao_patio: 0.2
   fixar_janela_bombeamento: livre
@@ -233,42 +233,63 @@ porto:
   capacidade_patio_porto_max: 1500000
   capacidade_patio_porto_min: 0
   carga_navios:
-    NAVIO-1: 62950
+    NAVIO-1: 29576
   data_chegada_navio:
-    NAVIO-1: 27
+    NAVIO-1: 118
   estoque_produto_patio:
-    PRDT_U1: 36079
-    PRDT_U2: 44810
-    PRDT_U3: 21960
-    PRDT_U4: 23673
+    PRDT_U1: 26245
+    PRDT_U2: 46693
+    PRDT_U3: 28288
+    PRDT_U4: 48774
+    0:
+    - PRDT_U1
+    - 1042150
+    1:
+    - PRDT_U2
+    - 143695
+    2:
+    - PRDT_U3
+    - 87339
+    3:
+    - PRDT_U4
+    - 68629
   navios: &id001
   - NAVIO-1
   navios_horizonte: *id001
   prod_para_estoque:
-    PRDT_C1: 5396
-    PRDT_C2: 5511
-    PRDT_C3: 16295
-    PRDT_U1: 22564
-    PRDT_U2: 12447
-    PRDT_U3: 6896
-    PRDT_U4: 30887
+    PRDT_C1: 4635
+    PRDT_C2: 9729
+    PRDT_C3: 14137
+    PRDT_U1: 27430
+    PRDT_U2: 20397
+    PRDT_U3: 6431
+    PRDT_U4: 17239
   produtos_de_cada_navio:
   - - NAVIO-1
-    - PRDT_U3
+    - PRDT_U2
   taxa_carreg_navios:
-    NAVIO-1: 4765
+    NAVIO-1: 4705
 usina:
   estoque_inicial_patio_usina:
-    PRDT_C1: 2605
-    PRDT_C2: 1413
-    PRDT_C3: 5792
+    PRDT_C1: 3857
+    PRDT_C2: 10755
+    PRDT_C3: 15388
+    0:
+    - PRDT_C1
+    - 231944
+    1:
+    - PRDT_C2
+    - 14569
+    2:
+    - PRDT_C3
+    - 471
   estoque_inicial_polpa_ubu:
   - - PRDT_C1
-    - 7189
+    - 10823
   - - PRDT_C2
-    - 2518
+    - 22260
   - - PRDT_C3
-    - 2513
+    - 1739
   fator_conv:
     d01: 0.065
     d02: 0.065

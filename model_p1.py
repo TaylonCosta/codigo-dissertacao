@@ -459,245 +459,246 @@ class Model_p1():
                         modelo += (varBombeamentoPolpa[produto][horas] <=0, f"rest_fixado2_{produto}_{horas}")
                     if varBombeamentoPolpaPPO[produto][horas] == 1 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
                         modelo += (varBombeamentoPolpa[produto][horas] >=1, f"rest_fixado2_{produto}_{horas}")
-
-        # Restrição para garantir que apenas um produto é bombeado por vez
-        for hora in horas_D14:
-            modelo += (
-                lpSum(varBombeamentoPolpa[produto][hora] for produto in produtos_conc) <= 1,
-                f"rest_bombeamento_unico_produto_{produto}_{hora}",
-            )
-
-        def bombeamento_hora_anterior(produto, idx_hora):
-            return varBombeamentoPolpa[produto][horas_D14[idx_hora-1]]
-
-        # Define o bombeamento de polpa para as horas de d01 a d14, respeitando as janelas mínimas de polpa e de água respectivamente
-        for produto in produtos_conc:
-            for i, hora in enumerate(horas_D14[1:-PolpaLi+1]):
+        
+        else:
+            # Restrição para garantir que apenas um produto é bombeado por vez
+            for hora in horas_D14:
                 modelo += (
-                    varBombeamentoPolpa[produto][horas_D14[i]] + 
-                        lpSum([varBombeamentoPolpa[produto][horas_D14[j]] for j in range(i+1, i+PolpaLi)]) >= 
-                        PolpaLi - PolpaLi*(1 - varBombeamentoPolpa[produto][horas_D14[i]] + bombeamento_hora_anterior(produto, i)),
-                    f"rest_janela_bombeamento_polpa_{produto}_{hora}",
+                    lpSum(varBombeamentoPolpa[produto][hora] for produto in produtos_conc) <= 1,
+                    f"rest_bombeamento_unico_produto_{produto}_{hora}",
                 )
-                    
-        for i, hora in enumerate(horas_D14[1:-AguaLi+1]):
-            modelo += (
-                lpSum(varBombeamentoPolpa[produto][horas_D14[i]] for produto in produtos_conc)+ 
-                lpSum([varBombeamentoPolpa[produto][horas_D14[j]] 
-                        for produto in produtos_conc for j in range(i+1, i+AguaLi)]) <=
-                        BIG_M*(1 + lpSum(varBombeamentoPolpa[produto][horas_D14[i]] for produto in produtos_conc)
-                        - lpSum(bombeamento_hora_anterior(produto, i) for produto in produtos_conc)),
-                f"rest_janela_bombeamento_agua_{produto}_{hora}",
-            )
-        # Contabiliza o bombeamento acumulado de polpa - Xac
-        varBombeamentoPolpaAcumulado = LpVariable.dicts("Mineroduto_Bombeamento_Polpa_Acumulado", (horas_D14), 0, len(horas_D14), LpInteger)
 
-        # Indica o bombeamento final de polpa
-        varBombeamentoPolpaFinal = LpVariable.dicts("Mineroduto_Bombeamento_Polpa_Final", (horas_D14), 0, len(horas_D14), LpInteger)
+            def bombeamento_hora_anterior(produto, idx_hora):
+                return varBombeamentoPolpa[produto][horas_D14[idx_hora-1]]
 
-        def bombeamento_acumulado_polpa_hora_anterior(idx_hora):
-            if idx_hora == 0:
-                # subject to Producao2f{t in 1..H}: #maximo de 1s
-                #    Xac[1] = 0;
-                return bomb_polpa_acum_semana_anterior
-            else:
-                return varBombeamentoPolpaAcumulado[horas_D14[idx_hora-1]]
+            # Define o bombeamento de polpa para as horas de d01 a d14, respeitando as janelas mínimas de polpa e de água respectivamente
+            for produto in produtos_conc:
+                for i, hora in enumerate(horas_D14[1:-PolpaLi+1]):
+                    modelo += (
+                        varBombeamentoPolpa[produto][horas_D14[i]] + 
+                            lpSum([varBombeamentoPolpa[produto][horas_D14[j]] for j in range(i+1, i+PolpaLi)]) >= 
+                            PolpaLi - PolpaLi*(1 - varBombeamentoPolpa[produto][horas_D14[i]] + bombeamento_hora_anterior(produto, i)),
+                        f"rest_janela_bombeamento_polpa_{produto}_{hora}",
+                    )
+                        
+            for i, hora in enumerate(horas_D14[1:-AguaLi+1]):
+                modelo += (
+                    lpSum(varBombeamentoPolpa[produto][horas_D14[i]] for produto in produtos_conc)+ 
+                    lpSum([varBombeamentoPolpa[produto][horas_D14[j]] 
+                            for produto in produtos_conc for j in range(i+1, i+AguaLi)]) <=
+                            BIG_M*(1 + lpSum(varBombeamentoPolpa[produto][horas_D14[i]] for produto in produtos_conc)
+                            - lpSum(bombeamento_hora_anterior(produto, i) for produto in produtos_conc)),
+                    f"rest_janela_bombeamento_agua_{produto}_{hora}",
+                )
+            # Contabiliza o bombeamento acumulado de polpa - Xac
+            varBombeamentoPolpaAcumulado = LpVariable.dicts("Mineroduto_Bombeamento_Polpa_Acumulado", (horas_D14), 0, len(horas_D14), LpInteger)
 
-        # subject to Producao1a{t in 2..H}: #maximo de 1s
-        #    Xac[t] <= Xac[t-1] + 1 + (1- X[t])*M;
+            # Indica o bombeamento final de polpa
+            varBombeamentoPolpaFinal = LpVariable.dicts("Mineroduto_Bombeamento_Polpa_Final", (horas_D14), 0, len(horas_D14), LpInteger)
 
-        for idx_hora in range(len(horas_D14)):
-            modelo += (
-                varBombeamentoPolpaAcumulado[horas_D14[idx_hora]] <= 
-                    bombeamento_acumulado_polpa_hora_anterior(idx_hora) + 1 + 
-                    (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc))*BIG_M,
-                f"seq_bomb_1a_{horas_D14[idx_hora]}",
-            )
+            def bombeamento_acumulado_polpa_hora_anterior(idx_hora):
+                if idx_hora == 0:
+                    # subject to Producao2f{t in 1..H}: #maximo de 1s
+                    #    Xac[1] = 0;
+                    return bomb_polpa_acum_semana_anterior
+                else:
+                    return varBombeamentoPolpaAcumulado[horas_D14[idx_hora-1]]
 
-        # subject to Producao1b{t in 2..H}: #maximo de 1s
-        #    Xac[t] >= Xac[t-1] + 1 - (1- X[t])*M;
+            # subject to Producao1a{t in 2..H}: #maximo de 1s
+            #    Xac[t] <= Xac[t-1] + 1 + (1- X[t])*M;
 
-        for idx_hora in range(len(horas_D14)):
-            modelo += (
-                varBombeamentoPolpaAcumulado[horas_D14[idx_hora]] >=
-                    bombeamento_acumulado_polpa_hora_anterior(idx_hora) + 1 - 
-                    (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc))*BIG_M,
-                f"seq_bomb_1b_{horas_D14[idx_hora]}",
-            )
+            for idx_hora in range(len(horas_D14)):
+                modelo += (
+                    varBombeamentoPolpaAcumulado[horas_D14[idx_hora]] <= 
+                        bombeamento_acumulado_polpa_hora_anterior(idx_hora) + 1 + 
+                        (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc))*BIG_M,
+                    f"seq_bomb_1a_{horas_D14[idx_hora]}",
+                )
 
-        # subject to Producao1c{t in 2..H}: #maximo de 1s
-        #    Xac[t] <= X[t]*M;
+            # subject to Producao1b{t in 2..H}: #maximo de 1s
+            #    Xac[t] >= Xac[t-1] + 1 - (1- X[t])*M;
 
-        for idx_hora in range(len(horas_D14)):
-            modelo += (
-                varBombeamentoPolpaAcumulado[horas_D14[idx_hora]] <=
-                lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc)
-                *BIG_M,
-                f"seq_bomb_1c_{horas_D14[idx_hora]}",
-            )
+            for idx_hora in range(len(horas_D14)):
+                modelo += (
+                    varBombeamentoPolpaAcumulado[horas_D14[idx_hora]] >=
+                        bombeamento_acumulado_polpa_hora_anterior(idx_hora) + 1 - 
+                        (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc))*BIG_M,
+                    f"seq_bomb_1b_{horas_D14[idx_hora]}",
+                )
 
-        for idx_hora in range(1, len(horas_D14)):
-            modelo += (
-                varBombeamentoPolpaFinal[horas_D14[idx_hora]] <= 
-                bombeamento_acumulado_polpa_hora_anterior(idx_hora) + 
-                (1 - lpSum(bombeamento_hora_anterior(produto, idx_hora) for produto in produtos_conc)
-                + lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc))*BIG_M_MINERODUTO,
-                f"rest_seq_bomb_2a_{horas_D14[idx_hora]}",
-            )
+            # subject to Producao1c{t in 2..H}: #maximo de 1s
+            #    Xac[t] <= X[t]*M;
 
-        # subject to Producao2b{t in 2..H}: #maximo de 1s
-        #    Xf[t] >= Xac[t-1] - (1 - X[t-1] + X[t])*M;
+            for idx_hora in range(len(horas_D14)):
+                modelo += (
+                    varBombeamentoPolpaAcumulado[horas_D14[idx_hora]] <=
+                    lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc)
+                    *BIG_M,
+                    f"seq_bomb_1c_{horas_D14[idx_hora]}",
+                )
 
-        for idx_hora in range(1, len(horas_D14)):
-            modelo += (
-                varBombeamentoPolpaFinal[horas_D14[idx_hora]] >= 
-                bombeamento_acumulado_polpa_hora_anterior(idx_hora) -
-                (1 - lpSum(bombeamento_hora_anterior(produto, idx_hora) for produto in produtos_conc) 
-                + lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc))*BIG_M_MINERODUTO,
-                f"rest_seq_bomb_2b_{horas_D14[idx_hora]}",
-            )
+            for idx_hora in range(1, len(horas_D14)):
+                modelo += (
+                    varBombeamentoPolpaFinal[horas_D14[idx_hora]] <= 
+                    bombeamento_acumulado_polpa_hora_anterior(idx_hora) + 
+                    (1 - lpSum(bombeamento_hora_anterior(produto, idx_hora) for produto in produtos_conc)
+                    + lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc))*BIG_M_MINERODUTO,
+                    f"rest_seq_bomb_2a_{horas_D14[idx_hora]}",
+                )
 
-        # subject to Producao2c{t in 2..H}: #maximo de 1s
-        #    Xf[t] <= X[t-1]*M;
+            # subject to Producao2b{t in 2..H}: #maximo de 1s
+            #    Xf[t] >= Xac[t-1] - (1 - X[t-1] + X[t])*M;
 
-        for idx_hora in range(1, len(horas_D14)):
-            modelo += (
-                varBombeamentoPolpaFinal[horas_D14[idx_hora]] <=
-                lpSum(bombeamento_hora_anterior(produto, idx_hora) for produto in produtos_conc)*BIG_M_MINERODUTO,
-                f"rest_seq_bomb_2c_{horas_D14[idx_hora]}",
-            )
+            for idx_hora in range(1, len(horas_D14)):
+                modelo += (
+                    varBombeamentoPolpaFinal[horas_D14[idx_hora]] >= 
+                    bombeamento_acumulado_polpa_hora_anterior(idx_hora) -
+                    (1 - lpSum(bombeamento_hora_anterior(produto, idx_hora) for produto in produtos_conc) 
+                    + lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc))*BIG_M_MINERODUTO,
+                    f"rest_seq_bomb_2b_{horas_D14[idx_hora]}",
+                )
 
-        # subject to Producao2d{t in 2..H}: #maximo de 1s
-        #    Xf[t] <= (1-X[t])*M;
+            # subject to Producao2c{t in 2..H}: #maximo de 1s
+            #    Xf[t] <= X[t-1]*M;
 
-        for idx_hora in range(1, len(horas_D14)):
-            modelo += (
-                varBombeamentoPolpaFinal[horas_D14[idx_hora]] <=
-                (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc))*BIG_M_MINERODUTO,
-                f"rest_seq_bomb_2d_{horas_D14[idx_hora]}",
-            )
+            for idx_hora in range(1, len(horas_D14)):
+                modelo += (
+                    varBombeamentoPolpaFinal[horas_D14[idx_hora]] <=
+                    lpSum(bombeamento_hora_anterior(produto, idx_hora) for produto in produtos_conc)*BIG_M_MINERODUTO,
+                    f"rest_seq_bomb_2c_{horas_D14[idx_hora]}",
+                )
 
-        # subject to Producao2e{t in 1..H}: #maximo de 1s
-        #    Xf[t] <= dmax;
+            # subject to Producao2d{t in 2..H}: #maximo de 1s
+            #    Xf[t] <= (1-X[t])*M;
 
-        for idx_hora in range(len(horas_D14)):
-            modelo += (
-                varBombeamentoPolpaFinal[horas_D14[idx_hora]] <= PolpaLs,
-                f"rest_seq_bomb_2e_{horas_D14[idx_hora]}",
-            )
-
-        # subject to Producao2ee{t in 1..H}: #maximo de 1s
-        #    Xac[t] <= dmax;
-
-        for idx_hora in range(len(horas_D14)):
-            modelo += (
-                varBombeamentoPolpaAcumulado[horas_D14[idx_hora]] <= PolpaLs,
-                f"rest_seq_bomb_2ee_{horas_D14[idx_hora]}",
-            )
-    
-        varBombeamentoAguaAcumulado = LpVariable.dicts("Mineroduto_Bombeamento_Agua_Acumulado", (horas_D14), 0, len(horas_D14), LpInteger)
-        varBombeamentoAguaFinal = LpVariable.dicts("Mineroduto_Bombeamento_Agua_Final", (horas_D14), 0, len(horas_D14), LpInteger)
-
-        def bombeamento_acumulado_agua_hora_anterior(idx_hora):
-            if idx_hora == 0:
-                # subject to Producao2f{t in 1..H}: #maximo de 1s
-                #    Xac[1] = 0;
-                return bomb_agua_acum_semana_anterior
-            else:
-                return varBombeamentoAguaAcumulado[horas_D14[idx_hora-1]]
-
-        # subject to Producao1a{t in 2..H}: #maximo de 1s
-        #    Xac[t] <= Xac[t-1] + 1 + (1- X[t])*M;
-
-        for idx_hora in range(len(horas_D14)):
-            modelo += (
-                varBombeamentoAguaAcumulado[horas_D14[idx_hora]] <= 
-                    bombeamento_acumulado_agua_hora_anterior(idx_hora) + 1 + 
-                    (1 - (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc)))*BIG_M_MINERODUTO,
-                f"rest_seq_bomb_agua_1a_{horas_D14[idx_hora]}",
-            )
-
-        # subject to Producao1b{t in 2..H}: #maximo de 1s
-        #    Xac[t] >= Xac[t-1] + 1 - (1- X[t])*M;
-
-        for idx_hora in range(len(horas_D14)):
-            modelo += (
-                varBombeamentoAguaAcumulado[horas_D14[idx_hora]] >=
-                    bombeamento_acumulado_agua_hora_anterior(idx_hora) + 1 - 
-                    (1 - (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc)))*BIG_M_MINERODUTO,
-                f"rest_seq_bomb_agua_1b_{horas_D14[idx_hora]}",
-            )
-
-        # subject to Producao1c{t in 2..H}: #maximo de 1s
-        #    Xac[t] <= X[t]*M;
-
-        for idx_hora in range(len(horas_D14)):
-            modelo += (
-                varBombeamentoAguaAcumulado[horas_D14[idx_hora]] <= 
+            for idx_hora in range(1, len(horas_D14)):
+                modelo += (
+                    varBombeamentoPolpaFinal[horas_D14[idx_hora]] <=
                     (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc))*BIG_M_MINERODUTO,
-                f"rest_seq_bomb_agua_1c_{horas_D14[idx_hora]}",
-            )
+                    f"rest_seq_bomb_2d_{horas_D14[idx_hora]}",
+                )
 
-        # subject to Producao2a{t in 2..H}: #maximo de 1s
-        #    Xf[t] <= Xac[t-1] + (1 - X[t-1] + X[t])*M;
+            # subject to Producao2e{t in 1..H}: #maximo de 1s
+            #    Xf[t] <= dmax;
 
-        for idx_hora in range(1, len(horas_D14)):
-            modelo += (
-                varBombeamentoAguaFinal[horas_D14[idx_hora]] <=
-                bombeamento_acumulado_agua_hora_anterior(idx_hora) +
-                (1 - (1 - lpSum(bombeamento_hora_anterior(produto, idx_hora) for produto in produtos_conc)) +
-                (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc)))*BIG_M_MINERODUTO,
-                f"rest_seq_bomb_agua_2a_{horas_D14[idx_hora]}",
-            )
+            for idx_hora in range(len(horas_D14)):
+                modelo += (
+                    varBombeamentoPolpaFinal[horas_D14[idx_hora]] <= PolpaLs,
+                    f"rest_seq_bomb_2e_{horas_D14[idx_hora]}",
+                )
 
-        # subject to Producao2b{t in 2..H}: #maximo de 1s
-        #    Xf[t] >= Xac[t-1] - (1 - X[t-1] + X[t])*M;
+            # subject to Producao2ee{t in 1..H}: #maximo de 1s
+            #    Xac[t] <= dmax;
 
-        for idx_hora in range(1, len(horas_D14)):
-            modelo += (
-                varBombeamentoAguaFinal[horas_D14[idx_hora]] >=
-                bombeamento_acumulado_agua_hora_anterior(idx_hora) -
-                (1 - (1 - lpSum(bombeamento_hora_anterior(produto, idx_hora) for produto in produtos_conc)) +
-                (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc)))*BIG_M_MINERODUTO,
-                f"rest_seq_bomb_agua_2b_{horas_D14[idx_hora]}",
-            )
+            for idx_hora in range(len(horas_D14)):
+                modelo += (
+                    varBombeamentoPolpaAcumulado[horas_D14[idx_hora]] <= PolpaLs,
+                    f"rest_seq_bomb_2ee_{horas_D14[idx_hora]}",
+                )
+        
+            varBombeamentoAguaAcumulado = LpVariable.dicts("Mineroduto_Bombeamento_Agua_Acumulado", (horas_D14), 0, len(horas_D14), LpInteger)
+            varBombeamentoAguaFinal = LpVariable.dicts("Mineroduto_Bombeamento_Agua_Final", (horas_D14), 0, len(horas_D14), LpInteger)
 
-        # subject to Producao2c{t in 2..H}: #maximo de 1s
-        #    Xf[t] <= X[t-1]*M;
+            def bombeamento_acumulado_agua_hora_anterior(idx_hora):
+                if idx_hora == 0:
+                    # subject to Producao2f{t in 1..H}: #maximo de 1s
+                    #    Xac[1] = 0;
+                    return bomb_agua_acum_semana_anterior
+                else:
+                    return varBombeamentoAguaAcumulado[horas_D14[idx_hora-1]]
 
-        for idx_hora in range(1, len(horas_D14)):
-            modelo += (
-                varBombeamentoAguaFinal[horas_D14[idx_hora]] <= 
-                (1 - lpSum(bombeamento_hora_anterior(produto, idx_hora) for produto in produtos_conc))*BIG_M_MINERODUTO,
-                f"rest_seq_bomb_agua_2c_{horas_D14[idx_hora]}",
-            )
+            # subject to Producao1a{t in 2..H}: #maximo de 1s
+            #    Xac[t] <= Xac[t-1] + 1 + (1- X[t])*M;
 
-        # subject to Producao2d{t in 2..H}: #maximo de 1s
-        #    Xf[t] <= (1-X[t])*M;
+            for idx_hora in range(len(horas_D14)):
+                modelo += (
+                    varBombeamentoAguaAcumulado[horas_D14[idx_hora]] <= 
+                        bombeamento_acumulado_agua_hora_anterior(idx_hora) + 1 + 
+                        (1 - (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc)))*BIG_M_MINERODUTO,
+                    f"rest_seq_bomb_agua_1a_{horas_D14[idx_hora]}",
+                )
 
-        for idx_hora in range(len(horas_D14)):
-            modelo += (
-                varBombeamentoAguaFinal[horas_D14[idx_hora]] <= 
-                (1 - (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc)))*BIG_M_MINERODUTO,
-                f"rest_seq_bomb_agua_2d_{horas_D14[idx_hora]}",
-            )
+            # subject to Producao1b{t in 2..H}: #maximo de 1s
+            #    Xac[t] >= Xac[t-1] + 1 - (1- X[t])*M;
 
-        # subject to Producao2e{t in 1..H}: #maximo de 1s
-        #    Xf[t] <= dmax;
+            for idx_hora in range(len(horas_D14)):
+                modelo += (
+                    varBombeamentoAguaAcumulado[horas_D14[idx_hora]] >=
+                        bombeamento_acumulado_agua_hora_anterior(idx_hora) + 1 - 
+                        (1 - (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc)))*BIG_M_MINERODUTO,
+                    f"rest_seq_bomb_agua_1b_{horas_D14[idx_hora]}",
+                )
 
-        for idx_hora in range(len(horas_D14)):
-            modelo += (
-                varBombeamentoAguaFinal[horas_D14[idx_hora]] <= AguaLs,
-                f"rest_seq_bomb_agua_2e_{horas_D14[idx_hora]}",
-            )
+            # subject to Producao1c{t in 2..H}: #maximo de 1s
+            #    Xac[t] <= X[t]*M;
 
-        # subject to Producao2ee{t in 1..H}: #maximo de 1s
-        #    Xac[t] <= dmax;
-        for idx_hora in range(len(horas_D14)):
-            modelo += (
-                varBombeamentoAguaAcumulado[horas_D14[idx_hora]] <= AguaLs,
-                f"rest_seq_bomb_agua_2ee_{horas_D14[idx_hora]}",
-            )
+            for idx_hora in range(len(horas_D14)):
+                modelo += (
+                    varBombeamentoAguaAcumulado[horas_D14[idx_hora]] <= 
+                        (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc))*BIG_M_MINERODUTO,
+                    f"rest_seq_bomb_agua_1c_{horas_D14[idx_hora]}",
+                )
+
+            # subject to Producao2a{t in 2..H}: #maximo de 1s
+            #    Xf[t] <= Xac[t-1] + (1 - X[t-1] + X[t])*M;
+
+            for idx_hora in range(1, len(horas_D14)):
+                modelo += (
+                    varBombeamentoAguaFinal[horas_D14[idx_hora]] <=
+                    bombeamento_acumulado_agua_hora_anterior(idx_hora) +
+                    (1 - (1 - lpSum(bombeamento_hora_anterior(produto, idx_hora) for produto in produtos_conc)) +
+                    (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc)))*BIG_M_MINERODUTO,
+                    f"rest_seq_bomb_agua_2a_{horas_D14[idx_hora]}",
+                )
+
+            # subject to Producao2b{t in 2..H}: #maximo de 1s
+            #    Xf[t] >= Xac[t-1] - (1 - X[t-1] + X[t])*M;
+
+            for idx_hora in range(1, len(horas_D14)):
+                modelo += (
+                    varBombeamentoAguaFinal[horas_D14[idx_hora]] >=
+                    bombeamento_acumulado_agua_hora_anterior(idx_hora) -
+                    (1 - (1 - lpSum(bombeamento_hora_anterior(produto, idx_hora) for produto in produtos_conc)) +
+                    (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc)))*BIG_M_MINERODUTO,
+                    f"rest_seq_bomb_agua_2b_{horas_D14[idx_hora]}",
+                )
+
+            # subject to Producao2c{t in 2..H}: #maximo de 1s
+            #    Xf[t] <= X[t-1]*M;
+
+            for idx_hora in range(1, len(horas_D14)):
+                modelo += (
+                    varBombeamentoAguaFinal[horas_D14[idx_hora]] <= 
+                    (1 - lpSum(bombeamento_hora_anterior(produto, idx_hora) for produto in produtos_conc))*BIG_M_MINERODUTO,
+                    f"rest_seq_bomb_agua_2c_{horas_D14[idx_hora]}",
+                )
+
+            # subject to Producao2d{t in 2..H}: #maximo de 1s
+            #    Xf[t] <= (1-X[t])*M;
+
+            for idx_hora in range(len(horas_D14)):
+                modelo += (
+                    varBombeamentoAguaFinal[horas_D14[idx_hora]] <= 
+                    (1 - (1 - lpSum(varBombeamentoPolpa[produto][horas_D14[idx_hora]] for produto in produtos_conc)))*BIG_M_MINERODUTO,
+                    f"rest_seq_bomb_agua_2d_{horas_D14[idx_hora]}",
+                )
+
+            # subject to Producao2e{t in 1..H}: #maximo de 1s
+            #    Xf[t] <= dmax;
+
+            for idx_hora in range(len(horas_D14)):
+                modelo += (
+                    varBombeamentoAguaFinal[horas_D14[idx_hora]] <= AguaLs,
+                    f"rest_seq_bomb_agua_2e_{horas_D14[idx_hora]}",
+                )
+
+            # subject to Producao2ee{t in 1..H}: #maximo de 1s
+            #    Xac[t] <= dmax;
+            for idx_hora in range(len(horas_D14)):
+                modelo += (
+                    varBombeamentoAguaAcumulado[horas_D14[idx_hora]] <= AguaLs,
+                    f"rest_seq_bomb_agua_2ee_{horas_D14[idx_hora]}",
+                )
 
 
         varBombeado = LpVariable.dicts("Bombeado", (produtos_conc, horas_D14), 0, None, LpContinuous)
@@ -1081,11 +1082,14 @@ class Model_p1():
                 - BIG_M * (1-varLiberaIncorporacaoPatio[horas_D14[i]]),
                 f"rest_define_incorporacao_do_patio_{horas_D14[i]}",
             )
+        
+        slack_conc = LpVariable.dicts("Slack conc", produtos_conc, lowBound=0)
+        modelo += lpSum(slack_conc[produto_c] for produto_c in produtos_conc)
 
         # Define o limite mínimo do estoque da praça ao final do horizonte de planejamento
         for produto in produtos_conc:
             modelo += (
-                varEstoquePatio[produto][horas_D14[-1]] >= prod_para_estoque[produto],
+                varEstoquePatio[produto][horas_D14[-1]] + slack_conc[produto] >= prod_para_estoque[produto],
                 f"rest_define_limite_minimo_final_estoque_praca_{produto}",
             )
 
@@ -1105,10 +1109,15 @@ class Model_p1():
                                                 LpContinuous)
 
 
+        
+        slack_usina = LpVariable.dicts("Slack usina", produtos_usina, lowBound=0)
+        modelo += lpSum(slack_usina[produto_u] for produto_u in produtos_usina)
+
+
         # Define o limite mínimo do estoque da praça ao final do horizonte de planejamento
         for produto in produtos_usina:
             modelo += (
-                varEstoqueProdutoPatio[produto][horas_D14[-1]] >= prod_para_estoque[produto],
+                varEstoqueProdutoPatio[produto][horas_D14[-1]] + slack_usina[produto] >= prod_para_estoque[produto],
                 f"rest_define_limite_minimo_final_estoque_praca_{produto}",
             )
         # Restrições para garantir que a capacidade do porto é respeitada
@@ -1268,6 +1277,8 @@ class Model_p1():
         # Definindo a função objetivo
         fo = 0
         fo += - (lpSum([varVolumeAtrasadoNavio[navio]*(1/menor_taxa_carregamento) for navio in navios_horizonte]))
+        fo += - (lpSum([slack_conc[produto_c] for produto_c in produtos_conc]))
+        fo += - (lpSum([slack_usina[produto_u] for produto_u in produtos_usina]))
         # fo += lpSum([varTaxaBritagem[produto_mina][hora]*(1/menor_taxa_carregamento) for produto_mina in produtos_mina for hora in horas_D14])
         # fo += lpSum([varTaxaAlim[produto_conc][hora]*(1/menor_taxa_carregamento) for produto_conc in produtos_conc for hora in horas_D14])
         # fo += lpSum([varProducaoSemIncorporacao[produto_usina][hora]*(1/menor_taxa_carregamento) for produto_usina in produtos_usina for hora in horas_D14])

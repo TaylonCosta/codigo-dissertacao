@@ -2,9 +2,9 @@ concentrador:
   duracao_manutencoes_concentrador: []
   estoque_pulmao_inicial_concentrador:
   - - PRDT1
-    - 18028
+    - 23929
   - - PRDT2
-    - 14232
+    - 52472
   faixas_producao_concentrador: 625
   fixar_taxa_alimentacao: livre
   inicio_manutencoes_concentrador: []
@@ -175,11 +175,11 @@ mineroduto:
   considerar_janela_final: false
   estoque_inicial_eb06:
   - - PRDT_C1
-    - 2681
+    - 7786
   - - PRDT_C2
-    - 1007
+    - 1888
   - - PRDT_C3
-    - 3511
+    - 421
   fator_limite_excesso_patio: 0.8
   fator_limite_incorporacao_patio: 0.2
   fixar_janela_bombeamento: livre
@@ -233,48 +233,63 @@ porto:
   capacidade_patio_porto_max: 1500000
   capacidade_patio_porto_min: 0
   carga_navios:
-    NAVIO-1: 52882
-    NAVIO-2: 70925
+    NAVIO-1: 38773
   data_chegada_navio:
-    NAVIO-1: 68
-    NAVIO-2: 40
+    NAVIO-1: 147
   estoque_produto_patio:
-    PRDT_U1: 46630
-    PRDT_U2: 23488
-    PRDT_U3: 46819
-    PRDT_U4: 25193
+    PRDT_U1: 26245
+    PRDT_U2: 46693
+    PRDT_U3: 28288
+    PRDT_U4: 48774
+    0:
+    - PRDT_U1
+    - 539321
+    1:
+    - PRDT_U2
+    - 891872
+    2:
+    - PRDT_U3
+    - 67741
+    3:
+    - PRDT_U4
+    - 752
   navios: &id001
   - NAVIO-1
-  - NAVIO-2
   navios_horizonte: *id001
   prod_para_estoque:
-    PRDT_C1: 17576
-    PRDT_C2: 18728
-    PRDT_C3: 16454
-    PRDT_U1: 8343
-    PRDT_U2: 15776
-    PRDT_U3: 18105
-    PRDT_U4: 5014
+    PRDT_C1: 5372
+    PRDT_C2: 6009
+    PRDT_C3: 16612
+    PRDT_U1: 166
+    PRDT_U2: 6427
+    PRDT_U3: 33212
+    PRDT_U4: 32198
   produtos_de_cada_navio:
   - - NAVIO-1
     - PRDT_U1
-  - - NAVIO-2
-    - PRDT_U1
   taxa_carreg_navios:
-    NAVIO-1: 4507
-    NAVIO-2: 4594
+    NAVIO-1: 4934
 usina:
   estoque_inicial_patio_usina:
-    PRDT_C1: 4521
-    PRDT_C2: 9726
-    PRDT_C3: 3181
+    PRDT_C1: 3857
+    PRDT_C2: 10755
+    PRDT_C3: 15388
+    0:
+    - PRDT_C1
+    - 240734
+    1:
+    - PRDT_C2
+    - 44066
+    2:
+    - PRDT_C3
+    - 12101
   estoque_inicial_polpa_ubu:
   - - PRDT_C1
-    - 12204
+    - 10984
   - - PRDT_C2
-    - 9943
+    - 17894
   - - PRDT_C3
-    - 2437
+    - 4393
   fator_conv:
     d01: 0.065
     d02: 0.065

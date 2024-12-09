@@ -103,4 +103,4 @@ class Learning():
         #                     hour_str = f'h0{aux + 1}' if aux < 9 else f'h{aux + 1}'
         #                     key_consumo = f'Producao_Ubu_{produto}_{prdt_usina}_{dia_str}_{hour_str}'
         #                     consumo_prod_ubu[produto][(dia - 1) * 24 + aux] += resultados_modelo['variaveis'][key_consumo]
-        return fo_value, estoque_eb06, estoque_ubu, prod_concentrador, prod_ubu
+        return fo_value, estoque_eb06, estoque_ubu, prod_concentrador, prod_ubu, resultados_modelo['solver']['status']

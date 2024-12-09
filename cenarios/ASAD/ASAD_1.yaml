@@ -65,7 +65,7 @@ mineroduto:
   considerar_janela_final: False
 
   janela_min_bombeamento_agua: 5
-  janela_max_bombeamento_agua: 20 
+  janela_max_bombeamento_agua: 20
   fixar_janela_bombeamento_agua: livre
   janela_fixa_bombeamento_agua: 6
   janela_para_fixar_bombeamento_agua: 168

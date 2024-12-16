@@ -2,6 +2,7 @@ from pulp import LpProblem, LpMaximize, LpContinuous, LpInteger, LpVariable, lpS
 import json
 import math
 import os
+import datetime
 
 
 class Model_p1():
@@ -1083,15 +1084,15 @@ class Model_p1():
                 f"rest_define_incorporacao_do_patio_{horas_D14[i]}",
             )
         
-        slack_conc = LpVariable.dicts("Slack conc", produtos_conc, lowBound=0)
-        modelo += lpSum(slack_conc[produto_c] for produto_c in produtos_conc)
+        # slack_conc = LpVariable.dicts("Slack conc", produtos_conc, lowBound=0)
+        # modelo += lpSum(slack_conc[produto_c] for produto_c in produtos_conc)
 
         # Define o limite mínimo do estoque da praça ao final do horizonte de planejamento
-        for produto in produtos_conc:
-            modelo += (
-                varEstoquePatio[produto][horas_D14[-1]] + slack_conc[produto] >= prod_para_estoque[produto],
-                f"rest_define_limite_minimo_final_estoque_praca_{produto}",
-            )
+        # for produto in produtos_conc:
+        #     modelo += (
+        #         varEstoquePatio[produto][horas_D14[-1]] + slack_conc[produto] >= prod_para_estoque[produto],
+        #         f"rest_define_limite_minimo_final_estoque_praca_{produto}",
+        #     )
 
 
         # Indica, para cada navio, se é a hora que inicia o carregamento
@@ -1110,16 +1111,16 @@ class Model_p1():
 
 
         
-        slack_usina = LpVariable.dicts("Slack usina", produtos_usina, lowBound=0)
-        modelo += lpSum(slack_usina[produto_u] for produto_u in produtos_usina)
+        # slack_usina = LpVariable.dicts("Slack usina", produtos_usina, lowBound=0)
+        # modelo += lpSum(slack_usina[produto_u] for produto_u in produtos_usina)
 
 
         # Define o limite mínimo do estoque da praça ao final do horizonte de planejamento
-        for produto in produtos_usina:
-            modelo += (
-                varEstoqueProdutoPatio[produto][horas_D14[-1]] + slack_usina[produto] >= prod_para_estoque[produto],
-                f"rest_define_limite_minimo_final_estoque_praca_{produto}",
-            )
+        # for produto in produtos_usina:
+        #     modelo += (
+        #         varEstoqueProdutoPatio[produto][horas_D14[-1]] + slack_usina[produto] >= prod_para_estoque[produto],
+        #         f"rest_define_limite_minimo_final_estoque_praca_{produto}",
+        #     )
         # Restrições para garantir que a capacidade do porto é respeitada
         for navio in navios:
             for idx_hora in range(len(horas_D14)):
@@ -1265,25 +1266,21 @@ class Model_p1():
        
         menor_taxa_carregamento = min([taxa_carreg_navios[navio] for navio in navios_horizonte])
 
+        # data >= (1-sum(varBinProduziu))*BigM
+
         # slack = pulp.LpVariable.dicts("Slack", produtos_usina, lowBound=0)
         
-        # modelo += pulp.lpSum(slack[produto_u] for produto_u in produtos_usina)
-
-        # for produto_u in produtos_usina:
-        #     modelo += (
-        #         lpSum(varProducaoSemIncorporacao[produto_u][hora] for hora in horas_D14) + slack[produto_u] >= prod_minima_usina[produto_u]
-        #     )
-
         # Definindo a função objetivo
         fo = 0
         fo += - (lpSum([varVolumeAtrasadoNavio[navio]*(1/menor_taxa_carregamento) for navio in navios_horizonte]))
-        fo += - (lpSum([slack_conc[produto_c] for produto_c in produtos_conc]))
-        fo += - (lpSum([slack_usina[produto_u] for produto_u in produtos_usina]))
+        # fo += - (lpSum([slack_conc[produto_c] for produto_c in produtos_conc]))
+        # fo += - (lpSum([slack_usina[produto_u] for produto_u in produtos_usina]))
         # fo += lpSum([varTaxaBritagem[produto_mina][hora]*(1/menor_taxa_carregamento) for produto_mina in produtos_mina for hora in horas_D14])
         # fo += lpSum([varTaxaAlim[produto_conc][hora]*(1/menor_taxa_carregamento) for produto_conc in produtos_conc for hora in horas_D14])
         # fo += lpSum([varProducaoSemIncorporacao[produto_usina][hora]*(1/menor_taxa_carregamento) for produto_usina in produtos_usina for hora in horas_D14])
         modelo += (fo, "FO",)
 
+        print(f"solving model: {datetime.datetime.now()}")
         # The problem is solved using PuLP's choice of Solver
         solver.solve(modelo)
         resultados = {'variaveis':{}}
@@ -1308,7 +1305,7 @@ class Model_p1():
             'status': LpStatus[modelo.status],
             'tempo': modelo.solutionTime,
         }
-
+        print(f"solving done: {resultados['solver']['status']}\t{resultados['solver']['tempo']}\t{resultados['solver']['valor_fo']}")
         # Cria a pasta com os resultados dos experimentos se ainda não existir
         if not os.path.exists(args.pasta_saida):
             os.makedirs(args.pasta_saida)

@@ -23,12 +23,15 @@ TRAINING_STEPS = 200000
 USAR_LOG_TENSORBOARD = (
     True  # Para ver o log, execute o comando: tensorboard --logdir ./ppo_tensorboard/
 )
+TRAINING_STEPS_COUNT = 0
 SEMENTE = 5
 RANDOM = False
 SIZE = 1
 SIZE_BOMBEAMENTO = 168
 SAVE = True
-LOAD = False
+LOAD = True
+PolpaAcum = 0
+AguaAcum = 0
 
 
 if not UNIQUE_INSTANCE:
@@ -64,6 +67,9 @@ class CustomizedEnv(gymnasium.Env):
                 bombeamento["PRDT_C3"].update({i: 0})
             cont += 1
         return bombeamento
+    
+    # def define_training_steps():
+
 
     def initialize(self):
         (
@@ -81,6 +87,8 @@ class CustomizedEnv(gymnasium.Env):
             self.prdt_conc,
             self.prdt_usina,
         ) = self.inital_data_ppo
+        self.AguaAcum = 0
+        self.PolpaAcum = 0
 
         return (
             self.estoque_eb06_inicial,
@@ -96,14 +104,16 @@ class CustomizedEnv(gymnasium.Env):
             self.vazao_bombas_eb06,
             self.prdt_conc,
             self.prdt_usina,
+            self.AguaAcum,
+            self.PolpaAcum,
         )
 
     def evaluate(self, BombeamentoPolpa, passo, data):
         L = Learning(self.convert_bombeamento_list(BombeamentoPolpa), 0, data)
-        status, estoque_eb06, estoque_ubu, prod_concentrador, prod_usina = (
+        value, estoque_eb06, estoque_ubu, prod_concentrador, prod_usina, status = (
             L.solve_model()
         )
-        return status, estoque_eb06, estoque_ubu, prod_concentrador, prod_usina
+        return value, estoque_eb06, estoque_ubu, prod_concentrador, prod_usina, status
 
     def create_instance(self):
         # randomness = 0.2
@@ -124,8 +134,8 @@ class CustomizedEnv(gymnasium.Env):
             self.vazao_bombas_eb06,
             self.prdt_conc,
             self.prdt_usina,
-            # self.PolpaAcum,
-            # self.AguaAcum
+            self.AguaAcum,
+            self.PolpaAcum,
         ) = self.initialize()
         self.MaxCon = self.disp_conc_inicial
         self.MaxUbu = self.disp_usina_inicial
@@ -170,9 +180,14 @@ class CustomizedEnv(gymnasium.Env):
             type=str,
             help="Pasta onde serão salvos os arquivos de resultados",
         )
+        parser.add_argument(
+            "--ppo", action="store_true", help="Resolve o mdoelo pelo ppo"
+        )
+
         args = parser.parse_args()
 
         print(args.cenario)
+
         load_data = Load_data()
         self.inital_data_ppo = load_data.load_simplified_data_ppo(args)
         self.data = load_data.load(args)
@@ -197,6 +212,9 @@ class CustomizedEnv(gymnasium.Env):
         self.ultima_recompensa = None
         self.Agua = 1
         self.Polpa = [1] * len(self.prdt_conc)
+        self.status = None
+        self.AguaAcum = 0
+        self.PolpaAcum = 0
 
     def normalize_state(self, state):
         temp_state = state
@@ -231,6 +249,8 @@ class CustomizedEnv(gymnasium.Env):
             self.create_instance()
         self.seedNum = seed
         info = {}
+        self.PolpaAcum = 0
+        self.AguaAcum = 0
         self.state = []
         self.use_instance()
         self.passo = 0
@@ -240,7 +260,7 @@ class CustomizedEnv(gymnasium.Env):
         self.cont_reward = 0
         self.Agua = 0
         self.Polpa = [0] * len(self.prdt_conc)
-        self.status = -1
+        self.value = -1
         self.ultima_acao = None
         self.ultima_recompensa = 0
         self.BombeamentoPolpa = [0] * SIZE_BOMBEAMENTO
@@ -250,6 +270,7 @@ class CustomizedEnv(gymnasium.Env):
             self.estoque_ubu,
             self.prod_concentrador,
             self.prod_usina,
+            self.status,
         ) = self.evaluate(self.BombeamentoPolpa, 0, self.data)
 
         for produto_conc in self.prdt_conc:
@@ -259,13 +280,20 @@ class CustomizedEnv(gymnasium.Env):
             self.state.append(self.prod_usina[produto_conc][1])
         self.FO_Inicial = self.fo_value
         self.FO_Best = self.FO_Inicial
+        
+        with open("training_steps.txt", "r") as f:
+            total_steps = int(f.read())
+            print(f"Total training steps: {total_steps}")
+            TRAINING_STEPS_COUNT = total_steps
 
-        # checa se ha polpa suficiente para bombear o produto escolhido na action
+        myfile = open("training_steps.txt", "w")
+        myfile.write(str(TRAINING_STEPS_COUNT+1))
+        myfile.close()
 
         return self.normalize_state(self.state), info
 
     def step(self, action):
-        
+
         FIM = SIZE_BOMBEAMENTO - 1
         self.Agua = 1
         self.Polpa = [1] * len(self.prdt_conc)
@@ -277,7 +305,6 @@ class CustomizedEnv(gymnasium.Env):
         print(f"\tbatch polpa: {self.nBatchsP}")
         info = {}
 
-
         # fixa o batch no tamanho minimo para apenas um produto:
         if self.nBatchsP == 0 and action != 0:
             if (
@@ -288,6 +315,7 @@ class CustomizedEnv(gymnasium.Env):
                     self.BombeamentoPolpa[i] = action
                     self.passo += 1
                     self.nBatchsP += 1
+                    self.PolpaAcum += 1
             elif (
                 not self.passo + self.PolpaLi <= SIZE_BOMBEAMENTO - 1
                 and self.nBatchsP + self.PolpaLi <= self.PolpaLs
@@ -296,6 +324,7 @@ class CustomizedEnv(gymnasium.Env):
                     self.BombeamentoPolpa[i] = action
                     self.passo += 1
                     self.nBatchsP += 1
+                    self.PolpaAcum += 1
             self.Agua = 1
             self.Polpa = [0] * len(self.prdt_conc)
             self.Polpa[action - 1] = 1
@@ -310,6 +339,7 @@ class CustomizedEnv(gymnasium.Env):
                     self.BombeamentoPolpa[i] = action
                     self.passo += 1
                     self.nBatchsA += 1
+                    self.AguaAcum += 1
             elif (
                 not self.passo + self.AguaLi <= SIZE_BOMBEAMENTO - 1
                 and self.nBatchsA + self.AguaLi <= self.AguaLs
@@ -318,6 +348,7 @@ class CustomizedEnv(gymnasium.Env):
                     self.BombeamentoPolpa[i] = action
                     self.passo += 1
                     self.nBatchsA += 1
+                    self.AguaAcum += 1
             self.Agua = 1
             self.Polpa = [1] * len(self.prdt_conc)
             self.nBatchsP = 0
@@ -334,6 +365,7 @@ class CustomizedEnv(gymnasium.Env):
             self.passo += 1
             self.nBatchsP += 1
             self.nBatchsA = 0
+            self.PolpaAcum += 1
 
         elif (
             action == 0 and self.nBatchsA >= self.AguaLi and self.nBatchsA < self.AguaLs
@@ -344,6 +376,7 @@ class CustomizedEnv(gymnasium.Env):
             self.passo += 1
             self.nBatchsA += 1
             self.nBatchsP = 0
+            self.AguaAcum += 1
 
         terminou_episodio = bool(self.passo == FIM)
 
@@ -354,6 +387,7 @@ class CustomizedEnv(gymnasium.Env):
             self.estoque_ubu,
             self.prod_concentrador,
             self.prod_usina,
+            self.status,
         ) = self.evaluate(self.BombeamentoPolpa, self.passo, self.data)
         for produto_conc in self.prdt_conc:
             self.actual_state.append(self.estoque_eb06[produto_conc][self.passo])
@@ -383,6 +417,7 @@ class CustomizedEnv(gymnasium.Env):
 
         # Optionally we can pass additional info, we are not using that for now
         # print(f"step {self.passo}")
+        print(f"polpa acumulado: {self.PolpaAcum}\nagua acumulado: {self.AguaAcum}")
         print(
             f"\tlast action: {self.ultima_acao}, FO: {self.FO}, Melhor FO: {self.FO_Best}"
         )
@@ -421,7 +456,6 @@ class CustomizedEnv(gymnasium.Env):
         self.action_space.seed(seed)
 
     def valid_action_mask(self):
-        # self.mask= np.array([0, 0, 1, 0])
         cont = 0
         for produto_conc in self.prdt_conc:
             # print(f"produto: {produto_conc}, passo: {self.passo}")
@@ -518,18 +552,31 @@ def run_ppo():
         tensorboard_log = "./ppo_tensorboard/"
     else:
         tensorboard_log = None
+    
+    
+    if LOAD:
+        print('LOADED')
+        model = MaskablePPO.load("model_ppo", env=env)
 
-    # Train the agent
-    model = MaskablePPO(
-        MaskableActorCriticPolicy, env, verbose=1, tensorboard_log=tensorboard_log
-    ).learn(TRAINING_STEPS)
+    else:
+        # Train the agent
+        model = MaskablePPO(MaskableActorCriticPolicy, env, verbose=1, tensorboard_log=tensorboard_log)
+    
     if SAVE:
         model.save("model_ppo")
 
-    if LOAD:
-        model = MaskablePPO.load("model_ppo", env=env)
-    # model.learn(total_timesteps=TRAINING_STEPS)
-    # model.save("ppo_Mineroduto")
+    try:
+        # Assuming you saved the total number of steps externally (e.g., in a file or variable)
+        with open("training_steps.txt", "r") as f:
+            total_steps = int(f.read())
+        print(f"Total training steps: {total_steps}")
+        TRAINING_STEPS_COUNT = total_steps
+
+    except:
+        print("oh noes")
+
+
+    model.learn(TRAINING_STEPS-TRAINING_STEPS_COUNT)
 
     print("===== DEMONSTRANDO RESULTADO =====")
 

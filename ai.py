@@ -38,7 +38,7 @@ class Learning():
         # prod_usina = {c: {u: {} for u in produtos_usina} for c in produtos_conc}
 
         fo_value = 0
-        if resultados_modelo['solver']['status'] == 'Infeasible':
+        if not resultados_modelo['solver']['valor_fo'] and not resultados_modelo['solver']['valor_fo'] == 0.0:
             # Set all variables to 0 if the status is 'Infeasible'
             for produto in produtos_conc:
                     estoque_eb06[produto] = {0: 0}

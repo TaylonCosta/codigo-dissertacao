@@ -14,15 +14,14 @@ class Load_data:
         return cenario
 
     def load(self, args):
-        print(f"[OK]\nLendo arquivo {args.cenario}...   ", end="")
         # Abre o arquivo YAML com dados do cenário (parâmetros do problema)
-        print(args.cenario)
+
         cenario = self.ler_cenario(args.cenario)
 
         # -----------------------------------------------------------------------------
         # Solver
         print(f"[OK]\nInstanciando solver {args.solver}...   ", end="")
-        solver = getSolver(args.solver, msg=True, timeLimit=600, gapRel=0.1)
+        solver = getSolver(args.solver, msg=False, timeLimit=180, gapRel=0.3)
         # solver.options.remove(("SolutionLimit", value))
         # ------------------------------------------------------------------------------
 
@@ -33,8 +32,6 @@ class Load_data:
 
         # -----------------------------------------------------------------------------
         # Índices usados pelas variáveis e parâmetros
-
-        print(f"[OK]\nCriando índices...   ", end="")
         dias = [f"d{dia+1:02d}" for dia in range(7)]  # d01, d02, ...   , d14
         horas = [f"h{hora+1:02d}" for hora in range(24)]  # h01, h02, ...   , h6
         horas_D14 = [
@@ -86,8 +83,6 @@ class Load_data:
             / 100
             for d in range(len(dias))
         }
-        print("--------------------------")
-        print(taxa_producao_britagem)
         # Mina
         campanha_c3 = cenario["mina"]["campanha"]
         produtos_mina = set()
@@ -155,7 +150,6 @@ class Load_data:
         tempo_mineroduto = cenario["mineroduto"]["tempo_mineroduto"]
 
         max_taxa_envio_patio = cenario["mineroduto"]["max_taxa_envio_patio"]
-        print(max_taxa_envio_patio)
         fator_limite_excesso_patio = cenario["mineroduto"]["fator_limite_excesso_patio"]
         fator_limite_incorporacao_patio = cenario["mineroduto"]["fator_limite_incorporacao_patio"]
         taxa_max_incorporacao_patio = cenario["mineroduto"]["taxa_max_incorporacao_patio"]
@@ -186,8 +180,6 @@ class Load_data:
         resultados_planilha = {}
 
         # -----------------------------------------------------------------------------
-
-        print(f"[OK]\nObtendo parâmetros da planilha...   ", end="")
 
         # Lê os dados da aba MINA
         # ws = wb["MINA"]
@@ -266,26 +258,6 @@ class Load_data:
 
         # Validando se os valores dos parâmetros se encontram dentro dos valores mínimos e máximos
 
-        for parametro in parametros_mina:
-            if parametro != "Campanha - C3":
-                if (
-                    min(parametros_mina[parametro].values())
-                    < min_parametros_mina[parametro]
-                ):
-                    print(
-                        "ATENÇÃO: O valor mínimo de "
-                        + parametro
-                        + " está abaixo do permitido"
-                    )
-                elif (
-                    max(parametros_mina[parametro].values())
-                    > max_parametros_mina[parametro]
-                ):
-                    print(
-                        "ATENÇÃO: O valor máximo de "
-                        + parametro
-                        + " está acima do permitido"
-                    )
 
         # -----------------------------------------------------------------------------
 
@@ -467,7 +439,6 @@ class Load_data:
         for navio, produto_usina in cenario["porto"]["produtos_de_cada_navio"]:
             produtos_de_cada_navio[navio][produto_usina] = 1
 
-        print(f"[OK]\nDefinindo parâmetros calculados...   ", end="")
 
         # Guarda os parâmetros calculados
         parametros_calculados = {}
@@ -634,7 +605,6 @@ class Load_data:
         return cenario, solver, data
 
     def load_simplified_data_ppo(self, args):
-        print(f"[OK]\nLendo arquivo {args.cenario}...   ", end="")
         # Abre o arquivo YAML com dados do cenário (parâmetros do problema)
         cenario = self.ler_cenario(args.cenario)
 

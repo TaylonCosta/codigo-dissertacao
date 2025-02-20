@@ -11,6 +11,7 @@ class Load_data:
         "Abre o arquivo YAML com parâmetros do cenário"
         with open(nome_arquivo, "r") as arquivo:
             cenario = yaml.safe_load(arquivo)
+        print(nome_arquivo)
         return cenario
 
     def load(self, args):
@@ -21,7 +22,7 @@ class Load_data:
         # -----------------------------------------------------------------------------
         # Solver
         print(f"[OK]\nInstanciando solver {args.solver}...   ", end="")
-        solver = getSolver(args.solver, msg=False, timeLimit=180, gapRel=0.3)
+        solver = getSolver(args.solver, msg=True, timeLimit=1200, gapRel=0.01)
         # solver.options.remove(("SolutionLimit", value))
         # ------------------------------------------------------------------------------
 

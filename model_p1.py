@@ -3,6 +3,9 @@ import json
 import math
 import os
 import datetime
+import numpy as np
+from itertools import accumulate
+import orloge
 
 
 class Model_p1():
@@ -11,15 +14,43 @@ class Model_p1():
         ''' Retorna o dia de uma hora no formato dXX_hYY '''
         return hora.split('_')[0]
 
-    def gerar_nome_arquivo_saida(self, nome_base_arquivo):
-        if not os.path.exists(nome_base_arquivo + ".json"):
-            return nome_base_arquivo + ".json"
+    def gerar_nome_arquivo_saida(self, nome_base_arquivo, tipo):
+        if not os.path.exists(nome_base_arquivo + "."+ tipo):
+            return nome_base_arquivo + "." + tipo
 
         contador = 1
-        while os.path.exists(f"{nome_base_arquivo}_{contador}.json"):
+        while os.path.exists(f"{nome_base_arquivo}_{contador}.{tipo}"):
             contador += 1
-        return f"{nome_base_arquivo}_{contador}.json"
+        return f"{nome_base_arquivo}_{contador}.{tipo}"
 
+    def verifica_status_solucao(self, nome_arquivo_log_solver, modelo):
+        status_solucao = LpStatus[modelo.status]
+        gap = None
+        valor_fo = None
+        
+        # Obtendo os dados de log do solver como um dicionário
+        logs_solver = orloge.get_info_solver(nome_arquivo_log_solver, 'GUROBI')
+
+        melhor_limite, melhor_solucao = logs_solver["best_bound"], logs_solver["best_solution"]
+
+        if melhor_limite is not None and melhor_solucao is not None :
+            gap = abs(melhor_limite - melhor_solucao) / (1e-10 + abs(melhor_solucao)) * 100 # Gap in %. We add 1e-10 to avoid division by zero.
+        else :
+            gap = 'N/A'
+
+        if LpStatus[modelo.status] == 'Optimal':
+            valor_fo = modelo.objective.value()
+            if gap == 0:
+                print(f'Solução ÓTIMA encontrada: {melhor_solucao:.1f} (gap: {gap:.1f}%)')
+            else:
+                status_solucao = 'Feasible'
+                print(f'Solução viável encontrada: {melhor_solucao:.1f} (gap: {gap:.1f}%)')
+            print('[OK]')
+        elif logs_solver['status'] == 'Model is infeasible':
+            status_solucao = 'Infeasible'
+            print(f'Não foi possível encontrar solução!')
+
+        return valor_fo, status_solucao, gap
 
     def modelo(self, cenario, solver, data, varBombeamentoPolpaPPO, horizon):
         # variaveis utilizadas no modelo
@@ -413,8 +444,13 @@ class Model_p1():
         # Indica o estoque EB06, por hora
         varEstoqueEB06 = LpVariable.dicts("Estoque EB06", (produtos_conc, horas_D14), 0, None, LpContinuous)
 
-        # Indica se há bombeamento de polpa em cada hora
-        varBombeamentoPolpa = LpVariable.dicts("Bombeamento Polpa", (produtos_conc, horas_D14), 0, 1, LpInteger)
+        if args.heuristica:
+            varBombeamentoPolpa = LpVariable.dicts("Bombeamento Polpa", (produtos_conc, horas_D14), 0, 1, LpContinuous)
+
+
+        else:
+            # Indica se há bombeamento de polpa em cada hora
+            varBombeamentoPolpa = LpVariable.dicts("Bombeamento Polpa", (produtos_conc, horas_D14), 0, 1, LpInteger)
 
         # Restrição de capacidade do estoque EB06
         for hora in horas_D14:
@@ -459,7 +495,7 @@ class Model_p1():
                     if varBombeamentoPolpaPPO[produto][horas] == 0 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
                         modelo += (varBombeamentoPolpa[produto][horas] <=0, f"rest_fixado2_{produto}_{horas}")
                     if varBombeamentoPolpaPPO[produto][horas] == 1 and f"rest_fixado2_{produto}_{horas}" not in modelo.constraints:
-                        modelo += (varBombeamentoPolpa[produto][horas] >=1, f"rest_fixado2_{produto}_{horas}")
+                        modelo += (varBombeamentoPolpa[produto][horas] >=1, f"rest_fixado2_{produto}_{horas}")      
         
         else:
             # Restrição para garantir que apenas um produto é bombeado por vez
@@ -1266,6 +1302,14 @@ class Model_p1():
        
         menor_taxa_carregamento = min([taxa_carreg_navios[navio] for navio in navios_horizonte])
 
+        w_teste = LpVariable.dicts("w_teste", (produtos_conc, horas_D14), 0, 1, LpInteger)
+        Fixadas = LpVariable.dicts("fixadas", (produtos_conc, horas_D14), 0, 1, LpInteger)
+
+        for produto in produtos_conc:
+            for hora in horas_D14:
+                modelo += (w_teste[produto][hora] >= 0,  f"teste7_{produto}_{hora}")
+                modelo += (Fixadas[produto][hora] >= 0,  f"teste8_{produto}_{hora}")
+
         # data >= (1-sum(varBinProduziu))*BigM
 
         # slack = pulp.LpVariable.dicts("Slack", produtos_usina, lowBound=0)
@@ -1281,8 +1325,208 @@ class Model_p1():
         modelo += (fo, "FO",)
 
         print(f"solving model: {datetime.datetime.now()}")
-        # The problem is solved using PuLP's choice of Solver
         solver.solve(modelo)
+
+        valor_fo_modelo_completo = None
+        tempo_modelo_completo = 0
+        status_solucao_modelo_completo = None
+        gap_modelo_completo = None
+
+        valor_fo_modelo_relaxado = None
+        tempo_modelo_relaxado = 0
+        status_solucao_modelo_relaxado = None
+        gap_modelo_relaxado = None
+
+        valor_fo_modelo_fixado = None
+        tempo_modelo_fixado = 0
+        status_solucao_modelo_fixado = None
+        gap_modelo_fixado = None
+
+        ############################  Heuristica ###################################
+        
+        FixadaT = None
+        if args.heuristica:
+            print('[OK]')
+            print('Tratando a heurística de variáveis do mineroduto')
+                
+            resultados_variavel_ac = {}
+            for produto_conc in produtos_conc:
+                acumulado = list(accumulate([varBombeamentoPolpa[produto_conc][hora].varValue for hora in horas_D14]))
+                resultados_variavel_ac[produto_conc] = {horas_D14[i] : acumulado[i] for i in range(len(horas_D14))}
+                
+            LIp = PolpaLi
+            LSp = PolpaLs
+            Polpa = LIp
+            
+            LIa = AguaLi
+            LSa = AguaLs
+            Agua = LIa
+            
+            Fixada = 0
+            FixadaT = 0
+            lista_teste = []
+            limite_inf = 0.85
+            LIMITE_FIX = 0.6
+            Limite_Set = 0.5
+            
+            cont = 0
+            cont_conc = 0
+            cont_horas = 0
+            permite = np.zeros((len(produtos_conc),len(horas_D14)))
+            # livre = np.zeros((len(produtos_conc),len(horas_D14)))
+            # w_teste = LpVariable.dicts("w_teste", (produtos_conc, horas_D14), 0, 1, LpBinary)
+            # Fixadas = LpVariable.dicts("fixadas", (produtos_conc, horas_D14), 0, 1, LpBinary)
+            
+            DataMin = 0
+            for produto in produtos_conc:
+                Fixada = 0
+                for hora in horas_D14:
+                    if cont_horas > DataMin and resultados_variavel_ac[produto][hora] >= Fixada and varBombeamentoPolpa[produto][hora].varValue >= limite_inf and permite[cont_conc][cont_horas]==0:# and np.sum(permite[cont_conc][cont_horas:cont_horas+LIp]==0):                    
+                        
+                        DataInicial = BIG_M
+                        
+                        for hora_p in range(max(DataMin,cont_horas), min(cont_horas+LIp, 168)):
+                            #print(hora_p)
+                            
+                            if varBombeamentoPolpa[produto][horas_D14[hora_p]].varValue >= LIMITE_FIX and hora_p > DataMin and resultados_variavel_ac[produto][horas_D14[hora_p]] >= Fixada and permite[cont_conc][hora_p]==0:
+                                
+                                if hora_p < DataInicial:
+                                    DataInicial = hora_p
+                                
+                                modelo += (varBombeamentoPolpa[produto][horas_D14[hora_p]] >= 1, f"rest_fixado_{produto}_{horas_D14[hora_p]}")
+                                DataMin = hora_p
+                                lista_teste.append(f"{produto}_{horas_D14[hora_p]}")
+                                Fixada +=1
+                                FixadaT +=1
+                                print(f"rest_fixado_{produto}_{horas_D14[hora_p]}")
+                                
+                                for prod in range(0, len(produtos_conc)):
+                                    permite[prod][hora_p] = 1
+
+                        for hora_p in range(DataMin+1, min(DataMin + LSa + 1, 168)):
+                            for prod in range(0, len(produtos_conc)):
+                                permite[prod][hora_p] = 1
+                            
+                        if DataInicial < BIG_M:
+                            for hora_p in range(max(DataInicial-LSa, 0), DataInicial):
+                                for prod in range(0, len(produtos_conc)):
+                                    permite[prod][hora_p] = 1
+                    cont_horas += 1
+                cont_horas = 0
+                cont_conc += 1            
+                    # if varBombeamentoPolpaEB06[produto][hora].varValue < 1e-5:
+                    #     modelo += (varBombeamentoPolpaEB06[produto][hora] == 0, f"rest_teste2_{produto}_{hora}")
+            
+            print('[OK]')
+                            
+            print('Inicializando variáveis do modelo com a solução da heurística')
+
+            for v in modelo.variables():
+                if v.lowBound is not None and v.varValue < v.lowBound:
+                    v.setInitialValue(v.lowBound)
+                elif v.upBound is not None and v.varValue > v.upBound:
+                    v.setInitialValue(v.upBound)
+                else:
+                    v.setInitialValue(v.varValue)
+
+            for produto in produtos_conc:
+                Fixada = 0
+                for hora in horas_D14:
+                    if  resultados_variavel_ac[produto][hora] >= Fixada and varBombeamentoPolpa[produto][hora].varValue >= Limite_Set:   
+                        varBombeamentoPolpa[produto][hora].setInitialValue(1)
+                        Fixada +=1
+                        FixadaT +=1
+                    else:
+                        varBombeamentoPolpa[produto][hora].setInitialValue(0)
+            print('[OK]')
+                        
+            for produto in produtos_conc:
+                for hora in horas_D14:
+                    modelo += (varBombeamentoPolpa[produto][hora] <= 0 + BIG_M*w_teste[produto][hora], f"rest_teste3_{produto}_{hora}")
+                    modelo += (varBombeamentoPolpa[produto][hora] >= 1 - BIG_M*(1 - w_teste[produto][hora]), f"rest_teste4_{produto}_{hora}")
+
+            
+            # print('Fixadas:', FixadaT)
+            # for produto in produtos_conc:
+            #     for hora in horas_D14:
+            #         if Fixadas[produto][hora].varValue == 1:
+            #             print(f"{produto}_{hora}: {Fixadas[produto][hora].varValue}")
+            #             lista_teste.append(f"{produto}_{hora}")
+            
+            
+            # with open('teste.json', 'w') as f:
+            #     json.dump(lista_teste, f, indent=4)
+            # Se quiser nova FO
+            # modelo.setObjective(lpSum([varTaxaAlim[produto_conc][hora] for produto_conc in produtos_conc for hora in horas_D14]))
+            
+            print('RESOLVENDO o modelo com variáveis do mineroduto fixadas')
+
+            # Aproveitar valor da memória
+            solver.optionsDict['warmStart'] = True
+            
+            nome_arquivo_log_solver = self.gerar_nome_arquivo_saida(f"{cenario['geral']['nome']}_solver_fixado", "log")
+            solver.optionsDict['logPath'] = nome_arquivo_log_solver
+            # print("RODANDO NOVAMENTE O MODELO")
+            solver.solve(modelo)
+
+            tempo_modelo_fixado = modelo.solutionTime
+            valor_fo_modelo_fixado, status_solucao_modelo_fixado, gap_modelo_fixado = self.verifica_status_solucao(nome_arquivo_log_solver, modelo)
+                            
+            print('RESOLVENDO o modelo original iniciado com a solução heurística')
+
+            for produto in produtos_conc:
+                for hora in horas_D14:
+                    if f"rest_fixado_{produto}_{hora}" in modelo.constraints:
+                        del modelo.constraints[f"rest_fixado_{produto}_{hora}"]
+
+            for v in modelo.variables():
+                if v.lowBound is not None and v.varValue < v.lowBound:
+                    v.setInitialValue(v.lowBound)
+                elif v.upBound is not None and v.varValue > v.upBound:
+                    v.setInitialValue(v.upBound)
+                else:
+                    v.setInitialValue(v.varValue)
+            
+            # Aproveitar valor da memória
+            # solver.optionsDict['warmStart'] = True
+            nome_arquivo_log_solver = self.gerar_nome_arquivo_saida(f"{cenario['geral']['nome']}_solver_completo", "log")
+            solver.optionsDict['logPath'] = nome_arquivo_log_solver
+            # print("RODANDO NOVAMENTE O MODELO")
+            solver.solve(modelo)
+
+            tempo_modelo_completo = modelo.solutionTime
+            valor_fo_modelo_completo, status_solucao_modelo_completo, gap_modelo_completo = self.verifica_status_solucao(nome_arquivo_log_solver, modelo)
+    
+            ## Avaliando a solução ####
+
+            # Obtendo os dados de log do solver como um dicionário
+            logs_solver = orloge.get_info_solver(nome_arquivo_log_solver, 'GUROBI')
+
+            melhor_limite, melhor_solucao = logs_solver["best_bound"], logs_solver["best_solution"]
+
+            if melhor_limite is not None and melhor_solucao is not None :
+                gap = abs(melhor_limite - melhor_solucao) / (1e-10 + abs(melhor_solucao)) * 100 # Gap in %. We add 1e-10 to avoid division by zero.
+            else :
+                gap = 'N/A'
+
+            status_solucao = LpStatus[modelo.status]
+
+            restricoes_limitantes = None
+            variaveis_limitantes = None
+
+            nome_arquivo_ILP = None
+
+            if LpStatus[modelo.status] == 'Optimal':
+                if gap == 0:
+                    print(f'Solução ÓTIMA encontrada: {melhor_solucao:.1f} (gap: {gap:.1f}%)')
+                else:
+                    status_solucao = 'Feasible'
+                    print(f'Solução viável encontrada: {melhor_solucao:.1f} (gap: {gap:.1f}%)')
+                print('[OK]')
+            elif logs_solver['status'] == 'Model is infeasible':
+                status_solucao = 'Infeasible'
+                print(f'Não foi possível encontrar solução!')
+
         resultados = {'variaveis':{}}
         for v in modelo.variables():
             resultados['variaveis'][v.name] = v.varValue
@@ -1311,8 +1555,9 @@ class Model_p1():
             os.makedirs(args.pasta_saida)
 
         # Salvando os dados em arquivo binário usando pickels
-        nome_arquivo_saida = self.gerar_nome_arquivo_saida(f"{cenario['geral']['nome']}")
+        nome_arquivo_saida = self.gerar_nome_arquivo_saida(f"{cenario['geral']['nome']}", 'json')
         with open(f'{args.pasta_saida}/{nome_arquivo_saida}', "w", encoding="utf8") as f:
             json.dump(resultados, f)
 
+        print(f"DONE: {datetime.datetime.now()}")
         return modelo.status, resultados

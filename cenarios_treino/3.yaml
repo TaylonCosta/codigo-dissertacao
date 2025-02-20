@@ -239,11 +239,11 @@ porto:
     NAVIO-4: 59719
     NAVIO-5: 10146
   data_chegada_navio:
-    NAVIO-1: 122
-    NAVIO-2: 74
-    NAVIO-3: 23
-    NAVIO-4: 122
-    NAVIO-5: 150
+    NAVIO-1: 1
+    NAVIO-2: 1
+    NAVIO-3: 1
+    NAVIO-4: 1
+    NAVIO-5: 1
   estoque_produto_patio:
     PRDT_U1: 26245
     PRDT_U2: 46693

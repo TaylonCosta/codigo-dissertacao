@@ -1,0 +1,42 @@
+
+Gurobi 11.0.1 (linux64) logging started Tue Feb 11 21:22:58 2025
+
+Set parameter LogFile to value "ASAD7_solver_fixado.log"
+Gurobi Optimizer version 11.0.1 build v11.0.1rc0 (linux64 - "Ubuntu 22.04.4 LTS")
+
+CPU model: AMD Ryzen 5 5500U with Radeon Graphics, instruction set [SSE2|AVX|AVX2]
+Thread count: 6 physical cores, 12 logical processors, using up to 12 threads
+
+Optimize a model with 77543 rows, 20668 columns and 351833 nonzeros
+Model fingerprint: 0xdb2affe6
+Variable types: 12604 continuous, 8064 integer (0 binary)
+Coefficient statistics:
+  Matrix range     [9e-02, 1e+07]
+  Objective range  [3e-04, 3e-04]
+  Bounds range     [1e+00, 2e+06]
+  RHS range        [1e+00, 1e+07]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint rest_define_EstoqueEB06_PRDT_C1_d01_h04 by 499.581484628
+MIP start from previous solve did not produce a new incumbent solution
+
+Presolve removed 60455 rows and 11288 columns
+Presolve time: 1.86s
+Presolved: 17088 rows, 9380 columns, 79794 nonzeros
+Variable types: 4819 continuous, 4561 integer (2967 binary)
+
+Root relaxation: infeasible, 2206 iterations, 0.08 seconds (0.06 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 infeasible    0               - infeasible      -     -    2s
+
+Explored 1 nodes (2206 simplex iterations) in 2.10 seconds (2.19 work units)
+Thread count was 12 (of 12 available processors)
+
+Solution count 0
+No other solutions better than -1e+100
+
+Model is infeasible
+Best objective -, best bound -, gap -

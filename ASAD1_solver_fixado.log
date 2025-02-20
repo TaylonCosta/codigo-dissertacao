@@ -1,0 +1,104 @@
+
+Gurobi 11.0.1 (linux64) logging started Tue Feb 11 00:24:05 2025
+
+Set parameter LogFile to value "ASAD1_solver_fixado.log"
+Gurobi Optimizer version 11.0.1 build v11.0.1rc0 (linux64 - "Ubuntu 22.04.4 LTS")
+
+CPU model: AMD Ryzen 5 5500U with Radeon Graphics, instruction set [SSE2|AVX|AVX2]
+Thread count: 6 physical cores, 12 logical processors, using up to 12 threads
+
+Optimize a model with 77541 rows, 20668 columns and 274611 nonzeros
+Model fingerprint: 0x6714a40b
+Variable types: 12604 continuous, 8064 integer (0 binary)
+Coefficient statistics:
+  Matrix range     [9e-02, 1e+07]
+  Objective range  [2e-04, 2e-04]
+  Bounds range     [1e+00, 2e+06]
+  RHS range        [1e+00, 1e+07]
+
+User MIP start did not produce a new incumbent solution
+User MIP start violates constraint rest_define_EstoqueEB06_PRDT_C2_d01_h03 by 156.083358843
+MIP start from previous solve did not produce a new incumbent solution
+
+Presolve removed 59931 rows and 10968 columns
+Presolve time: 1.67s
+Presolved: 17610 rows, 9700 columns, 102019 nonzeros
+Variable types: 5035 continuous, 4665 integer (3071 binary)
+
+Root relaxation: objective -2.665107e+01, 14146 iterations, 2.75 seconds (3.51 work units)
+Total elapsed time = 8.74s (DegenMoves)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  -26.65107    0  828          -  -26.65107      -     -   11s
+Another try with MIP start
+     0     0  -27.12437    0 1162          -  -27.12437      -     -   13s
+     0     0  -27.20020    0 1111          -  -27.20020      -     -   13s
+     0     0  -27.20020    0 1147          -  -27.20020      -     -   14s
+     0     0  -27.20020    0 1149          -  -27.20020      -     -   14s
+     0     0  -27.20020    0 1185          -  -27.20020      -     -   14s
+     0     0  -27.20020    0 1162          -  -27.20020      -     -   14s
+     0     0  -27.20020    0 1179          -  -27.20020      -     -   14s
+     0     0  -27.20020    0  471          -  -27.20020      -     -   20s
+     0     0  -27.35062    0  672          -  -27.35062      -     -   22s
+     0     0  -27.35062    0  810          -  -27.35062      -     -   22s
+     0     0  -27.35062    0  675          -  -27.35062      -     -   23s
+     0     0  -27.42431    0  728          -  -27.42431      -     -   23s
+     0     0  -29.56751    0  824          -  -29.56751      -     -   24s
+     0     0  -30.00000    0   93          -  -30.00000      -     -   27s
+     0     0  -30.00000    0  132          -  -30.00000      -     -   27s
+     0     0  -30.00000    0  159          -  -30.00000      -     -   27s
+     0     0  -30.00000    0  155          -  -30.00000      -     -   27s
+     0     0  -30.00000    0   87          -  -30.00000      -     -   28s
+     0     0  -30.00000    0  114          -  -30.00000      -     -   28s
+     0     0  -30.00000    0  101          -  -30.00000      -     -   29s
+     0     0  -30.00000    0  151          -  -30.00000      -     -   30s
+     0     0  -30.00000    0   76          -  -30.00000      -     -   30s
+     0     0  -30.00000    0  125          -  -30.00000      -     -   31s
+     0     0  -30.00000    0   80          -  -30.00000      -     -   31s
+     0     0  -30.00000    0  102          -  -30.00000      -     -   31s
+     0     0  -30.00000    0  182          -  -30.00000      -     -   32s
+     0     0  -30.00000    0   85          -  -30.00000      -     -   34s
+     0     2  -30.00000    0   83          -  -30.00000      -     -   36s
+    68    27 infeasible   15               -  -31.00000      -   358   40s
+   219   128  -34.01711   37  414          -  -31.00000      -   259   45s
+   614   395  -34.01711  102  536          -  -31.00000      -   201   50s
+H  821   393                     -36.0342146  -31.00000  14.0%   214   52s
+   905   635 infeasible   51       -36.03421  -34.01711  5.60%   206   57s
+  1479   699  -34.01711   97  726  -36.03421  -34.01711  5.60%   174   61s
+  2352   891  -34.01711   42 1179  -36.03421  -34.01711  5.60%   166   68s
+  2354   892  -34.01711   50  416  -36.03421  -34.01711  5.60%   165   74s
+  2355   893  -34.01711   22  742  -36.03421  -34.01711  5.60%   165   76s
+  2357   894  -34.01711   56  133  -36.03421  -34.01711  5.60%   165   80s
+  2362   898  -34.01711   27  150  -36.03421  -34.01711  5.60%   165   86s
+  2402   903  -34.01711   18  241  -36.03421  -34.01711  5.60%   241   90s
+  2595   934  -34.01711   34  170  -36.03421  -34.01711  5.60%   237   95s
+  3431   682 infeasible   31       -36.03421  -34.01711  5.60%   197  100s
+  3672   570 infeasible   28       -36.03421  -34.01711  5.60%   195  106s
+  3939   404 infeasible   30       -36.03421  -34.01711  5.60%   188  110s
+  3994   355 infeasible   31       -36.03421  -34.01711  5.60%   190  115s
+
+Cutting planes:
+  Learned: 4
+  Gomory: 1
+  Cover: 40
+  Implied bound: 276
+  Projected implied bound: 14
+  Clique: 1
+  MIR: 46
+  StrongCG: 6
+  Flow cover: 115
+  Zero half: 4
+  RLT: 43
+  Relax-and-lift: 36
+  BQP: 1
+
+Explored 3996 nodes (818007 simplex iterations) in 115.27 seconds (133.64 work units)
+Thread count was 12 (of 12 available processors)
+
+Solution count 1: -36.0342 
+No other solutions better than -36.0342
+
+Optimal solution found (tolerance 1.00e-02)
+Best objective -3.603421461897e+01, best bound -3.603421461897e+01, gap 0.0000%

@@ -68,8 +68,6 @@ class CustomizedEnv(gymnasium.Env):
             cont += 1
         return bombeamento
     
-    # def define_training_steps():
-
 
     def initialize(self):
         (

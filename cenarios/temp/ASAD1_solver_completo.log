@@ -1,0 +1,82 @@
+
+Gurobi 11.0.1 (linux64) logging started Tue Feb 11 20:22:06 2025
+
+Set parameter LogFile to value "ASAD1_solver_completo.log"
+Gurobi Optimizer version 11.0.1 build v11.0.1rc0 (linux64 - "Ubuntu 22.04.4 LTS")
+
+CPU model: AMD Ryzen 5 5500U with Radeon Graphics, instruction set [SSE2|AVX|AVX2]
+Thread count: 6 physical cores, 12 logical processors, using up to 12 threads
+
+Optimize a model with 116808 rows, 20668 columns and 412917 nonzeros
+Model fingerprint: 0xa59e33ff
+Variable types: 12604 continuous, 8064 integer (0 binary)
+Coefficient statistics:
+  Matrix range     [9e-02, 1e+07]
+  Objective range  [2e-04, 2e-04]
+  Bounds range     [1e+00, 2e+06]
+  RHS range        [1e+00, 1e+07]
+
+Loaded user MIP start with objective -36.0342
+MIP start from previous solve produced solution with objective -36.0342 (0.10s)
+MIP start from previous solve did not produce a new incumbent solution
+
+Presolve removed 100128 rows and 11526 columns
+Presolve time: 1.94s
+Presolved: 16680 rows, 9142 columns, 64833 nonzeros
+Variable types: 4801 continuous, 4341 integer (2746 binary)
+
+Root relaxation: objective -2.665057e+01, 10225 iterations, 1.54 seconds (1.87 work units)
+Total elapsed time = 5.55s (DegenMoves)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  -26.65057    0  600  -36.03421  -26.65057  26.0%     -    6s
+     0     0  -29.00000    0  885  -36.03421  -29.00000  19.5%     -    7s
+     0     0  -29.00000    0  857  -36.03421  -29.00000  19.5%     -    8s
+     0     0  -29.00000    0  856  -36.03421  -29.00000  19.5%     -    8s
+     0     0  -29.00000    0  881  -36.03421  -29.00000  19.5%     -    8s
+     0     0  -29.00000    0  791  -36.03421  -29.00000  19.5%     -    9s
+     0     0  -29.00000    0  800  -36.03421  -29.00000  19.5%     -    9s
+     0     0  -29.00000    0  722  -36.03421  -29.00000  19.5%     -    9s
+     0     0  -29.00000    0  734  -36.03421  -29.00000  19.5%     -    9s
+     0     0  -29.00000    0  753  -36.03421  -29.00000  19.5%     -   10s
+     0     0  -29.00000    0  703  -36.03421  -29.00000  19.5%     -   10s
+     0     0  -29.00000    0  207  -36.03421  -29.00000  19.5%     -   12s
+     0     2  -29.00000    0  167  -36.03421  -29.00000  19.5%     -   13s
+    26     6  -29.96971    8  529  -36.03421  -29.22584  18.9%   287   15s
+   302    96  -34.01711   30  492  -36.03421  -33.01711  8.37%   144   20s
+   773   412  -34.01711  129  215  -36.03421  -33.01711  8.37%   133   25s
+  1210   689  -34.01711  106  544  -36.03421  -34.01711  5.60%   144   32s
+  1708   826  -34.01711  130  464  -36.03421  -34.01711  5.60%   135   35s
+  2815  1010  -34.01711  233  207  -36.03421  -34.01711  5.60%   135   43s
+  2817  1011  -34.01711  184  184  -36.03421  -34.01711  5.60%   135   47s
+  2819  1013  -34.01711   35  887  -36.03421  -34.01711  5.60%   135   50s
+  2828  1019  -34.01711  144  122  -36.03421  -34.01711  5.60%   135   55s
+  2834  1023  -34.01711  116   83  -36.03421  -34.01711  5.60%   134   60s
+  2995  1011  -34.01711   24  174  -36.03421  -34.01711  5.60%  38.9   65s
+  3203  1088  -34.01711   50  149  -36.03421  -34.01711  5.60%  50.0   70s
+  3604   910 infeasible   21       -36.03421  -34.01711  5.60%  79.5   76s
+  3837   734 infeasible   21       -36.03421  -34.01711  5.60%  93.2   80s
+
+Cutting planes:
+  Learned: 2
+  Gomory: 3
+  Cover: 77
+  Implied bound: 156
+  Clique: 25
+  MIR: 51
+  StrongCG: 1
+  Flow cover: 3
+  Network: 1
+  RLT: 27
+  Relax-and-lift: 41
+
+Explored 3987 nodes (844025 simplex iterations) in 83.70 seconds (93.77 work units)
+Thread count was 12 (of 12 available processors)
+
+Solution count 1: -36.0342 
+No other solutions better than -36.0342
+
+Optimal solution found (tolerance 1.00e-02)
+Best objective -3.603421461897e+01, best bound -3.603421461897e+01, gap 0.0000%

@@ -1,0 +1,34 @@
+
+Gurobi 11.0.1 (linux64) logging started Tue Feb 11 21:27:19 2025
+
+Set parameter LogFile to value "ASAD9_solver_completo.log"
+Gurobi Optimizer version 11.0.1 build v11.0.1rc0 (linux64 - "Ubuntu 22.04.4 LTS")
+
+CPU model: AMD Ryzen 5 5500U with Radeon Graphics, instruction set [SSE2|AVX|AVX2]
+Thread count: 6 physical cores, 12 logical processors, using up to 12 threads
+
+Optimize a model with 113762 rows, 20162 columns and 395087 nonzeros
+Model fingerprint: 0x10d8000d
+Variable types: 12434 continuous, 7728 integer (0 binary)
+Coefficient statistics:
+  Matrix range     [9e-02, 1e+07]
+  Objective range  [2e-04, 2e-04]
+  Bounds range     [1e+00, 2e+06]
+  RHS range        [1e+00, 1e+07]
+
+Loaded user MIP start with objective -49
+MIP start from previous solve did not produce a new incumbent solution
+
+Presolve removed 95965 rows and 10590 columns
+Presolve time: 1.19s
+Presolved: 17797 rows, 9572 columns, 61873 nonzeros
+Variable types: 4894 continuous, 4678 integer (2924 binary)
+
+Explored 0 nodes (0 simplex iterations) in 1.29 seconds (1.16 work units)
+Thread count was 12 (of 12 available processors)
+
+Solution count 1: -49 
+No other solutions better than -49
+
+Optimal solution found (tolerance 1.00e-02)
+Best objective -4.900000000000e+01, best bound -4.900000000000e+01, gap 0.0000%
